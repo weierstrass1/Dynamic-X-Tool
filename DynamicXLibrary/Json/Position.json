@@ -1,0 +1,100 @@
+﻿{
+  "SameXY": {
+    "PreLoop": [
+      "STZ !TileX",
+      " STZ !TileY",
+      " STZ !TileSize",
+      " JSL !IsValid",
+      " BCS +",
+      " PLB",
+      " JML !Draw_Return",
+      "+",
+      " LDA !TileSize",
+      " STA !Iterator+1"
+    ],
+    "PreLoopSize": 17,
+    "InLoop": [
+      "LDA !TileX",
+      " STA $400000,x",
+      " LDA !TileY",
+      " STA $400001,x",
+      " <Size_InLoop>",
+      " CLC",
+      " ADC !Iterator+1",
+      " STA !TileSize"
+    ],
+    "InLoopSize": 17
+  },
+  "SameX": {
+    "PreLoop": [
+      "STZ !TileX",
+      " STZ !TileSize",
+      " JSL !IsValidX",
+      " BCS +",
+      " PLB",
+      " JML !Draw_Return",
+      "+",
+      " LDA !TileSize",
+      " STA !Iterator+1"
+    ],
+    "PreLoopSize": 15,
+    "InLoop": [
+      "LDA YDisplacements,y",
+      " STA !TileY",
+      " JSL !IsValidY",
+      " BCC ..next",
+      " LDA !TileX",
+      " STA $400000,x",
+      " LDA !TileY",
+      " STA $400001,x",
+      " <Size_InLoop>",
+      " CLC",
+      " ADC !Iterator+1",
+      " STA !TileSize"
+    ],
+    "InLoopSize": 35
+  },
+  "SameY": {
+    "PreLoop": [
+      "STZ !TileY",
+      " JSL !IsValidY",
+      " BCS +",
+      " PLB",
+      " JML !Draw_Return",
+      "+"
+    ],
+    "PreLoopSize": 9,
+    "InLoop": [
+      "LDA XDisplacements,y",
+      " STA !TileX",
+      " <Size_InLoop>",
+      " STA !TileSize",
+      " JSL !IsValidX",
+      " BCC ..next",
+      " LDA !TileX",
+      " STA $400000,x",
+      " LDA !TileY",
+      " STA $400001,x"
+    ],
+    "InLoopSize": 32
+  },
+  "DifferentXY": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      "LDA XDisplacements,y",
+      " STA !TileX",
+      " LDA YDisplacements,y",
+      " STA !TileY",
+      " <Size_InLoop>",
+      " STA !TileSize",
+      " JSL !IsValid",
+      " BCC ..next",
+      " LDA !TileX",
+      " STA $400000,x",
+      " LDA !TileY",
+      " STA $400001,x"
+    ],
+    "InLoopSize": 37
+  }
+}

@@ -1,0 +1,17 @@
+﻿{
+  "Same": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [ "!Property" ],
+    "InLoopSize": 2
+  },
+  "Different": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      "Properties,y",
+      " ORA !Property"
+    ],
+    "InLoopSize": 5
+  }
+}

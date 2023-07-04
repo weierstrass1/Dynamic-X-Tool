@@ -1,0 +1,53 @@
+﻿{
+  "NotDynamic": {
+    "Same": {
+      "PreLoop": [ "" ],
+      "PreLoopSize": 0,
+      "InLoop": [
+        "LDA !Tile",
+        " STA $400002,x",
+        " LDA <Property_InLoop>",
+        " STA $400003,x"
+      ],
+      "InLoopSize": 2
+    },
+    "Different": {
+      "PreLoop": [ "" ],
+      "PreLoopSize": 0,
+      "InLoop": [
+        "LDA Tiles,y",
+        " STA $400002,x",
+        " LDA <Property_InLoop>",
+        " STA $400003,x"
+      ],
+      "InLoopSize": 3
+    }
+  },
+  "Dynamic": {
+    "Same": {
+      "PreLoop": [
+      ],
+      "PreLoopSize": 8,
+      "InLoop": [
+        "LDA !PoseOffset",
+        " STA $400002,x",
+        " LDA <Property_InLoop>",
+        " STA $400003,x"
+      ],
+      "InLoopSize": 2
+    },
+    "Different": {
+      "PreLoop": [
+      ],
+      "PreLoopSize": 0,
+      "InLoop": [
+        "LDA Tiles,y",
+        " JSL !RemapOamTile",
+        " STA $400003,x",
+        " LDA $8A",
+        " STA $400002,x"
+      ],
+      "InLoopSize": 7
+    }
+  }
+}

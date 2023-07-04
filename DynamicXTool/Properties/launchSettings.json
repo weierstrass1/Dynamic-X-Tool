@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DynamicXTool": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Users\\pndia\\Documents\\hacking\\Dynamic X\\test.smc\""
+    }
+  }
+}

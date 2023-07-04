@@ -1,0 +1,14 @@
+﻿{
+  "Same": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [ "LDA <FixedSize>" ],
+    "InLoopSize": 2
+  },
+  "Different": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [ "LDA Sizes,y" ],
+    "InLoopSize": 3
+  }
+}

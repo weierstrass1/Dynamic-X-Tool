@@ -1,0 +1,13 @@
+GFXs: 
+	YIPiranhaPlantBody.bin
+Palettes:
+	YIPiranhaPlantPal.bin
+
+ResourceSize:
+Frame0_ResourceSize:
+	db $02,$02
+Frame1_ResourceSize:
+	db $02,$02
+
+ResourceLastRow:
+    db $10

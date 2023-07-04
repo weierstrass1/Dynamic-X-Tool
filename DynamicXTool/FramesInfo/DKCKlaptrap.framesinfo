@@ -1,0 +1,298 @@
+﻿Dynamic: 
+	true
+;>Table: Tiles
+;>Description: Tiles codes of each tile of each frame
+;>ValuesSize: 8
+Tiles:
+    
+Frame0_Frame0_Tiles:
+	db $04,$02,$00
+Frame1_Frame1_Tiles:
+	db $04,$02,$06,$00
+Frame2_Frame2_Tiles:
+	db $04,$02,$06,$00
+Frame3_Frame3_Tiles:
+	db $04,$02,$00
+Frame4_Frame4_Tiles:
+	db $06,$02,$05,$00,$04
+Frame5_Frame5_Tiles:
+	db $07,$04,$06,$02,$00
+Frame6_Frame6_Tiles:
+	db $07,$04,$06,$00,$02
+Frame7_Frame7_Tiles:
+	db $07,$04,$06,$02,$00
+Frame8_Frame8_Tiles:
+	db $04,$02,$06,$00
+Frame9_Frame9_Tiles:
+	db $04,$02,$06,$00
+Frame10_Frame10_Tiles:
+	db $05,$02,$00,$04
+Frame11_Frame11_Tiles:
+	db $05,$02,$00,$04
+Frame12_Frame12_Tiles:
+	db $05,$02,$00,$04
+Frame13_Frame13_Tiles:
+	db $05,$02,$00,$04
+Frame14_Frame14_Tiles:
+	db $05,$02,$00,$04
+Frame15_Frame15_Tiles:
+	db $06,$04,$02,$00
+Frame16_Frame16_Tiles:
+	db $02,$05,$00,$04
+Frame0_Frame0_TilesFlipX:
+	db $04,$02,$00
+Frame1_Frame1_TilesFlipX:
+	db $04,$02,$06,$00
+Frame2_Frame2_TilesFlipX:
+	db $04,$02,$06,$00
+Frame3_Frame3_TilesFlipX:
+	db $04,$02,$00
+Frame4_Frame4_TilesFlipX:
+	db $06,$02,$05,$00,$04
+Frame5_Frame5_TilesFlipX:
+	db $07,$04,$06,$02,$00
+Frame6_Frame6_TilesFlipX:
+	db $07,$04,$06,$00,$02
+Frame7_Frame7_TilesFlipX:
+	db $07,$04,$06,$02,$00
+Frame8_Frame8_TilesFlipX:
+	db $04,$02,$06,$00
+Frame9_Frame9_TilesFlipX:
+	db $04,$02,$06,$00
+Frame10_Frame10_TilesFlipX:
+	db $05,$02,$00,$04
+Frame11_Frame11_TilesFlipX:
+	db $05,$02,$00,$04
+Frame12_Frame12_TilesFlipX:
+	db $05,$02,$00,$04
+Frame13_Frame13_TilesFlipX:
+	db $05,$02,$00,$04
+Frame14_Frame14_TilesFlipX:
+	db $05,$02,$00,$04
+Frame15_Frame15_TilesFlipX:
+	db $06,$04,$02,$00
+Frame16_Frame16_TilesFlipX:
+	db $02,$05,$00,$04
+;>EndTable
+
+;>Table: XDisplacements
+;>Description: X Displacement of each tile of each frame
+;>ValuesSize: 8
+XDisplacements:
+    
+Frame0_Frame0_XDisp:
+	db $00,$05,$06
+Frame1_Frame1_XDisp:
+	db $F8,$08,$0A,$12
+Frame2_Frame2_XDisp:
+	db $F7,$07,$0E,$12
+Frame3_Frame3_XDisp:
+	db $F7,$07,$12
+Frame4_Frame4_XDisp:
+	db $FB,$01,$0D,$11,$1B
+Frame5_Frame5_XDisp:
+	db $FC,$01,$09,$11,$11
+Frame6_Frame6_XDisp:
+	db $FE,$02,$08,$10,$10
+Frame7_Frame7_XDisp:
+	db $FD,$01,$0C,$11,$13
+Frame8_Frame8_XDisp:
+	db $FB,$0B,$0E,$13
+Frame9_Frame9_XDisp:
+	db $FC,$0C,$0C,$14
+Frame10_Frame10_XDisp:
+	db $F9,$01,$0E,$1C
+Frame11_Frame11_XDisp:
+	db $F9,$00,$0F,$1D
+Frame12_Frame12_XDisp:
+	db $FA,$FF,$0F,$1D
+Frame13_Frame13_XDisp:
+	db $FB,$FE,$0E,$1D
+Frame14_Frame14_XDisp:
+	db $FD,$FE,$0E,$1C
+Frame15_Frame15_XDisp:
+	db $F5,$05,$0D,$12
+Frame16_Frame16_XDisp:
+	db $FB,$0A,$0B,$1A
+Frame0_Frame0_XDispFlipX:
+	db $08,$FB,$FA
+Frame1_Frame1_XDispFlipX:
+	db $08,$F8,$FE,$EE
+Frame2_Frame2_XDispFlipX:
+	db $09,$F9,$FA,$EE
+Frame3_Frame3_XDispFlipX:
+	db $09,$F9,$EE
+Frame4_Frame4_XDispFlipX:
+	db $0D,$FF,$FB,$EF,$ED
+Frame5_Frame5_XDispFlipX:
+	db $0C,$FF,$FF,$EF,$EF
+Frame6_Frame6_XDispFlipX:
+	db $0A,$FE,$00,$F0,$F0
+Frame7_Frame7_XDispFlipX:
+	db $0B,$FF,$FC,$EF,$ED
+Frame8_Frame8_XDispFlipX:
+	db $05,$F5,$FA,$ED
+Frame9_Frame9_XDispFlipX:
+	db $04,$F4,$FC,$EC
+Frame10_Frame10_XDispFlipX:
+	db $0F,$FF,$F2,$EC
+Frame11_Frame11_XDispFlipX:
+	db $0F,$00,$F1,$EB
+Frame12_Frame12_XDispFlipX:
+	db $0E,$01,$F1,$EB
+Frame13_Frame13_XDispFlipX:
+	db $0D,$02,$F2,$EB
+Frame14_Frame14_XDispFlipX:
+	db $0B,$02,$F2,$EC
+Frame15_Frame15_XDispFlipX:
+	db $0B,$FB,$F3,$EE
+Frame16_Frame16_XDispFlipX:
+	db $05,$FE,$F5,$EE
+;>EndTable
+;>Table: YDisplacements
+;>Description: Y Displacement of each tile of each frame
+;>ValuesSize: 8
+YDisplacements:
+    
+Frame0_Frame0_YDisp:
+	db $09,$FB,$0B
+Frame1_Frame1_YDisp:
+	db $07,$02,$0D,$09
+Frame2_Frame2_YDisp:
+	db $07,$04,$01,$08
+Frame3_Frame3_YDisp:
+	db $06,$01,$07
+Frame4_Frame4_YDisp:
+	db $09,$03,$FE,$03,$02
+Frame5_Frame5_YDisp:
+	db $09,$FD,$0D,$F9,$09
+Frame6_Frame6_YDisp:
+	db $09,$FE,$0E,$FA,$08
+Frame7_Frame7_YDisp:
+	db $0A,$03,$FF,$06,$FF
+Frame8_Frame8_YDisp:
+	db $07,$00,$10,$04
+Frame9_Frame9_YDisp:
+	db $05,$00,$0B,$06
+Frame10_Frame10_YDisp:
+	db $09,$04,$00,$06
+Frame11_Frame11_YDisp:
+	db $07,$04,$01,$06
+Frame12_Frame12_YDisp:
+	db $02,$05,$01,$04
+Frame13_Frame13_YDisp:
+	db $FF,$06,$02,$04
+Frame14_Frame14_YDisp:
+	db $FE,$05,$04,$04
+Frame15_Frame15_YDisp:
+	db $03,$05,$02,$05
+Frame16_Frame16_YDisp:
+	db $01,$00,$04,$09
+Frame0_Frame0_YDispFlipX:
+	db $09,$FB,$0B
+Frame1_Frame1_YDispFlipX:
+	db $07,$02,$0D,$09
+Frame2_Frame2_YDispFlipX:
+	db $07,$04,$01,$08
+Frame3_Frame3_YDispFlipX:
+	db $06,$01,$07
+Frame4_Frame4_YDispFlipX:
+	db $09,$03,$FE,$03,$02
+Frame5_Frame5_YDispFlipX:
+	db $09,$FD,$0D,$F9,$09
+Frame6_Frame6_YDispFlipX:
+	db $09,$FE,$0E,$FA,$08
+Frame7_Frame7_YDispFlipX:
+	db $0A,$03,$FF,$06,$FF
+Frame8_Frame8_YDispFlipX:
+	db $07,$00,$10,$04
+Frame9_Frame9_YDispFlipX:
+	db $05,$00,$0B,$06
+Frame10_Frame10_YDispFlipX:
+	db $09,$04,$00,$06
+Frame11_Frame11_YDispFlipX:
+	db $07,$04,$01,$06
+Frame12_Frame12_YDispFlipX:
+	db $02,$05,$01,$04
+Frame13_Frame13_YDispFlipX:
+	db $FF,$06,$02,$04
+Frame14_Frame14_YDispFlipX:
+	db $FE,$05,$04,$04
+Frame15_Frame15_YDispFlipX:
+	db $03,$05,$02,$05
+Frame16_Frame16_YDispFlipX:
+	db $01,$00,$04,$09
+;>EndTable
+;>Table: Sizes.
+;>Description: size of each tile of each frame
+;>ValuesSize: 8
+Sizes:
+    
+Frame0_Frame0_Sizes:
+	db $00,$02,$02
+Frame1_Frame1_Sizes:
+	db $02,$02,$00,$02
+Frame2_Frame2_Sizes:
+	db $02,$02,$00,$02
+Frame3_Frame3_Sizes:
+	db $02,$02,$02
+Frame4_Frame4_Sizes:
+	db $00,$02,$00,$02,$00
+Frame5_Frame5_Sizes:
+	db $00,$02,$00,$02,$02
+Frame6_Frame6_Sizes:
+	db $00,$02,$00,$02,$02
+Frame7_Frame7_Sizes:
+	db $00,$02,$00,$02,$02
+Frame8_Frame8_Sizes:
+	db $02,$02,$00,$02
+Frame9_Frame9_Sizes:
+	db $02,$02,$00,$02
+Frame10_Frame10_Sizes:
+	db $00,$02,$02,$00
+Frame11_Frame11_Sizes:
+	db $00,$02,$02,$00
+Frame12_Frame12_Sizes:
+	db $00,$02,$02,$00
+Frame13_Frame13_Sizes:
+	db $00,$02,$02,$00
+Frame14_Frame14_Sizes:
+	db $00,$02,$02,$00
+Frame15_Frame15_Sizes:
+	db $02,$02,$02,$02
+Frame16_Frame16_Sizes:
+	db $02,$00,$02,$00
+Frame0_Frame0_SizesFlipX:
+	db $00,$02,$02
+Frame1_Frame1_SizesFlipX:
+	db $02,$02,$00,$02
+Frame2_Frame2_SizesFlipX:
+	db $02,$02,$00,$02
+Frame3_Frame3_SizesFlipX:
+	db $02,$02,$02
+Frame4_Frame4_SizesFlipX:
+	db $00,$02,$00,$02,$00
+Frame5_Frame5_SizesFlipX:
+	db $00,$02,$00,$02,$02
+Frame6_Frame6_SizesFlipX:
+	db $00,$02,$00,$02,$02
+Frame7_Frame7_SizesFlipX:
+	db $00,$02,$00,$02,$02
+Frame8_Frame8_SizesFlipX:
+	db $02,$02,$00,$02
+Frame9_Frame9_SizesFlipX:
+	db $02,$02,$00,$02
+Frame10_Frame10_SizesFlipX:
+	db $00,$02,$02,$00
+Frame11_Frame11_SizesFlipX:
+	db $00,$02,$02,$00
+Frame12_Frame12_SizesFlipX:
+	db $00,$02,$02,$00
+Frame13_Frame13_SizesFlipX:
+	db $00,$02,$02,$00
+Frame14_Frame14_SizesFlipX:
+	db $00,$02,$02,$00
+Frame15_Frame15_SizesFlipX:
+	db $02,$02,$02,$02
+Frame16_Frame16_SizesFlipX:
+	db $02,$00,$02,$00

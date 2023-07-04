@@ -1,0 +1,44 @@
+GFXs: 
+	DKCKlump.bin
+Palettes:
+    DKCKlumpPal1.bin
+    DKCKlumpPal2.bin
+
+ResourceSize:
+Walk0_ResourceSize:
+	db $23,$02
+Walk1_ResourceSize:
+	db $24,$02
+Walk2_ResourceSize:
+	db $25,$04
+Walk3_ResourceSize:
+	db $24,$04
+Walk4_ResourceSize:
+	db $24,$04
+Walk5_ResourceSize:
+	db $23,$00
+Walk6_ResourceSize:
+	db $23,$02
+Walk7_ResourceSize:
+	db $25,$04
+Flip0_ResourceSize:
+	db $23,$02
+Resist0_ResourceSize:
+	db $24,$02
+Death0_ResourceSize:
+	db $27,$06
+Death1_ResourceSize:
+	db $25,$04
+Death2_ResourceSize:
+	db $26,$06
+Death3_ResourceSize:
+	db $26,$06
+Death4_ResourceSize:
+	db $21,$00
+Death5_ResourceSize:
+	db $20,$00
+Death6_ResourceSize:
+	db $20,$00
+
+ResourceLastRow:
+    db $30

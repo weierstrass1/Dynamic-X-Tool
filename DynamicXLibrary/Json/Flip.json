@@ -1,0 +1,62 @@
+﻿{
+  "NoFlip": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      ".NoFlip",
+      "<Flip_NoFlip>"
+    ],
+    "InLoopSize": 0
+  },
+  "FlipX": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      "LDA !Property",
+      " BIT #$40",
+      " BNE .FlipX",
+      ".NoFlip",
+      "<Flip_NoFlip>",
+      ".FlipX",
+      "<Flip_FlipX>"
+    ],
+    "InLoopSize": 6
+  },
+  "FlipY": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      "LDA !Property",
+      " BIT #$80",
+      " BNE .FlipY",
+      ".NoFlip",
+      "<Flip_NoFlip>",
+      ".FlipY",
+      "<Flip_FlipY>"
+    ],
+    "InLoopSize": 6
+  },
+  "FlipXY": {
+    "PreLoop": [ "" ],
+    "PreLoopSize": 0,
+    "InLoop": [
+      "LDA !Property",
+      " BIT #$C0",
+      " BNE .Flip",
+      ".NoFlip",
+      "<Flip_NoFlip>",
+      ".Flip",
+      " BIT #$80",
+      " BNE .WithFlipY",
+      ".FlipX",
+      "<Flip_FlipX>",
+      ".WithFlipY",
+      " BIT #$40",
+      " BEQ .FlipY",
+      "<Flip_FlipXY>",
+      ".FlipY",
+      "<Flip_FlipY>"
+    ],
+    "InLoopSize": 14
+  }
+}
