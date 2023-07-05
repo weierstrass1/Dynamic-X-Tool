@@ -1,3 +1,3 @@
-﻿TableOffset:<Offset>
+TableOffset:<Offset>
 NumberOfTilesMinus1:<Length>
 GraphicRoutine:<Routine>

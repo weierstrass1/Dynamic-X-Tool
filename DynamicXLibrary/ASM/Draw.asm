@@ -1,9 +1,9 @@
-﻿    !rom = $800000
-    !dp = $0000
+!rom = $800000
+!dp = $0000
 if read1($00FFD5) == $23
     sa1rom
     !rom = $000000
-    !dp = $6000
+    !dp = $3000
 endif
 
 !Routines #= ((read1($0082DE)<<16)+read2($008241))|!rom
@@ -31,8 +31,6 @@ endif
 
 org !Routines+$06
     dl Draw|!rom
-org !Routines+$15
-    dl Draw_Return|!rom
 
 reset freespaceuse
 freecode cleaned
@@ -73,22 +71,6 @@ Draw:
     SEP #$20
     
     JML [!GraphicRoutine|!dp]
-.Return
-    STZ $0B
-    REP #$30
-
-    LDX !MaxTilePriority
-    LDA.l maxtilePointer,x
-    AND #$00F0
-    TAX
-    LDA !maxtile_pointer
-    STA !maxtile_pointer_max,x
-    LDA !maxtile_pointer+2
-    STA !maxtile_pointer_max+2,x
-
-    PLX
-    SEP #$30
-RTL
 
 maxtilePointer:
     db $00,$10,$20,$30

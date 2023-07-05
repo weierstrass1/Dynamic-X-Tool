@@ -26,12 +26,11 @@ endif
     dl RemapOamTile|!rom
     dl XIsValid|!rom
     dl YIsValid|!rom
+    dl Draw_Return|!rom
 if read2($00823D+4) == $8449 && read1($0082DA+4) == $09
     dl $000000
     dl $000000
-    dl $000000
 else
-    dl !Draw_Return
     dl !ResourceTable
     dl !GraphicRoutinesTable
 endif

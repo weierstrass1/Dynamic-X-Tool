@@ -1,4 +1,4 @@
-﻿if read1($00FFD5) == $23
+if read1($00FFD5) == $23
     sa1rom
 endif
 

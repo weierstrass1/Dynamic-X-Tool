@@ -1,4 +1,4 @@
-﻿..Loop
+..Loop
 	LDX !maxtile_pointer+0
 	CPX !maxtile_pointer+4
 	BEQ ..End

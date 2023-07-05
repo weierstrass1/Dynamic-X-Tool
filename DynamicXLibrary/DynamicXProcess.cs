@@ -263,7 +263,7 @@ namespace DynamicXLibrary
                 string[] patchingResult = PatchApplier.Apply(rom, $"{filepath}{grv.ID}.asm").Split('\n');
                 pos = 0x200 + int.Parse(patchingResult[0]);
                 size = int.Parse(patchingResult[1]);
-                graphicRoutinesPosition.Add(pos);
+                graphicRoutinesPosition.Add(SNESROMUtils.PCtoSNES(pos + 8, mapper));
                 graphicRoutinesSize.Add(size);
                 Log.WriteLine($"Graphic Routine {grv.GetFlags()} Inserted At ${SNESROMUtils.PCtoSNES(pos,mapper):X6} (PC: {pos:X6}): {size} bytes");
             }

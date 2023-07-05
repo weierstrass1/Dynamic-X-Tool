@@ -170,3 +170,24 @@ RTL
 .ZeroProp
     LDA !Property
 RTL
+
+Draw:
+.Return
+    STZ $0B
+    REP #$30
+
+    LDX !MaxTilePriority
+    LDA.l maxtilePointer,x
+    AND #$00F0
+    TAX
+    LDA !maxtile_pointer
+    STA !maxtile_pointer_max,x
+    LDA !maxtile_pointer+2
+    STA !maxtile_pointer_max+2,x
+
+    PLX
+    SEP #$30
+RTL
+
+maxtilePointer:
+    db $00,$10,$20,$30
