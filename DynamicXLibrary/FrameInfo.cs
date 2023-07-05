@@ -14,7 +14,7 @@ namespace DynamicXLibrary
         public int[]? FlipXDisplacements { get; set; }
         public int[]? FlipYDisplacements { get; set; }
         public int[]? Sizes { get; set; }
-        public FrameInfo(string contextName, string name) 
+        public FrameInfo(string contextName, string name)
         {
             ContextName = contextName;
             Name = name;
@@ -64,7 +64,7 @@ namespace DynamicXLibrary
 
             int l = GetLength();
 
-            if((Tiles != null && Tiles.Length != l)||
+            if ((Tiles != null && Tiles.Length != l) ||
                 (Properties != null && Properties.Length != l) ||
                 (XDisplacements != null && XDisplacements.Length != l) ||
                 (YDisplacements != null && YDisplacements.Length != l) ||
@@ -132,15 +132,78 @@ namespace DynamicXLibrary
             {
                 grv = GraphicRoutineVersion.Get(fi.GetKey())!;
                 int offset = 0;
-                foreach(FrameInfo fi2 in grv.FramesInfo)
+                foreach (FrameInfo fi2 in grv.FramesInfo)
                 {
-                    if(fi2 == fi)
+                    if (fi2 == fi)
                         break;
                     offset += fi2.GetLength();
                 }
                 offsets.Add(offset);
             }
             return offsets.ToArray();
+        }
+        public int GetRenderBoxXDistanceOutOfScreen()
+            => getRenderBoxDistanceOutOfScreen(XDisplacements, FlipXDisplacements);
+        public int GetRenderBoxYDistanceOutOfScreen()
+            => getRenderBoxDistanceOutOfScreen(YDisplacements, FlipYDisplacements);
+        private static int getRenderBoxDistanceOutOfScreen(int[]? disps, int[]? flipdisps)
+        {
+            if (disps == null || disps.Length == 0)
+            {
+                return 16;
+            }
+            int min = int.MaxValue;
+            int max = int.MinValue;
+            int v;
+            foreach (var x in disps)
+            {
+                v = x < 128 ? x : 1 + (x^0xFF);
+                if (v < min)
+                    min = v;
+                if (v > max)
+                    max = v;
+            }
+            if (flipdisps != null && flipdisps.Length > 0)
+            {
+                foreach (var x in flipdisps)
+                {
+                    v = x < 128 ? x : 1 + (x ^ 0xFF);
+                    if (v < min)
+                        min = v;
+                    if (v > max)
+                        max = v;
+                }
+            }
+            return Math.Max(Math.Abs(min), max + 16);
+        }
+        public static int GetMaximumRenderBoxXDistanceOutOfScreen(List<FrameInfo> list)
+            => maximumValue(list
+                .Select(x => x.GetRenderBoxXDistanceOutOfScreen())
+                .ToList());
+        public static int GetMaximumRenderBoxYDistanceOutOfScreen(List<FrameInfo> list)
+            => maximumValue(list
+                .Select(x => x.GetRenderBoxYDistanceOutOfScreen())
+                .ToList());
+        private static int maximumValue(List<int> list)
+        {
+            int max = int.MinValue;
+            foreach(var i in list)
+            {
+                if(i > max)
+                    max = i;
+            }
+            return max;
+        }
+        public static Dictionary<string, List<FrameInfo>> GroupByContextName(List<FrameInfo> list)
+        {
+            Dictionary<string, List<FrameInfo>> groups = new();
+            foreach(var fi in list)
+            {
+                if (!groups.ContainsKey(fi.ContextName))
+                    groups.Add(fi.ContextName, new());
+                groups[fi.ContextName].Add(fi);
+            }
+            return groups;
         }
     }
 }

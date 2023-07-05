@@ -1,6 +1,114 @@
-incsrc "../Data/DynamicPoseData.asm"
+if read1($00FFD5) == $23
+    sa1rom
+endif
+
+incsrc "../DynamicX/DynamicXDefines.asm"
 
 !OffsetBetweenSameHash = $000F
+
+org !Routines+$00
+    dl PoseWasLoaded|!rom
+    dl TakeDynamicRequest|!rom
+
+org !Routines+$2D
+    dl SetPropertyAndOffset|!rom
+
+reset freespaceuse
+freecode cleaned
+
+Start:
+;This routine creates a request to 
+;Load a Dynamic Pose in VRAM.
+;Input:
+;   Y = Pose ID (16 bits)
+;Output:
+;   Carry Set if the request succeed.
+;   Carry Clear if the request failed.
+TakeDynamicRequest:
+
+    LDA #$00
+    XBA
+
+    JSR FindPose
+    BCC .NotFound
+
+    SEP #$30
+    TXA
+    LSR
+    TAX
+
+    JSL SetPropertyAndOffset
+    SEC
+RTL
+.NotFound
+    STX $45
+
+    PHB
+    PHK
+    PLB
+
+    REP #$20
+    PHY
+    TYA
+    ASL
+    TAY
+
+    ;If it is not possible to load more data in vram
+    ;during this frame then return carry clear
+    LDA PoseSize,y
+    PLY
+    CLC
+    ADC DX_Dynamic_CurrentDataSend
+    CMP DX_Dynamic_MaxDataPerFrame
+    SEP #$20
+    BEQ .NoDataSizeRestriction
+    BCC .NoDataSizeRestriction
+.MaxDataPerFrameSurpassed   
+    SEP #$30
+    PLB
+    CLC
+RTL
+.NoDataSizeRestriction
+
+    JSR FindSpace
+    BCS +
+
+    PLB
+    CLC
+RTL
+
++
+    REP #$20
+    TYA
+    PHY
+    ASL
+    TAY
+    LDA PoseSize,y
+    PLY
+    CLC
+    ADC DX_Dynamic_CurrentDataSend
+    STA DX_Dynamic_CurrentDataSend
+    SEP #$20
+
+    JSR ClearSlot
+
+    JSR UpdateSpace
+
+    LDX $45
+    JSR GetSlotPosition
+    JSR UpdateSlot
+
+    JSR DynamicRoutine
+
+    LDX $45
+
+    SEP #$30
+
+    JSL SetPropertyAndOffset
+
+    PLB
+    SEC
+RTL
 
 ;Check if a pose is already loaded.
 ;
@@ -102,98 +210,6 @@ RTL
 
 !Property = $04
 !PoseOffset = $08
-;This routine creates a request to 
-;Load a Dynamic Pose in VRAM.
-;Input:
-;   Y = Pose ID (16 bits)
-;Output:
-;   Carry Set if the request succeed.
-;   Carry Clear if the request failed.
-TakeDynamicRequest:
-
-    LDA #$00
-    XBA
-
-    JSR FindPose
-    BCC .NotFound
-
-    SEP #$30
-    TXA
-    LSR
-    TAX
-
-    JSL SetPropertyAndOffset
-    SEC
-RTL
-.NotFound
-    STX $45
-
-    PHB
-    PHK
-    PLB
-
-    REP #$20
-    PHY
-    TYA
-    ASL
-    TAY
-
-    ;If it is not possible to load more data in vram
-    ;during this frame then return carry clear
-    LDA PoseSize,y
-    PLY
-    CLC
-    ADC DX_Dynamic_CurrentDataSend
-    CMP DX_Dynamic_MaxDataPerFrame
-    SEP #$20
-    BEQ .NoDataSizeRestriction
-    BCC .NoDataSizeRestriction
-.MaxDataPerFrameSurpassed   
-    SEP #$30
-    PLB
-    CLC
-RTL
-.NoDataSizeRestriction
-
-    JSR FindSpace
-    BCS +
-
-    PLB
-    CLC
-RTL
-
-+
-    REP #$20
-    TYA
-    PHY
-    ASL
-    TAY
-    LDA PoseSize,y
-    PLY
-    CLC
-    ADC DX_Dynamic_CurrentDataSend
-    STA DX_Dynamic_CurrentDataSend
-    SEP #$20
-
-    JSR ClearSlot
-
-    JSR UpdateSpace
-
-    LDX $45
-    JSR GetSlotPosition
-    JSR UpdateSlot
-
-    JSR DynamicRoutine
-
-    LDX $45
-
-    SEP #$30
-
-    JSL SetPropertyAndOffset
-
-    PLB
-    SEC
-RTL
 
 SetPropertyAndOffset:
     PHB
@@ -943,3 +959,10 @@ RTS
     ADC !CurrentLine1Size
     STA DX_PPU_VRAM_Transfer_Source+2,x       ;/MapAddr = Addr
 RTS
+
+incsrc "../DynamicX/Data/DynamicPoseData.asm"
+
+End:
+
+print dec(snestopc(Start))
+print freespaceuse

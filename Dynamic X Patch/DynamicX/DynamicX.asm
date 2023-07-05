@@ -9,39 +9,42 @@ incsrc "DynamicXDefines.asm"
 
 incsrc "Hijacks/BaseHijacks.asm"
 
+reset freespaceuse
 freecode
 
 Routines:
-    dl PoseWasLoaded|!rom
-    dl TakeDynamicRequest|!rom
-    dl Draw|!rom
+if read2($00823D+4) == $8449 && read1($0082DA+4) == $09
+    dl $000000
+    dl $000000
+    dl $000000
+else
+    dl !PoseWasLoaded
+    dl !TakeDynamicRequest
+    dl !Draw
+endif
     dl IsValid|!rom
     dl RemapOamTile|!rom
     dl XIsValid|!rom
     dl YIsValid|!rom
-    dl Draw_Return|!rom
 if read2($00823D+4) == $8449 && read1($0082DA+4) == $09
     dl $000000
     dl $000000
+    dl $000000
 else
-    if !ResourceTable == $000000
-        dl $000000
-    else
-        dl !ResourceTable
-    endif
-    if !GraphicRoutinesTable == $000000
-        dl $000000
-    else
-        dl !GraphicRoutinesTable
-    endif
+    dl !Draw_Return
+    dl !ResourceTable
+    dl !GraphicRoutinesTable
 endif
     dl AssignPalette|!rom
     dl SetHSLBase|!rom
     dl SetRGBBase|!rom
     dl MixHSL|!rom
     dl MixRGB|!rom
-    dl SetPropertyAndOffset|!rom
-
+if read2($00823D+4) == $8449 && read1($0082DA+4) == $09
+    dl $000000
+else
+    dl !SetPropertyAndOffset
+endif
 GameModeTable:
     db $00,$00,$01,$01,$01,$01,$01,$01
     ;  g00,g01,g02,g03,g04,g05,g06,g07
@@ -221,8 +224,12 @@ endif
     STZ $10
     JML $00806B|!rom
 
-incsrc "Management/Dynamic.asm"
 incsrc "Management/Drawing.asm"
 incsrc "Management/Palette.asm"
 incsrc "NMI/VRAMDMA.asm"
 incsrc "NMI/ColorPaletteChange.asm"
+
+End:
+
+print dec(Routines)
+print freespaceuse

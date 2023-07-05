@@ -63,9 +63,6 @@
     <None Update="DynamicX\Management\Drawing.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DynamicX\Management\Dynamic.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="DynamicX\Management\Palette.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

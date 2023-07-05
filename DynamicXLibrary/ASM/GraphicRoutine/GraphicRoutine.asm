@@ -20,6 +20,7 @@ endif
 org !GraphicRoutinesTable+<address>
     dl snestopc(GraphicRoutine)+$1F8
 
+reset freespaceuse
 freecode cleaned
 
 !XOffSet = $00
@@ -55,4 +56,6 @@ GraphicRoutine:
 
 <Tables>
 
+End:
 print dec(snestopc(GraphicRoutine)-8)
+print freespaceuse

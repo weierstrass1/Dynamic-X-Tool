@@ -133,7 +133,7 @@
 			if (rom[address] != 0x53 || rom[address + 1] != 0x54 ||
 				rom[address + 2] != 0x41 || rom[address + 3] != 0x52)
 					return 0;
-			int l = (rom[address + 5] << 8) + rom[address + 4];
+			int l = (rom[address + 5] << 8) + rom[address + 4] + 1;
 			if (address + 8 + l >= rom.Length)
 				return 0;
 			if (rom[address + 6] != (rom[address + 4] ^ 0xFF) ||

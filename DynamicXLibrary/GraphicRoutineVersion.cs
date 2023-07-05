@@ -18,6 +18,7 @@ namespace DynamicXLibrary
         public bool EqualXdisp { get; private set; }
         public bool EqualYdisp { get; private set; }
         public bool EqualSize { get; private set; }
+        public bool Size16 { get; private set; }
         private static readonly Dictionary<int, GraphicRoutineVersion> instances = new();
         public static List<GraphicRoutineVersion> GraphicRoutineVersions { get => instances.Values.ToList(); }
         public string Content { get; private set; }
@@ -93,6 +94,7 @@ namespace DynamicXLibrary
             grvValue.EqualXdisp = equalXdisp;
             grvValue.EqualYdisp = equalYdisp ;
             grvValue.EqualSize = equalSize ;
+            grvValue.Size16 = fi.AllSizesAre16();
 
             grvValue.FramesInfo.Add(fi);
             return grvValue;
@@ -171,8 +173,6 @@ namespace DynamicXLibrary
             => instances.ContainsKey(key) ? instances[key] : null;
         public string GetFlags()
         {
-            if (OneTile)
-                return "OneTile";
             StringBuilder sb = new();
             if ((FlipX || FlipY) && (!EqualXdisp || !EqualYdisp))
             {
@@ -185,9 +185,12 @@ namespace DynamicXLibrary
 
             if (!EqualTile && !EqualXdisp && !EqualYdisp && !EqualSize && !EqualProp)
                 return sb.ToString();
-            if(EqualSize)
-                sb.Insert(0, "Size");
-            if (EqualProp)
+            if (EqualSize)
+            {
+                string size = Size16 ? "Size16x16" : "Size8x8";
+                sb.Insert(0, size);
+            }
+            if (!OneTile && EqualProp)
                 sb.Insert(0, "Prop");
             if (EqualXdisp || EqualYdisp)
             {
@@ -200,6 +203,8 @@ namespace DynamicXLibrary
             if (EqualTile)
                 sb.Insert(0, "Tile");
             sb.Insert(0, "Same");
+            if (OneTile)
+                sb.Insert(0, "OneTile");
             return sb.ToString();
         }
     }

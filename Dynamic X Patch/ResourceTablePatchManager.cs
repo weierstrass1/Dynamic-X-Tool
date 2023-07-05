@@ -34,7 +34,7 @@ namespace Dynamic_X_Patch
                 pointer = SNESROMUtils.JoinAddress(rom[addr + 2], rom[addr + 1], rom[addr]) + offset;
                 size = SNESROMUtils.RemoveAt(rom, pointer);
                 if (size > 0)
-                    l.Add((SNESROMUtils.PCtoSNES(pointer,mapper), size));
+                    l.Add((SNESROMUtils.PCtoSNES(pointer + 8, mapper), size));
                 addr += 3;
             }
             l.Add((SNESROMUtils.PCtoSNES(address, mapper), SNESROMUtils.RemoveAt(rom, address - 8)));
