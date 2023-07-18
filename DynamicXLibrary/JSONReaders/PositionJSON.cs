@@ -22,7 +22,7 @@ namespace DynamicXLibrary.JSON
             if (AllEqualsX && AllEqualsY)
                 return SameXY;
             if (AllEqualsX)
-                return SameY;
+                return SameX;
             if (AllEqualsY)
                 return SameY;
             return DifferentXY;

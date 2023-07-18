@@ -8,7 +8,7 @@ namespace DynamicXLibrary
         private const string DYNAMIC_FLAG_PATTERN = @"\s*Dynamic:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private const string GFXS_PATTERN = @"\s*GFXS:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private const string PALETTES_PATTERN = @"\s*Palettes:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
-        private const string LASTROW_PATTERN = @"\s*ResourceLastRow:\s*\n\s*db\s*\$[A-Fa-z0-9]{2}\s*(\n|$)";
+        private const string LASTROW_PATTERN = @"\s*ResourceLastRow:\s*\n(\s*db\s*\$[A-Fa-z0-9]{2}(\s*,\s*\$[A-Fa-z0-9]{2})*\s*(\n|$))*";
         private static readonly Regex dynamicFlagRegex = getDynamicFlagRegex();
         private static readonly Regex gfxsRegex = getGFXsRegex();
         private static readonly Regex palettesRegex = getPalettesRegex();

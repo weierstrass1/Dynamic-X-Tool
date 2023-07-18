@@ -22,8 +22,8 @@ namespace DynamicXLibrary
         public bool OneTile() => Tiles != null && Tiles.Length == 1;
         public bool HasXDisplacement() => XDisplacements != null;
         public bool HasYDisplacement() => YDisplacements != null;
-        public bool HasXFlip() => FlipXDisplacements != null;
-        public bool HasYFlip() => FlipYDisplacements != null;
+        public bool HasXFlip() => FlipXDisplacements != null && !AllXDisplacementsAreEquals();
+        public bool HasYFlip() => FlipYDisplacements != null && !AllYDisplacementsAreEquals();
         public bool HasXYFlip() => HasXFlip() && HasYFlip();
         public bool HasProperties() => Properties != null;
         public bool HasSizes() => Sizes != null;
@@ -32,7 +32,7 @@ namespace DynamicXLibrary
         public bool AllXDisplacementsAreEquals() => allAreEquals(XDisplacements) && (XDisplacements == null || XDisplacements[0] == 0);
         public bool AllYDisplacementsAreEquals() => allAreEquals(YDisplacements) && (YDisplacements == null || YDisplacements[0] == 0);
         public bool AllSizesAreEquals() => allAreEquals(Sizes);
-        public bool AllSizesAre16() => AllSizesAreEquals() && Sizes != null && Sizes[0] == 2;
+        public bool AllSizesAre16() => AllSizesAreEquals() && (Sizes == null || Sizes[0] == 2);
         private static bool allAreEquals(int[]? array)
         {
             if (array == null || array.Length == 0)

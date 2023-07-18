@@ -74,6 +74,7 @@ RTL
     BCS +
 
     PLB
+    LDA $3EDEAD
     CLC
 RTL
 
@@ -531,7 +532,6 @@ RTS
 .NotFreeSpace
     PHX
     REP #$20
-    PHA
     ASL
     TAX
     PHX
@@ -544,6 +544,11 @@ RTS
     DEC A
     STA DX_Dynamic_Pose_HashSize,x
     PLX
+
+    REP #$20
+    LDA DX_Dynamic_Pose_ID,x
+    PHA
+    SEP #$20
 
     LDA #$FF
     STA DX_Dynamic_Pose_ID,x
@@ -585,12 +590,18 @@ GetSlotPosition:
     BEQ .leave
 
     TXA
+    LSR
     CLC
     ADC #!OffsetBetweenSameHash
+    AND #$007F
+    ASL
     TAX
     BRA .Loop
 .leave
     SEP #$20
+    TXA
+    LSR
+    STA $45
 RTS
 
 UpdateSpace:

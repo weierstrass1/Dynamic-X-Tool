@@ -29,7 +29,7 @@
     "PreLoop": [
       "STZ !TileX",
       " STZ !TileSize",
-      " JSL !IsValidX",
+      " JSL !XIsValid",
       " BCS +",
       " PLB",
       " JML !Draw_Return",
@@ -41,7 +41,7 @@
     "InLoop": [
       "LDA YDisplacements,y",
       " STA !TileY",
-      " JSL !IsValidY",
+      " JSL !YIsValid",
       " BCC ..next",
       " LDA !TileX",
       " STA $400000,x",
@@ -57,7 +57,7 @@
   "SameY": {
     "PreLoop": [
       "STZ !TileY",
-      " JSL !IsValidY",
+      " JSL !YIsValid",
       " BCS +",
       " PLB",
       " JML !Draw_Return",
@@ -69,7 +69,7 @@
       " STA !TileX",
       " <Size_InLoop>",
       " STA !TileSize",
-      " JSL !IsValidX",
+      " JSL !XIsValid",
       " BCC ..next",
       " LDA !TileX",
       " STA $400000,x",

@@ -18,8 +18,12 @@ namespace DynamicXLibrary
         public static string Apply(byte[] romData, string patchPath)
         {
             byte[] withoutHeader = romData[512..];
-            _ = Asar.Patch(patchPath, ref withoutHeader);
-            var err = Asar.GetErrors();
+            if (!Asar.Patch(patchPath, ref withoutHeader))
+                throw new Exception(string
+                    .Join('\n', $"Asar patch {patchPath} failed.", 
+                        Asar.GetErrors()
+                            .Select(x => $"Line {x.Line} : {x.Rawerrdata}")
+                            .ToArray()));
             withoutHeader.CopyTo(romData, 512);
             return string.Join('\n', Asar.GetPrints());
         }

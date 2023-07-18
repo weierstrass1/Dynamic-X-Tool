@@ -157,14 +157,14 @@ namespace DynamicXLibrary
                 int i = 0;
                 foreach (var resRef in resourceReferences)
                 {
-                    sb.AppendLine($"!GFX{graphics[i]} = ${SNESROMUtils.PCtoSNES(resRef.Position + 8, mapper):X6}");
+                    sb.AppendLine($"!DynamicPose{graphics[i]} = ${SNESROMUtils.PCtoSNES(resRef.Position + 8, mapper):X6}");
                     i++;
                 }
                 sb.Append('\n');
                 i = 0;
                 foreach (var resRef in resourceReferences)
                 {
-                    sb.AppendLine($"!GFXID{graphics[i]} = ${i:X4}");
+                    sb.AppendLine($"!DynamicPoseID{graphics[i]} = ${i:X4}");
                     i++;
                 }
                 sb.Append('\n');
@@ -176,14 +176,14 @@ namespace DynamicXLibrary
                 int i = 0;
                 foreach (var palRef in paletteReferences)
                 {
-                    sb.AppendLine($"!Pallete{palettes[i]} = ${SNESROMUtils.PCtoSNES(palRef.Position + 8, mapper):X6}");
+                    sb.AppendLine($"!Palette{palettes[i]} = ${SNESROMUtils.PCtoSNES(palRef.Position + 8, mapper):X6}");
                     i++;
                 }
                 sb.Append('\n');
                 i = 0;
                 foreach (var palRef in paletteReferences)
                 {
-                    sb.AppendLine($"!PalleteID{palettes[i]} = ${i:X4}");
+                    sb.AppendLine($"!PaletteID{palettes[i]} = ${i:X4}");
                     i++;
                 }
                 sb.Append('\n');
@@ -373,6 +373,7 @@ namespace DynamicXLibrary
                 space = spaces.First(x => x.Item2 >= 8 + buf.Length);
                 if (space == default)
                     return DynamicXErrors.ROMWithoutFreeSpace;
+                spaces.Remove(space);
                 SNESROMUtils.InsertDataWithRats(rom, space.Item1, buf);
                 bufferReferences.Add(new(i, i, space.Item1));
                 resRefs = resourceReferences!
@@ -387,7 +388,7 @@ namespace DynamicXLibrary
                     palRef.Position += space.Item1;
                 i++;
             }
-            Log.WriteLine("\n############## GFX Insertion ##############\n");
+            Log.WriteLine("\n############## Pose Insertion #############\n");
             foreach (var resRef in resourceReferences!)
                 Log.WriteLine($"GFX {graphics![resRef.ID]} Inserted at ${SNESROMUtils.PCtoSNES(resRef.Position, mapper):X6} (PC: {resRef.Position:X6}): {graphicsSize![resRef.ID]} bytes");
             Log.WriteLine("\n############ Palette Insertion ############\n");

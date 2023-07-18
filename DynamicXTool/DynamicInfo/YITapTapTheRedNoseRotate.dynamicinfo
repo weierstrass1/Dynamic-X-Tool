@@ -1,0 +1,57 @@
+GFXs: 
+	YITapTapTheRedNoseRotate.bin
+Palettes:
+    YITapTapTheRedNosePal.bin
+
+ResourceSize:
+Rotate0_ResourceSize:
+	db $2F,$0E
+Rotate1_ResourceSize:
+	db $2E,$0C
+Rotate2_ResourceSize:
+	db $2E,$0C
+Rotate3_ResourceSize:
+	db $2D,$0C
+Rotate4_ResourceSize:
+	db $2E,$0C
+Rotate5_ResourceSize:
+	db $2E,$0C
+Rotate6_ResourceSize:
+	db $2F,$0E
+Rotate7_ResourceSize:
+	db $2E,$0C
+Rotate8_ResourceSize:
+	db $2E,$0C
+Rotate9_ResourceSize:
+	db $2D,$0C
+Rotate10_ResourceSize:
+	db $2E,$0E
+Rotate11_ResourceSize:
+	db $2E,$0C
+Rotate12_ResourceSize:
+	db $2E,$0C
+Rotate13_ResourceSize:
+	db $2E,$0C
+Rotate14_ResourceSize:
+	db $2C,$0B
+Rotate15_ResourceSize:
+	db $2E,$0C
+Rotate16_ResourceSize:
+	db $2E,$0C
+Rotate17_ResourceSize:
+	db $2C,$0B
+Rotate18_ResourceSize:
+	db $2F,$0E
+Rotate19_ResourceSize:
+	db $2A,$0A
+Rotate20_ResourceSize:
+	db $2C,$0A
+Rotate21_ResourceSize:
+	db $2C,$0C
+Rotate22_ResourceSize:
+	db $2F,$0E
+Rotate23_ResourceSize:
+	db $2C,$0C
+
+ResourceLastRow:
+    db $30

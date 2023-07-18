@@ -1,0 +1,40 @@
+Dynamic: 
+	true
+	
+Tiles:
+    
+Frame0_MainBody0_Tiles:
+	db $0F,$06,$0C,$08,$0A,$0E,$00,$02,$04
+Frame0_MainBody0_TilesFlipX:
+	db $0F,$06,$0C,$08,$0A,$0E,$00,$02,$04
+;>EndTable
+
+;>Table: XDisplacements
+;>Description: X Displacement of each tile of each frame
+;>ValuesSize: 8
+XDisplacements:
+    
+Frame0_MainBody0_XDisp:
+	db $EF,$F1,$FF,$01,$0F,$11,$12,$12,$19
+Frame0_MainBody0_XDispFlipX:
+	db $19,$0F,$01,$FF,$F1,$F7,$EE,$EE,$E7
+;>EndTable
+;>Table: YDisplacements
+;>Description: Y Displacement of each tile of each frame
+;>ValuesSize: 8
+YDisplacements:
+    
+Frame0_MainBody0_YDisp:
+	db $1A,$11,$18,$11,$15,$0D,$F0,$00,$06
+Frame0_MainBody0_YDispFlipX:
+	db $1A,$11,$18,$11,$15,$0D,$F0,$00,$06
+;>EndTable
+;>Table: Sizes.
+;>Description: size of each tile of each frame
+;>ValuesSize: 8
+Sizes:
+    
+Frame0_MainBody0_Sizes:
+	db $00,$02,$02,$02,$02,$00,$02,$02,$02
+Frame0_MainBody0_SizesFlipX:
+	db $00,$02,$02,$02,$02,$00,$02,$02,$02

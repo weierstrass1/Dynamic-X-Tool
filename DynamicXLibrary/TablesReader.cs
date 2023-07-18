@@ -4,7 +4,7 @@ namespace DynamicXLibrary
 {
     public partial class TablesReader
     {
-        private const string BIG_TABLE_PATTERN = @"[A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n([A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n\s*d(b|w|l)\s*(\$[A-Fa-f0-9]+\s*,?\s*)+\s*\n?)+";
+        private const string BIG_TABLE_PATTERN = @"[A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n([A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n(\s*d(b|w|l)\s*(\$[A-Fa-f0-9]+\s*,?\s*)+)+\s*\n?)+";
         private const string SUB_TABLE_PATTERN = @"^(?!(ResourceLastRow))[A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n(\s*d(b|w|l)\s*(\$[A-Fa-f0-9]+\s*\,?\s*)+\s*\n?)+";
         private static readonly Regex bigTableRegex = getBigTableRegex();
         private static readonly Regex subTableRegex = getSubTableRegex();

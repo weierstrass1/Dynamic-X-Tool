@@ -26,6 +26,24 @@
     <None Update="DynamicInfo\YIPiranhaPlantBody.dynamicinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DynamicInfo\YITapTap.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicInfo\YITapTapTheRedNoseFace.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicInfo\YITapTapTheRedNoseFoot.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicInfo\YITapTapTheRedNoseMainBody.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicInfo\YITapTapTheRedNoseResize.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicInfo\YITapTapTheRedNoseRotate.dynamicinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="DynamicResources\DKCKlaptrap.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -65,6 +83,30 @@
     <None Update="DynamicResources\YIPiranhaPlantPal.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DynamicResources\YITapTap.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapPal.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNoseFace.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNoseFoot.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNoseMainBody.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNosePal.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNoseResize.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicResources\YITapTapTheRedNoseRotate.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="FramesInfo\DKCKlaptrap.framesinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -75,6 +117,24 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="FramesInfo\YIPiranhaPlant.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTap.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTapTheRedNoseFace.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTapTheRedNoseFoot.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTapTheRedNoseMainBody.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTapTheRedNoseResize.framesinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FramesInfo\YITapTapTheRedNoseRotate.framesinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="test.smc">

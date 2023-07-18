@@ -1,0 +1,104 @@
+Dynamic: 
+	true
+	
+Tiles:
+    
+Frame0_Foot0_Tiles:
+	db $00,$05,$02,$04
+Frame1_Foot1_Tiles:
+	db $00,$02
+Frame2_Foot2_Tiles:
+	db $02,$04,$00
+Frame3_Foot3_Tiles:
+	db $02,$00
+Frame4_Foot4_Tiles:
+	db $04,$02,$00
+Frame0_Foot0_TilesFlipX:
+	db $00,$05,$02,$04
+Frame1_Foot1_TilesFlipX:
+	db $00,$02
+Frame2_Foot2_TilesFlipX:
+	db $02,$04,$00
+Frame3_Foot3_TilesFlipX:
+	db $02,$00
+Frame4_Foot4_TilesFlipX:
+	db $04,$02,$00
+;>EndTable
+
+;>Table: XDisplacements
+;>Description: X Displacement of each tile of each frame
+;>ValuesSize: 8
+XDisplacements:
+    
+Frame0_Foot0_XDisp:
+	db $E9,$EE,$F3,$F9
+Frame1_Foot1_XDisp:
+	db $FB,$0B
+Frame2_Foot2_XDisp:
+	db $FD,$01,$09
+Frame3_Foot3_XDisp:
+	db $00,$02
+Frame4_Foot4_XDisp:
+	db $00,$01,$02
+Frame0_Foot0_XDispFlipX:
+	db $17,$1A,$0D,$0F
+Frame1_Foot1_XDispFlipX:
+	db $05,$F5
+Frame2_Foot2_XDispFlipX:
+	db $03,$07,$F7
+Frame3_Foot3_XDispFlipX:
+	db $00,$FE
+Frame4_Foot4_XDispFlipX:
+	db $08,$FF,$FE
+;>EndTable
+;>Table: YDisplacements
+;>Description: Y Displacement of each tile of each frame
+;>ValuesSize: 8
+YDisplacements:
+    
+Frame0_Foot0_YDisp:
+	db $0C,$1C,$15,$0D
+Frame1_Foot1_YDisp:
+	db $03,$03
+Frame2_Foot2_YDisp:
+	db $02,$FC,$FC
+Frame3_Foot3_YDisp:
+	db $01,$F9
+Frame4_Foot4_YDisp:
+	db $01,$02,$F8
+Frame0_Foot0_YDispFlipX:
+	db $0C,$1C,$15,$0D
+Frame1_Foot1_YDispFlipX:
+	db $03,$03
+Frame2_Foot2_YDispFlipX:
+	db $02,$FC,$FC
+Frame3_Foot3_YDispFlipX:
+	db $01,$F9
+Frame4_Foot4_YDispFlipX:
+	db $01,$02,$F8
+;>EndTable
+;>Table: Sizes.
+;>Description: size of each tile of each frame
+;>ValuesSize: 8
+Sizes:
+    
+Frame0_Foot0_Sizes:
+	db $02,$00,$02,$00
+Frame1_Foot1_Sizes:
+	db $02,$02
+Frame2_Foot2_Sizes:
+	db $02,$00,$02
+Frame3_Foot3_Sizes:
+	db $02,$02
+Frame4_Foot4_Sizes:
+	db $00,$02,$02
+Frame0_Foot0_SizesFlipX:
+	db $02,$00,$02,$00
+Frame1_Foot1_SizesFlipX:
+	db $02,$02
+Frame2_Foot2_SizesFlipX:
+	db $02,$00,$02
+Frame3_Foot3_SizesFlipX:
+	db $02,$02
+Frame4_Foot4_SizesFlipX:
+	db $00,$02,$02

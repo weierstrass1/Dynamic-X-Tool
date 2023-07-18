@@ -1,0 +1,85 @@
+Dynamic: 
+	true
+	
+Tiles:
+    
+Frame0_Small0_Tiles:
+	db $00
+Frame1_Small1_Tiles:
+	db $02,$00
+Frame2_Small2_Tiles:
+	db $02,$00
+Frame3_Small3_Tiles:
+	db $02,$00
+Frame0_Small0_TilesFlipX:
+	db $00
+Frame1_Small1_TilesFlipX:
+	db $02,$00
+Frame2_Small2_TilesFlipX:
+	db $02,$00
+Frame3_Small3_TilesFlipX:
+	db $02,$00
+;>EndTable
+
+;>Table: XDisplacements
+;>Description: X Displacement of each tile of each frame
+;>ValuesSize: 8
+XDisplacements:
+    
+Frame0_Small0_XDisp:
+	db $00
+Frame1_Small1_XDisp:
+	db $00,$01
+Frame2_Small2_XDisp:
+	db $FF,$01
+Frame3_Small3_XDisp:
+	db $00,$01
+Frame0_Small0_XDispFlipX:
+	db $00
+Frame1_Small1_XDispFlipX:
+	db $00,$FF
+Frame2_Small2_XDispFlipX:
+	db $01,$FF
+Frame3_Small3_XDispFlipX:
+	db $00,$FF
+;>EndTable
+;>Table: YDisplacements
+;>Description: Y Displacement of each tile of each frame
+;>ValuesSize: 8
+YDisplacements:
+    
+Frame0_Small0_YDisp:
+	db $01
+Frame1_Small1_YDisp:
+	db $01,$FE
+Frame2_Small2_YDisp:
+	db $01,$FF
+Frame3_Small3_YDisp:
+	db $01,$FC
+Frame0_Small0_YDispFlipX:
+	db $01
+Frame1_Small1_YDispFlipX:
+	db $01,$FE
+Frame2_Small2_YDispFlipX:
+	db $01,$FF
+Frame3_Small3_YDispFlipX:
+	db $01,$FC
+
+Sizes:
+    
+Frame0_Small0_Sizes:
+	db $02
+Frame1_Small1_Sizes:
+	db $02,$02
+Frame2_Small2_Sizes:
+	db $02,$02
+Frame3_Small3_Sizes:
+	db $02,$02
+Frame0_Small0_SizesFlipX:
+	db $02
+Frame1_Small1_SizesFlipX:
+	db $02,$02
+Frame2_Small2_SizesFlipX:
+	db $02,$02
+Frame3_Small3_SizesFlipX:
+	db $02,$02

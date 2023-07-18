@@ -1,0 +1,68 @@
+GFXs: 
+	YITapTapTheRedNoseResize.bin
+Palettes:
+    YITapTapTheRedNosePal.bin
+
+ResourceSize:
+Resize0_ResourceSize:
+	db $04,$04
+Resize1_ResourceSize:
+	db $05,$04
+Resize2_ResourceSize:
+	db $06,$04
+Resize3_ResourceSize:
+	db $07,$06
+Resize4_ResourceSize:
+	db $07,$06
+Resize5_ResourceSize:
+	db $08,$08
+Resize6_ResourceSize:
+	db $08,$08
+Resize7_ResourceSize:
+	db $08,$08
+Resize8_ResourceSize:
+	db $08,$08
+Resize9_ResourceSize:
+	db $09,$08
+Resize10_ResourceSize:
+	db $0B,$0A
+Resize11_ResourceSize:
+	db $0E,$0E
+Resize12_ResourceSize:
+	db $0E,$0C
+Resize13_ResourceSize:
+	db $0E,$0C
+Resize14_ResourceSize:
+	db $0F,$0E
+Resize15_ResourceSize:
+	db $20,$00
+Resize16_ResourceSize:
+	db $21,$00
+Resize17_ResourceSize:
+	db $21,$00
+Resize18_ResourceSize:
+	db $22,$02
+Resize19_ResourceSize:
+	db $23,$02
+Resize20_ResourceSize:
+	db $26,$06
+Resize21_ResourceSize:
+	db $25,$04
+Resize22_ResourceSize:
+	db $26,$04
+Resize23_ResourceSize:
+	db $28,$06
+Resize24_ResourceSize:
+	db $2A,$08
+Resize25_ResourceSize:
+	db $2A,$08
+Resize26_ResourceSize:
+	db $2C,$0A
+Resize27_ResourceSize:
+	db $2C,$0A
+Resize28_ResourceSize:
+	db $2C,$0B
+
+ResourceLastRow:
+	db $10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$10,$30
+	db $40,$40,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30

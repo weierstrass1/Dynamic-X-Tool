@@ -142,8 +142,14 @@ namespace DynamicXLibrary
             int baseBlocks = ResourceSizes[id2] / 32;
             baseBlocks *= 8;
             int lastRowBlock = Math.Max(ResourceSizes[id2] % 32, ResourceSizes[id2 + 1]);
-            lastRowBlock += lastRowBlock % 2;
-            lastRowBlock /= 2;
+            if(lastRowBlock < 16)
+            {
+                lastRowBlock += lastRowBlock % 2;
+                lastRowBlock /= 2;
+                return baseBlocks + lastRowBlock;
+            }
+            lastRowBlock += lastRowBlock % 4;
+            lastRowBlock /= 4;
             return baseBlocks + lastRowBlock;
         }
         public static int[] GetSizes(List<DynamicInfo> dis)
