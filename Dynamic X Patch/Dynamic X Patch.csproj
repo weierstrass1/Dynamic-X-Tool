@@ -10,10 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DynamicX\Management\GraphicRoutineVersions\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Dynamic X SNES\Dynamic X SNES.csproj" />
   </ItemGroup>
 
@@ -33,28 +29,7 @@
     <None Update="DynamicX\DynamicX.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DynamicX\DynamicXDefines.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="DynamicX\Hijacks\BaseHijacks.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\DynamicSpritesMacros.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\GraphicRoutinesMacros.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\MultAndDiv.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\Palettes.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\PPU.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicX\Macros\STDCall.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="DynamicX\Management\cs.bin">
@@ -66,6 +41,9 @@
     <None Update="DynamicX\Management\Palette.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DynamicX\Management\Player.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="DynamicX\Management\xs.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -75,6 +53,203 @@
     <None Update="DynamicX\NMI\VRAMDMA.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DynamicX\ExtraDefines\DynamicXDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\DynamicXSpritesTables.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\DyzenDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\GlobalCustomVars.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\DynamicSpritesMacros.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\GraphicRoutinesMacros.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\MultAndDiv.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\Palettes.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\PPU.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\Macros\STDCall.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DynamicX\ExtraDefines\MoreSpriteMiscs.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\CalculateXYSpeedForAimedJumpBasedOnJumpForce.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DamagePlayer.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DisplayContactEffect.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterDraw.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterDrawWithOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterPaletteAutoAssign.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterPaletteAutoAssignWithLevelEffects.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterRenderBox.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterUpload.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXClusterUploadWithoutPoseOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedDraw.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedDrawWithOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedPaletteAutoAssign.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedPaletteAutoAssignWithLevelEffects.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedRenderBox.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedUpload.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXExtendedUploadWithoutPoseOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalDraw.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalDrawWithOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalPaletteAutoAssign.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalPaletteAutoAssignWithLevelEffects.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalRenderBox.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalUpload.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DXNormalUploadWithoutPoseOffset.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenCheckBounce.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenCheckPlayerIsAbove.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenCheckPlayerSide.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenClusterSpriteInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenDetectPlayerIsAbove.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenFixClippingForInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenNormalSpriteClippingRoutine.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenNormalSpriteInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenNormalSpriteNormalSpriteInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenPlayerClippingRoutine.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenPlayerClusterSpriteInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenPlayerNormalSpriteInteraction.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenPrepareBounce.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenPrepareContactEffect.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DyzenProcessHitBoxes.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\FlipActionFlag.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\GetAnimationSpeed.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\GetGhostGraphicState.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\GetGhostState.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\InitSpriteLevelPalette.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\InitSpriteLevelPaletteWithLength.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SetSpeed.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SpriteLevelPalette.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SpriteLevelPaletteWithCheck.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SpriteLevelPaletteWithCheckAndLength.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SpriteLevelPaletteWithLength.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\SQRT.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\UpdateNormalSpriteSpeedWithGravity.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\UpdateNormalSpriteSpeedWithGravityAndFloorCheck.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DynamicX\Macros\" />
+    <Folder Include="DynamicX\Management\GraphicRoutineVersions\" />
   </ItemGroup>
 
 </Project>

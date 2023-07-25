@@ -1,4 +1,5 @@
 ﻿using AsarCLR;
+using System.Text;
 
 namespace DynamicXLibrary
 {
@@ -19,11 +20,15 @@ namespace DynamicXLibrary
         {
             byte[] withoutHeader = romData[512..];
             if (!Asar.Patch(patchPath, ref withoutHeader))
-                throw new Exception(string
-                    .Join('\n', $"Asar patch {patchPath} failed.", 
-                        Asar.GetErrors()
-                            .Select(x => $"Line {x.Line} : {x.Rawerrdata}")
-                            .ToArray()));
+            {
+                StringBuilder sb = new();
+                sb.AppendLine($"Asar patch {patchPath} failed.");
+                foreach(var error in Asar.GetErrors())
+                    sb.AppendLine($"{error.Fullerrdata}");
+                string s = sb.ToString();
+                
+                throw new Exception(s);
+            }
             withoutHeader.CopyTo(romData, 512);
             return string.Join('\n', Asar.GetPrints());
         }

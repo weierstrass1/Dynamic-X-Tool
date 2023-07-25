@@ -1,12 +1,17 @@
+if read1($00FFD5) == $23
+    fullsa1rom
+else
+    lorom
+endif
+
 !rom = $800000
 !dp = $0000
 if read1($00FFD5) == $23
-    sa1rom
     !rom = $000000
     !dp = $3000
 endif
 
-!Routines #= ((read1($0082DE)<<16)+read2($008241))|!rom
+!Routines #= (read3($00821F))|!rom
 
 !XOffSet = $00
 !YOffSet = $02

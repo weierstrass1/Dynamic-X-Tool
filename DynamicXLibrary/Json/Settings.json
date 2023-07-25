@@ -1,0 +1,17 @@
+﻿{
+  "InputROMPath": "",
+  "OutputROMPath": "",
+  "PixiPath": "",
+  "UberasmToolPath": "",
+  "GPSPath": "",
+  "GraphicChange": true,
+  "PaletteChange": true,
+  "PaletteEffects": true,
+  "DynamicPoses": true,
+  "DrawingSystem": true,
+  "ControllerOptimization": true,
+  "FixedColorOptimization": true,
+  "StatusBarOptimization": false,
+  "ScrollingOptimization": true,
+  "PlayerFeatures": false
+}

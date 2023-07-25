@@ -137,7 +137,10 @@
     <None Update="FramesInfo\YITapTapTheRedNoseRotate.framesinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="test.smc">
+    <None Update="PaletteEffects\otros.paleffect">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PaletteEffects\effect.paleffect">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

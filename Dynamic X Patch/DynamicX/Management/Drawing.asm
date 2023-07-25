@@ -145,12 +145,12 @@ RTL
 RTL
 
 RemapOamTile:
-    STA $0B
+    STA $8A
     CLC
     ADC !PoseOffset
     PHP
     PHA
-    EOR $0B
+    EOR $8A
     AND #$10
     BEQ .skipFix
     PLA

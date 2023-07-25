@@ -1,0 +1,40 @@
+{
+  "Effects": [
+    {
+      "Channel1": 0,
+      "Channel2": 0,
+      "Channel3": 0,
+      "Ratio1": 0,
+      "Ratio2": 0,
+      "Ratio3": 0,
+      "Channels": 0
+    },
+    {
+      "Channel1": 18,
+      "Channel2": 0,
+      "Channel3": 0,
+      "Ratio1": 21,
+      "Ratio2": 0,
+      "Ratio3": 0,
+      "Channels": 0
+    },
+    {
+      "Channel1": 0,
+      "Channel2": 0,
+      "Channel3": 0,
+      "Ratio1": 0,
+      "Ratio2": 0,
+      "Ratio3": 0,
+      "Channels": 0
+    },
+    {
+      "Channel1": 20,
+      "Channel2": 0,
+      "Channel3": 0,
+      "Ratio1": 20,
+      "Ratio2": 0,
+      "Ratio3": 0,
+      "Channels": 1
+    }
+  ]
+}

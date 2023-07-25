@@ -1,10 +1,15 @@
+if read1($00FFD5) == $23
+    fullsa1rom
+else
+    lorom
+endif
+
 !rom = $800000
 if read1($00FFD5) == $23
-    sa1rom
     !rom = $000000
 endif
 
-!Routines #= ((read1($0082DE)<<16)+read2($008241))|!rom
+!Routines #= (read3($00821F))|!rom
 
 !PoseWasLoaded = read3(!Routines+$00)
 !TakeDynamicRequest = read3(!Routines+$03)

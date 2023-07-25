@@ -1,0 +1,10 @@
+!SpriteMiscTable16 = !End
+!SpriteMiscTable17 = !SpriteMiscTable16+!MaxSprites
+!SpriteMiscTable18 = !SpriteMiscTable17+!MaxSprites
+!SpriteMiscTable19 = !SpriteMiscTable18+!MaxSprites
+!SpriteMiscTable20 = !SpriteMiscTable19+!MaxSprites
+!SpriteMiscTable21 = !SpriteMiscTable20+!MaxSprites
+!SpriteMiscTable22 = !SpriteMiscTable21+!MaxSprites
+!SpriteMiscTable23 = !SpriteMiscTable22+!MaxSprites
+!SpriteMiscTable24 = !SpriteMiscTable23+!MaxSprites
+!SpriteMiscTable25 = !SpriteMiscTable24+!MaxSprites

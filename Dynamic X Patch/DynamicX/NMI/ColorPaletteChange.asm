@@ -42,6 +42,7 @@ RTS
     STA.l DX_PPU_CGRAM_Transfer_Length
 RTS
 
+if !PaletteEffects
 CGRAMToBufferDMA:
     LDA.l DX_PPU_CGRAM_BufferTransfer_Length
     BPL +
@@ -85,3 +86,4 @@ RTS
     LDA.b #$FF
     STA.l DX_PPU_CGRAM_BufferTransfer_Length
 RTS
+endif

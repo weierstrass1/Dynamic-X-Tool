@@ -1,8 +1,10 @@
 if read1($00FFD5) == $23
-    sa1rom
+    fullsa1rom
+else
+    lorom
 endif
 
-org (read1($0082DE)<<16+read2($008241))+$<Offset>
+org (read3($00821F))+$<Offset>
     dl Table
 
 freedata cleaned

@@ -1,8 +1,10 @@
 if read1($00FFD5) == $23
-    sa1rom
+    fullsa1rom
+else
+    lorom
 endif
 
-incsrc "../DynamicX/DynamicXDefines.asm"
+incsrc "../DynamicX/ExtraDefines/DynamicXDefines.asm"
 
 !OffsetBetweenSameHash = $000F
 
@@ -73,8 +75,8 @@ RTL
     JSR FindSpace
     BCS +
 
+    SEP #$30
     PLB
-    LDA $3EDEAD
     CLC
 RTL
 
@@ -147,6 +149,8 @@ RTS
     LDA $00
     AND #$007F
     STA $04
+    ASL
+    TAX
 
     ;$00 = Pose ID
     ;$02 = Number of values with the same hash value, it is used to limit the loop

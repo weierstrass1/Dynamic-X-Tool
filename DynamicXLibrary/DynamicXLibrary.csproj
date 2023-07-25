@@ -14,6 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ASM\ExtendedSpriteDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ASM\Draw.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -29,6 +32,18 @@
     <None Update="ASM\GraphicRoutine\LoopSection.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ASM\ClusterSpriteDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\NormalSpriteDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\Options.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\PaletteEffects.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ASM\PoseDataTemplate.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -39,6 +54,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Json\Property.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Json\Settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Json\Size.json">
@@ -56,6 +74,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\DynamicXPaletteEffectCreator\DynamicXPaletteCreatorLibrary\DynamicXPaletteCreatorLibrary.csproj" />
     <ProjectReference Include="..\Dynamic X Patch\Dynamic X Patch.csproj" />
     <ProjectReference Include="..\Dynamic X SNES\Dynamic X SNES.csproj" />
   </ItemGroup>

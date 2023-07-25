@@ -41,6 +41,7 @@ endif
     CLC
 RTL
 
+if !PaletteEffects
 ;Get Max between 3 values
 macro max(v1,v2,v3)
 ?max:
@@ -611,17 +612,17 @@ MixHSL:
     %getRatio(!ratio3,!V3)
     STA !V3
 
-    LDA #$0020 
+    LDA #$001F
     SEC
     SBC !ratio1
     STA !ratio1
 
-    LDA #$0020 
+    LDA #$001F 
     SEC
     SBC !ratio2
     STA !ratio2
 
-    LDA #$0020 
+    LDA #$001F 
     SEC
     SBC !ratio3
     STA !ratio3
@@ -642,12 +643,10 @@ MixHSL:
     %getRatio(!ratio1,"[!Source],y")
     CLC
     ADC !V1
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !H
 
     INY
@@ -655,12 +654,10 @@ MixHSL:
     %getRatio(!ratio2,"[!Source],y")
     CLC
     ADC !V2
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !S
 
     INY
@@ -668,12 +665,10 @@ MixHSL:
     %getRatio(!ratio3,"[!Source],y")
     CLC
     ADC !V3
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !L
 
     JSR HSL2RGB
@@ -779,17 +774,17 @@ MixRGB:
     %getRatio(!ratio3,!V3)
     STA !V3
 
-    LDA #$0020
+    LDA #$001F
     SEC
     SBC !ratio1
     STA !ratio1
 
-    LDA #$0020 
+    LDA #$001F 
     SEC
     SBC !ratio2
     STA !ratio2
 
-    LDA #$0020
+    LDA #$001F
     SEC
     SBC !ratio3
     STA !ratio3
@@ -810,12 +805,10 @@ MixRGB:
     %getRatio(!ratio1,"[!Source],y")
     CLC
     ADC !V1
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !R
 
     INY
@@ -823,12 +816,10 @@ MixRGB:
     %getRatio(!ratio2,"[!Source],y")
     CLC
     ADC !V2
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !G
 
     INY
@@ -836,12 +827,10 @@ MixRGB:
     %getRatio(!ratio3,"[!Source],y")
     CLC
     ADC !V3
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
+    STA !tmprl
     SEP #$20
+    %DivW(!tmprh, !tmprl, #$1F)
+    LDA !DivisionResult
     STA !B
 
     %mergeChannels(!B,!G,!R,!tmprh,!tmprl)
@@ -872,3 +861,4 @@ MixRGB:
 
     PLB
 RTL
+endif

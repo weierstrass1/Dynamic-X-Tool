@@ -1,7 +1,12 @@
 ﻿using AsarCLR;
 using Dynamic_X_Patch;
 using DynamicXSNES;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DynamicXLibrary
 {
@@ -28,6 +33,7 @@ namespace DynamicXLibrary
         private List<ResourceReference>? resourceReferences;
         private List<ResourceReference>? paletteReferences;
         private List<ResourceReference>? bufferReferences;
+        private List<string>? palEffects;
         private List<string>? graphics;
         private List<int>? graphicsSize;
         private List<string>? palettes;
@@ -40,7 +46,8 @@ namespace DynamicXLibrary
         private int drawRoutineSize;
         private int drawRoutinePosition;
         private int dynamicXSize;
-
+        private int palEffectSize;
+        private int paletteTablesSize;
         public DynamicXProcess(string romPath)
         {
             if (!File.Exists(romPath))
@@ -74,11 +81,6 @@ namespace DynamicXLibrary
                 return DynamicXErrors.OutputDirectoryNotFound;
             string? log = Process();
             SaveROM(output);
-            string definesPath = Path.Combine(Path.GetDirectoryName(output)!, "DynamicXDefines.asm");
-            if (File.Exists(@definesPath))
-                File.Delete(definesPath);
-            File.Copy(Path.Combine("TMP", "DynamicXDefines.asm"),
-                Path.Combine(Path.GetDirectoryName(output)!, "DynamicXDefines.asm"));
             return log;
         }
         public string? Process()
@@ -87,60 +89,219 @@ namespace DynamicXLibrary
                 Directory.CreateDirectory("TMP");
             Remove();
             PatchDynamicX();
+            
             string log = GetDynamicInfo(out bool validation);
             if (!validation)
                 return log;
             log = GetFramesInfo(out validation);
             if (!validation)
                 return log;
-            GenerateBuffers();
-            DynamicXErrors? err = InsertBuffers();
-            if (err != null)
-                return err;
-            GenerateGraphicRoutines();
-            SetUpBufferAddresses();
-            SetUpGraphicRoutinesAddresses();
-            GenerateDynamicPoseData();
-            GeneratedPoseData();
+            if (Options.Instance.DynamicPoses)
+            {
+                GenerateBuffers();
+                DynamicXErrors? err = InsertBuffers();
+                if (err != null)
+                    return err;
+                SetUpBufferAddresses();
+                GenerateDynamicPoseData();
+                InsertPalettesTables();
+            }
+            if (Options.Instance.DrawingSystem)
+            {
+                GenerateGraphicRoutines();
+                SetUpGraphicRoutinesAddresses();
+                GeneratedPoseData();
+            }
+            if (Options.Instance.PaletteEffects)
+                InsertPaletteEffects();
             GenerateDefines();
+
+            PixiInstallation();
+            UberasmToolInstallation();
+            GPSInstallation();
+
             PrintSummary();
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
             File.WriteAllText("log.txt", Log.GetLog());
             return null;
         }
+        private void generateOptionsFile(Options opt)
+        {
+            string tmpFile = Path.Combine("TMP", "Options.asm");
+            if (File.Exists(tmpFile))
+                File.Delete(tmpFile);
+            File.WriteAllText(tmpFile, opt.GenerateOptionsFileContent());
+            string extraDefines = Path.Combine("DynamicX", "ExtraDefines", "Options.asm");
+            if(File.Exists(extraDefines))
+                File.Delete(extraDefines);
+            File.Copy(tmpFile, extraDefines);
+            string rom = Path.Combine(Path.GetDirectoryName(opt.OutputROMPath)!, "Options.asm");
+            if (File.Exists(rom))
+                File.Delete(rom);
+            File.Copy(tmpFile, rom);
+        }
+        private bool toolInstallation(string? path, string folderName, params string[] relativeFolder)
+        {
+            if (path == null || path == "")
+                return false;
+            foreach(var d in relativeFolder)
+            {
+                if (Directory.Exists(Path.Combine(path, d)))
+                    continue;
+                Log.WriteLine($"{folderName} Folder is not valid, {folderName} Installation Failed.");
+                return false;
+            }
+            return true;
+        }
+        private void copyDirectoryFiles(string src, string dst)
+        {
+            string fpath;
+            foreach (var p in Directory.GetFiles(src))
+            {
+                fpath = Path.Combine(dst, Path.GetFileName(p));
+                if (File.Exists(fpath))
+                    File.Delete(fpath);
+                File.Copy(p, fpath);
+            }
+        }
+        private void CopyExtraDefines(string extradefinesPath)
+        {
+            if (!Directory.Exists(extradefinesPath))
+                Directory.CreateDirectory(extradefinesPath);
+            copyDirectoryFiles(Path.Combine("DynamicX", "ExtraDefines"), extradefinesPath);
+            string macrosFolderDst = Path.Combine(extradefinesPath, "Macros");
+            string macrosFolderSrc = Path.Combine("DynamicX", "ExtraDefines", "Macros");
+            if (!Directory.Exists(macrosFolderDst))
+                Directory.CreateDirectory(macrosFolderDst);
+            copyDirectoryFiles(macrosFolderSrc, macrosFolderDst);
+            string dynXDefinesPath = Path.Combine(Path.GetDirectoryName(Options.Instance.OutputROMPath)!,"DynamicXDefines.asm");
+            string dynXDefinesDstPath = Path.Combine(extradefinesPath, "DynamicXDefines.asm");
+            if (File.Exists(dynXDefinesDstPath))
+                File.Delete(dynXDefinesDstPath);
+            File.Copy(dynXDefinesPath, dynXDefinesDstPath);
+        }
+        public void PixiInstallation()
+        {
+            if (!toolInstallation(Options.Instance.PixiPath, "Pixi", "asm", "routines", "sprites", "extended", "cluster"))
+                return;
+            CopyExtraDefines(Path.Combine(Options.Instance.PixiPath!, "asm", "ExtraDefines"));
+            string ndefines = Path.Combine(Options.Instance.PixiPath!, "sprites", "NormalSpriteDefines.asm");
+            if (File.Exists(ndefines))
+                File.Delete(ndefines);
+            File.Copy(Path.Combine("ASM", "NormalSpriteDefines.asm"), ndefines);
+            string cdefines = Path.Combine(Options.Instance.PixiPath!, "cluster", "ClusterSpriteDefines.asm");
+            if (File.Exists(cdefines))
+                File.Delete(cdefines);
+            File.Copy(Path.Combine("ASM", "ClusterSpriteDefines.asm"), cdefines);
+            string edefines = Path.Combine(Options.Instance.PixiPath!, "extended", "ExtendedSpriteDefines.asm");
+            if (File.Exists(edefines))
+                File.Delete(edefines);
+            File.Copy(Path.Combine("ASM", "ExtendedSpriteDefines.asm"), edefines);
+            copyDirectoryFiles("Routines", Path.Combine(Options.Instance.PixiPath!, "routines"));
+            Log.WriteLine("Dynamic X was installed on Pixi");
+        }
+        public void UberasmToolInstallation()
+        {
+            if (!toolInstallation(Options.Instance.UberasmToolPath, "Uberasm Tool", "other"))
+                return;
+            string macrospath = Path.Combine(Options.Instance.UberasmToolPath!, "other", "macro_library.asm");
+            if (!File.Exists(macrospath))
+            {
+                Log.WriteLine($"Uberasm Tool Folder is not valid, Uberasm Tool Installation Failed.");
+                return;
+            }
+            string extradefinespath = Path.Combine(Options.Instance.UberasmToolPath!, "other", "ExtraDefines");
+            CopyExtraDefines(extradefinespath);
+            string content = File.ReadAllText(macrospath);
+            Regex r = new("incsrc \\\"\\.\\/ExtraDefines\\/.+\\.asm\\\"");
+            content = r.Replace(content, "").Trim();
+            string[] files = Directory.GetFiles(Path.Combine("DynamicX", "ExtraDefines"));
+            StringBuilder sb = new(content);
+            sb.AppendLine("");
+            sb.AppendLine("");
+            foreach (string file in files)
+                sb.AppendLine($"incsrc \"./ExtraDefines/{Path.GetFileName(file)}\"");
+            File.Delete(macrospath);
+            File.WriteAllText(macrospath, sb.ToString());
+            Log.WriteLine("Dynamic X was installed on Uberasm Tool");
+        }
+        public void GPSInstallation()
+        {
+            if (Options.Instance.GPSPath == null || Options.Instance.GPSPath == "")
+                return;
+            string definesPath = Path.Combine(Options.Instance.GPSPath!, "defines.asm");
+            if (!File.Exists(definesPath))
+            {
+                Log.WriteLine($"GPS Folder is not valid, GPS Installation Failed.");
+                return;
+            }
+            string extradefinespath = Path.Combine(Options.Instance.GPSPath!, "ExtraDefines");
+            CopyExtraDefines(extradefinespath);
+            string content = File.ReadAllText(definesPath);
+            Regex r = new("incsrc \\\"\\.\\/ExtraDefines\\/.+\\.asm\\\"");
+            content = r.Replace(content, "").Trim();
+            string[] files = Directory.GetFiles(Path.Combine("DynamicX", "ExtraDefines"));
+            StringBuilder sb = new(content);
+            sb.AppendLine("");
+            sb.AppendLine("");
+            foreach (string file in files)
+                sb.AppendLine($"incsrc \"./ExtraDefines/{Path.GetFileName(file)}\"");
+            File.Delete(definesPath);
+            File.WriteAllText(definesPath, sb.ToString());
+            Log.WriteLine("Dynamic X was installed on GPS");
+        }
         public void PrintSummary()
         {
             Log.WriteLine("\n################# Summary #################\n");
             Log.WriteLine($"Dynamic X Installation: {dynamicXSize} bytes ({Math.Round(dynamicXSize / 327.68f) / 100} banks)");
-            Log.WriteLine($"Dynamic Poses Inserted: {graphics!.Count}");
-            Log.WriteLine($"Palettes Inserted: {palettes!.Count}");
-            Log.WriteLine($"Drawable Poses Inserted: {frameInfos.Count}");
+            if (Options.Instance.DynamicPoses)
+            {
+                Log.WriteLine($"Dynamic Poses Inserted: {graphics!.Count}");
+                Log.WriteLine($"Palettes Inserted: {palettes!.Count}");
+            }
+            if (Options.Instance.DrawingSystem)
+                Log.WriteLine($"Drawable Poses Inserted: {frameInfos.Count}");
             int countdyn = 0;
-            foreach (var sz in graphicsSize!)
-                countdyn += sz;
-            countdyn += dynamicRoutinesSize;
-            countdyn += buffers!.Count * 11 + 11;
-            Log.WriteLine($"Space Used in Dynamic Poses: {countdyn} bytes ({Math.Round(countdyn / 327.68f) / 100} banks)");
-            int countp = 0;
-            foreach (var sz in palettesSize!)
-                countp += sz;
-            Log.WriteLine($"Space Used in Palettes: {countp} bytes ({Math.Round(countp / 327.68f) / 100} banks)");
             int count = 0;
-            foreach (var sz in graphicRoutinesSize!)
-                count += sz;
-            count += drawRoutineSize;
-            count += graphicRoutinesSize!.Count * 11 + 11;
-            Log.WriteLine($"Space Used in Drawable Poses: {count} bytes ({Math.Round(count / 327.68f) / 100} banks)");
+            int countp = paletteTablesSize;
+            int countpeff = 0;
+            if (Options.Instance.DynamicPoses && graphicsSize != null)
+            {
+                foreach (var sz in graphicsSize)
+                    countdyn += sz;
+                countdyn += dynamicRoutinesSize;
+                countdyn += buffers!.Count * 11 + 11;
+                Log.WriteLine($"Space Used in Dynamic Poses: {countdyn} bytes ({Math.Round(countdyn / 327.68f) / 100} banks)");
+            }
+            if (Options.Instance.PaletteChange && palettesSize != null)
+            {
+                foreach (var sz in palettesSize)
+                    countp += sz;
+                Log.WriteLine($"Space Used in Palettes: {countp} bytes ({Math.Round(countp / 327.68f) / 100} banks)");
+            }
+            if (Options.Instance.DrawingSystem && graphicRoutinesSize != null)
+            {
+                foreach (var sz in graphicRoutinesSize)
+                    count += sz;
+                count += drawRoutineSize;
+                count += graphicRoutinesSize!.Count * 11 + 11;
+                Log.WriteLine($"Space Used in Drawable Poses: {count} bytes ({Math.Round(count / 327.68f) / 100} banks)");
+            }
+            if(Options.Instance.PaletteEffects && palEffects != null)
+            {
+                countpeff = palEffectSize;
+                Log.WriteLine($"Space Used in PaletteEffects: {countpeff} bytes ({Math.Round(countpeff / 327.68f) / 100} banks)");
+            }
             Log.WriteLine("");
-            int total = dynamicXSize + countdyn + countp + count;
+            int total = dynamicXSize + countdyn + countp + count + countpeff;
             Log.WriteLine($"Total Space Used: {total} bytes ({Math.Round(total / 327.68f) / 100} banks)");
         }
         public void GenerateDefines()
         {
-            StringBuilder sb = new(File.ReadAllText(Path.Combine("DynamicX", "DynamicXDefines.asm")));
+            StringBuilder sb = new(File.ReadAllText(Path.Combine("DynamicX", "ExtraDefines", "DynamicXDefines.asm")));
             sb.Append("\n\n");
-            if (graphicRoutinesPosition != null)
+            if (Options.Instance.DrawingSystem && graphicRoutinesPosition != null)
             {
                 int i = 0;
                 foreach (var grv in GraphicRoutineVersion.GraphicRoutineVersions)
@@ -150,7 +311,7 @@ namespace DynamicXLibrary
                 }
                 sb.Append('\n');
             }
-            if (resourceReferences != null && graphics != null)
+            if (Options.Instance.DynamicPoses && resourceReferences != null && graphics != null)
             {
                 sb.AppendLine($"!NumberOfGraphics = ${resourceReferences.Count:X4}");
                 sb.Append('\n');
@@ -169,7 +330,7 @@ namespace DynamicXLibrary
                 }
                 sb.Append('\n');
             }
-            if(paletteReferences != null && palettes != null)
+            if(Options.Instance.DynamicPoses && paletteReferences != null && palettes != null)
             {
                 sb.AppendLine($"!NumberOfPalettes = ${paletteReferences.Count:X4}");
                 sb.Append('\n');
@@ -187,8 +348,20 @@ namespace DynamicXLibrary
                     i++;
                 }
                 sb.Append('\n');
+                i = 0;
+                foreach (var dynInfo in dynamicInfos)
+                {
+                    if (dynInfo.Palettes == null)
+                        continue;
+                    sb.AppendLine($"!{dynInfo.ContextName}PaletteTableID{i} = ${i:X4}");
+                    i++;
+                }
+                sb.AppendLine($"!NumberOfPaletteTables = ${i:X4}");
+                sb.AppendLine("!PaletteIDTables = !PaletteTables");
+                sb.AppendLine("!PaletteAddrTables = !PaletteTables+(!NumberOfPaletteTables*2)");
+                sb.Append('\n');
             }
-            if(frameInfos != null && frameInfos.Count > 0)
+            if(Options.Instance.DrawingSystem && frameInfos != null && frameInfos.Count > 0)
             {
                 sb.AppendLine($"!NumberOfPoses = ${frameInfos.Count:X4}");
                 sb.Append('\n');
@@ -207,9 +380,36 @@ namespace DynamicXLibrary
                 sb.Append('\n');
                 foreach (var kvp in groups)
                     sb.AppendLine($"!RenderBoxYDistanceOutOfScreen{kvp.Key} = ${FrameInfo.GetMaximumRenderBoxYDistanceOutOfScreen(kvp.Value):X4}");
-
+                sb.Append('\n');
+            }
+            if (Options.Instance.PaletteEffects)
+            {
+                sb.AppendLine($"!NumberOfPaletteEffects = ${(palEffects == null ? 0 : palEffects.Count):X4}");
+                if (palEffects != null && palEffects.Count > 0)
+                {
+                    string[] split;
+                    string name;
+                    int size;
+                    int count = 0;
+                    foreach (var pal in palEffects)
+                    {
+                        split = pal.Split(',');
+                        name = split[0];
+                        size = int.Parse(split[1]);
+                        for (int i = 0; i < size; i++, count++)
+                            sb.AppendLine($"!PaletteEffectID{name}{i} = ${count:X4}");
+                    }
+            }
             }
             File.WriteAllText(Path.Combine("TMP", "DynamicXDefines.asm"), sb.ToString());
+
+            string definesPath = Path.Combine(Path.GetDirectoryName(Options.Instance.OutputROMPath)!, "DynamicXDefines.asm");
+            if (File.Exists(definesPath))
+                File.Delete(definesPath);
+            string outputDefinesPath = Path.Combine(Path.GetDirectoryName(Options.Instance.OutputROMPath)!, "DynamicXDefines.asm");
+            File.Copy(Path.Combine("TMP", "DynamicXDefines.asm"),
+                Path.Combine(Path.GetDirectoryName(Options.Instance.OutputROMPath)!, "DynamicXDefines.asm"));
+            Log.WriteLine($"Defines file created: {outputDefinesPath}");
         }
         public void GeneratedPoseData()
         {
@@ -269,6 +469,107 @@ namespace DynamicXLibrary
             }
             SaveROM(Path.Combine("TMP", "tmp.smc"));
         }
+        public void InsertPaletteEffects()
+        {
+            if (rom == null) 
+                return;
+            int patchLocation = GetPatchLocation();
+            if (patchLocation < 0)
+                return;
+            string patch = ResourceTablePatchManager.Generate(1, 0x30);
+            string patchPath = Path.Combine("TMP", "PaletteEffects.asm");
+            string palDataPath = Path.Combine("TMP", "PaletteEffectsData.bin");
+            var palsColls = PaletteEffectExtension.GetCollections();
+            if (palsColls.Count <= 0)
+                return;
+            palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
+            byte[] bin = PaletteEffectExtension.ToBin(palsColls);
+            if (File.Exists(palDataPath))
+                File.Delete(palDataPath);
+            File.WriteAllBytes(palDataPath, bin);
+            patch = patch.Replace("dl $000000", "dl Data");
+            patch = patch.Replace("dl $FFFFFF", """
+                dl $FFFFFF
+                Data:
+                    incbin "PaletteEffectsData.bin"
+                """);
+            if (File.Exists(patchPath))
+                File.Delete(patchPath);
+            File.WriteAllText(patchPath, patch);
+            int output = int.Parse(PatchApplier.Apply(rom, patchPath)) + 0x200;
+            palEffectSize = bin.Length + 6 + 8;
+            Log.WriteLine("\n######## Palette Effects Insertion ########\n");
+            Log.WriteLine($"Palette Effects Inserted At ${SNESROMUtils.PCtoSNES(output, mapper):X6} (PC: {output:X6}): {palEffectSize} bytes");
+
+            string[] res = PatchApplier.Apply(rom, Path.Combine("ASM", "PaletteEffects.asm")).Split('\n');
+            output = int.Parse(res[0]) + 0x200;
+            int size = int.Parse(res[1]);
+            palEffectSize += 8+ size;
+
+            Log.WriteLine($"Palette Effects Patch Inserted At ${SNESROMUtils.PCtoSNES(output, mapper):X6} (PC: {output:X6}): {size} bytes");
+            Log.WriteLine("");
+        }
+        public void InsertPalettesTables()
+        {
+            if (rom == null)
+                return;
+            if (palettes == null || paletteReferences == null)
+                return;
+            int patchLocation = GetPatchLocation();
+            if (patchLocation < 0)
+                return;
+            string patch = ResourceTablePatchManager.Generate(1, 0x42);
+            string patchPath = Path.Combine("TMP", "PosePaletteTables.asm");
+            string palDataPath = Path.Combine("TMP", "PosePaletteTables.bin");
+            var palsColls = PaletteEffectExtension.GetCollections();
+            if (palsColls.Count <= 0)
+                return;
+            palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
+            List<byte> binIDs = new();
+            List<byte> binAddrs = new();
+            Dictionary<string, List<(int, int, int)>> tables = new();
+            int index, position;
+            List<(int, int, int)> current;
+            int count = 0;
+
+            foreach (var dyninfo in dynamicInfos)
+            {
+                if (dyninfo.Palettes == null)
+                    continue;
+                current = new();
+                tables.Add(dyninfo.ContextName, current);
+                for (int i = 0;i < dyninfo.Palettes.Length;i++)
+                {
+                    index = palettes.IndexOf(Path.GetFileNameWithoutExtension(dyninfo.Palettes[i]));
+                    position = SNESROMUtils.PCtoSNES(paletteReferences[index].Position, mapper);
+                    current.Add((count, index, position));
+                    binIDs.Add((byte)index);
+                    binIDs.Add((byte)(index >> 8));
+                    binAddrs.Add((byte)position);
+                    binAddrs.Add((byte)(position >> 8));
+                    binAddrs.Add((byte)(position >> 16));
+                }
+                count++;
+            }
+            binIDs = binIDs.Concat(binAddrs).ToList();
+            if (File.Exists(palDataPath))
+                File.Delete(palDataPath);
+            File.WriteAllBytes(palDataPath, binIDs.ToArray());
+            patch = patch.Replace("dl $000000", "dl Data");
+            patch = patch.Replace("dl $FFFFFF", """
+                dl $FFFFFF
+                Data:
+                    incbin "PosePaletteTables.bin"
+                """);
+            if (File.Exists(patchPath))
+                File.Delete(patchPath);
+            File.WriteAllText(patchPath, patch);
+            int output = int.Parse(PatchApplier.Apply(rom, patchPath)) + 0x200;
+            paletteTablesSize = binIDs.Count + 6 + 8;
+            Log.WriteLine("\n######### Palette Tables Insertion ########\n");
+            Log.WriteLine($"Palette Tables Inserted At ${SNESROMUtils.PCtoSNES(output, mapper):X6} (PC: {output:X6}): {paletteTablesSize} bytes");
+            Log.WriteLine("");
+        }
         public void SetUpBufferAddresses()
         {
             if (rom == null)
@@ -299,12 +600,15 @@ namespace DynamicXLibrary
         }
         public void PatchDynamicX()
         {
+            generateOptionsFile(Options.Instance);
             string rompath = Path.Combine("TMP", "tmp.smc");
             SaveROM(rompath);
             string patchPath = Path.Combine("DynamicX", "DynamicX.asm");
             string[] res = PatchApplier.Apply(rompath, patchPath).Split('\n');
             var err = Asar.GetErrors();
             rom = File.ReadAllBytes(rompath);
+            if (res == null || res.Length < 2)
+                return;
             dynamicXSize = int.Parse(res[1]);
             int addr = int.Parse(res[0]);
             Log.WriteLine("\n########## Dynamic X Installation #########\n");
@@ -314,11 +618,10 @@ namespace DynamicXLibrary
         {
             if (rom == null)
                 return -1;
-            int hijack1 = SNESROMUtils.SNEStoPC(0x008241, mapper);
-            int hijack2 = SNESROMUtils.SNEStoPC(0x0082DE, mapper);
-            if (rom[hijack2] == 0x09 && rom[hijack1 + 1] == 0x84 && rom[hijack1] == 0x49)
+            int hijack1 = SNESROMUtils.SNEStoPC(0x00821F, mapper);
+            if (rom[hijack1+2] == 0x1B && rom[hijack1 + 1] == 0x80 && rom[hijack1] == 0xA3)
                 return -1;
-            int snes = SNESROMUtils.JoinAddress(rom[hijack2], rom[hijack1 + 1], rom[hijack1]);
+            int snes = SNESROMUtils.JoinAddress(rom[hijack1 + 2], rom[hijack1 + 1], rom[hijack1]);
             return SNESROMUtils.SNEStoPC(snes, mapper);
         }
         public void Remove()
@@ -332,18 +635,38 @@ namespace DynamicXLibrary
             int drawRout = patchLocation + 0x06;
             int resTab = patchLocation + 0x18;
             int gfxroutsTab = patchLocation + 0x1B;
+            int palEffTab = patchLocation + 0x30;
+            int palEffPatch = patchLocation + 0x33;
+            int palTabsPatch = patchLocation + 0x42;
             int join3DynRout = SNESROMUtils.JoinAddress(rom, dynRouts);
             int join3DrawRout = SNESROMUtils.JoinAddress(rom, drawRout);
+            int join3palEffTab = SNESROMUtils.JoinAddress(rom, palEffTab);
+            int join3palEffPatch = SNESROMUtils.JoinAddress(rom, palEffPatch);
+            int join3palTabsPatch = SNESROMUtils.JoinAddress(rom, palTabsPatch);
             int dynRoutsAddr = SNESROMUtils.SNEStoPC(join3DynRout, mapper);
             int drawRoutAddr = SNESROMUtils.SNEStoPC(join3DrawRout, mapper);
+            int palEffTabAddr = SNESROMUtils.SNEStoPC(join3palEffTab, mapper);
+            int palEffPatchAddr = SNESROMUtils.SNEStoPC(join3palEffPatch, mapper);
+            int palTabsPatchAddr = SNESROMUtils.SNEStoPC(join3palTabsPatch, mapper);
             if (dynRoutsAddr > 0) 
                 Log.WriteLine($"Removed Dynamic Routines At ${join3DynRout:X6} (PC: {dynRoutsAddr:X6}): {SNESROMUtils.RemoveAt(rom, dynRoutsAddr - 8)} bytes");
             if (drawRoutAddr > 0) 
                 Log.WriteLine($"Removed Draw Routine At ${join3DrawRout:X6} (PC: {drawRoutAddr:X6}): {SNESROMUtils.RemoveAt(rom, drawRoutAddr - 8)} bytes");
+            if (palEffTabAddr > 0)
+                Log.WriteLine($"Removed Palette Effects At ${join3palEffTab:X6} (PC: {palEffTabAddr:X6}): {SNESROMUtils.RemoveAt(rom, palEffTabAddr - 8)} bytes");
+            if (palEffPatchAddr > 0)
+                Log.WriteLine($"Removed Palette Effects Patch At ${join3palEffPatch:X6} (PC: {palEffPatchAddr:X6}): {SNESROMUtils.RemoveAt(rom, palEffPatchAddr - 8)} bytes");
+            if (palTabsPatchAddr > 0)
+                Log.WriteLine($"Removed Palette Tables Patch At ${join3palTabsPatch:X6} (PC: {palTabsPatchAddr:X6}): {SNESROMUtils.RemoveAt(rom, palTabsPatchAddr - 8)} bytes");
+
             if (SNESROMUtils.JoinAddress(rom[resTab + 2], rom[resTab + 1], rom[resTab]) != 0)
                 printRemoveList(ResourceTablePatchManager.Remove(rom, resTab, mapper));
             if (SNESROMUtils.JoinAddress(rom[gfxroutsTab + 2], rom[gfxroutsTab + 1], rom[gfxroutsTab]) != 0)
                 printRemoveList(ResourceTablePatchManager.Remove(rom, gfxroutsTab, mapper));
+            generateOptionsFile(Options.Empty);
+            string patchPath = Path.Combine("DynamicX", "DynamicX.asm");
+            string rompath = Path.Combine("TMP", "tmp.smc");
+            PatchApplier.Apply(rompath, patchPath).Split('\n');
             Log.WriteLine($"Dynamic X Desinstalled At ${SNESROMUtils.PCtoSNES(patchLocation, mapper):X6} (PC: {patchLocation:X6}): {SNESROMUtils.RemoveAt(rom, patchLocation - 8)} bytes");
             SaveROM(Path.Combine("TMP", "tmp.smc"));
         }
@@ -446,6 +769,11 @@ namespace DynamicXLibrary
         }
         public string GetDynamicInfo(out bool validation)
         {
+            if (!Options.Instance.DynamicPoses)
+            {
+                validation = true;
+                return "";
+            }
             string[] paths = Directory.GetFiles("DynamicInfo");
             DynamicInfo di;
             validation = true;
@@ -462,6 +790,11 @@ namespace DynamicXLibrary
         }
         public string GetFramesInfo(out bool validation)
         {
+            if(!Options.Instance.DrawingSystem)
+            {
+                validation = true;
+                return "";
+            }
             string[] paths = Directory.GetFiles("FramesInfo");
             FrameInfo[] fis;
             validation = true;
