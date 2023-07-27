@@ -88,6 +88,16 @@ JML $00F69E|!rom
     LDA.l DX_Dynamic_Player_Palette_Addr
     CMP.l DX_PPU_CGRAM_LastPlayerPal
     BNE +
+
+    LDA DX_Dynamic_Palettes_GlobalSPEnable
+    AND #$0080
+    BEQ ++
+
+    LDA DX_Dynamic_Palettes_GlobalEffectID
+    CMP DX_Dynamic_Palettes_LastGlobalEffectID+$10
+    BNE +
+
+++
     SEP #$20
     LDA.B #$0A                
     STA.W $0D84               
@@ -160,10 +170,14 @@ JML $00F69E|!rom
 
     LDA #$FFFF
     STA DX_Dynamic_Palettes_LastGlobalEffectID+$10
-    LDA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
-    AND #$7F7F
-    STA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
     SEP #$20
+    LDA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
+    AND #$7F
+    STA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
+    LDA DX_PPU_CGRAM_SPBaseHSLPaletteLoaded
+    AND #$7F
+    STA DX_PPU_CGRAM_SPBaseHSLPaletteLoaded
+
     LDA DX_PPU_CGRAM_SPPaletteCopyLoaded
     ORA #$80
     STA DX_PPU_CGRAM_SPPaletteCopyLoaded

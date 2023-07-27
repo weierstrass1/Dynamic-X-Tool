@@ -215,9 +215,6 @@ endif
 endif
     REP #$20
     LDA #$0000
-if !PlayerFeatures
-    STA DX_PPU_CGRAM_LastPlayerPal
-endif
 if !PaletteChange
     STA.w DX_Dynamic_Palettes_Updated+$00
     STA.w DX_Dynamic_Palettes_Updated+$02
@@ -242,6 +239,7 @@ if !PaletteEffects
 	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
 	STA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
 	STA DX_PPU_FixedColor_RGBBaseLoaded
+    STA DX_PPU_FixedColor_CopyLoaded
 endif
 if !DynamicPoses
     STA.w DX_Dynamic_Pose_Length
@@ -266,7 +264,6 @@ if !PaletteChange
     STA.w DX_Dynamic_Palettes_ID+$0A
     STA.w DX_Dynamic_Palettes_ID+$0C
     STA.w DX_Dynamic_Palettes_ID+$0E
-    STA.w DX_Dynamic_Palettes_ID+$10
     STA.w DX_Dynamic_Palettes_ID+$12
     STA.w DX_Dynamic_Palettes_ID+$14
     STA.w DX_Dynamic_Palettes_ID+$16
@@ -274,6 +271,10 @@ if !PaletteChange
     STA.w DX_Dynamic_Palettes_ID+$1A
     STA.w DX_Dynamic_Palettes_ID+$1C
     STA.w DX_Dynamic_Palettes_ID+$1E
+    STA DX_PPU_CGRAM_LastPlayerPal
+    LDA #$FFFE
+    STA.w DX_Dynamic_Palettes_ID+$10
+    LDA #$FFFF
 endif
 if !PaletteEffects
     STA.w DX_Dynamic_Palettes_LastGlobalEffectID+$00
@@ -411,18 +412,19 @@ endif
 
 .End
 if !PaletteChange
-    LDA #$00
+    REP #$20
+    LDA #$0000
     STA DX_Dynamic_Palettes_Updated+$00
-    STA DX_Dynamic_Palettes_Updated+$01
     STA DX_Dynamic_Palettes_Updated+$02
-    STA DX_Dynamic_Palettes_Updated+$03
     STA DX_Dynamic_Palettes_Updated+$04
-    STA DX_Dynamic_Palettes_Updated+$05
     STA DX_Dynamic_Palettes_Updated+$06
-    STA DX_Dynamic_Palettes_Updated+$07
-
+    STA DX_Dynamic_Palettes_Updated+$08
+    STA DX_Dynamic_Palettes_Updated+$0A
+    STA DX_Dynamic_Palettes_Updated+$0C
+    STA DX_Dynamic_Palettes_Updated+$0E
+    SEP #$20
     !i = $00
-while !i < $08
+while !i < $10
     LDA DX_Dynamic_Palettes_DisableTimer+!i
     BEQ +
     DEC A

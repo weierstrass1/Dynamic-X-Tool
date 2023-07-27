@@ -1,3 +1,5 @@
+!Version = !ClusterVersion
+
 !PoseIndex = !ClusterPoseIndex
 !LastPoseIndex = !ClusterLastPoseIndex
 !AnimationIndex = !ClusterAnimationIndex
@@ -20,8 +22,7 @@
 !PlayerIsAbove = !ClusterPlayerIsAbove
 
 !RenderBox = %DXClusterRenderBox()
-!PaletteAutoAssign = %DXClusterPaletteAutoAssign()
-!PaletteAutoAssignWithLevelEffects = %DXClusterPaletteAutoAssignWithLevelEffects()
+!PaletteAssignment = %DXClusterPaletteAssignment()
 !Upload = %DXClusterUpload()
 !DXDraw = %DXClusterDraw()
 !DXDrawWithOffset = %DXClusterDrawWithOffset()

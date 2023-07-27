@@ -348,17 +348,20 @@ namespace DynamicXLibrary
                     i++;
                 }
                 sb.Append('\n');
+                int palCounter = 0;
                 i = 0;
                 foreach (var dynInfo in dynamicInfos)
                 {
                     if (dynInfo.Palettes == null)
                         continue;
-                    sb.AppendLine($"!{dynInfo.ContextName}PaletteTableID{i} = ${i:X4}");
+                    sb.AppendLine($"!{dynInfo.ContextName}PaletteTableOffset = ${palCounter:X4}");
+                    palCounter += dynInfo.Palettes.Length;
                     i++;
                 }
                 sb.AppendLine($"!NumberOfPaletteTables = ${i:X4}");
-                sb.AppendLine("!PaletteIDTables = !PaletteTables");
-                sb.AppendLine("!PaletteAddrTables = !PaletteTables+(!NumberOfPaletteTables*2)");
+                sb.AppendLine($"!PaletteTableSize = ${palCounter:X4}");
+                sb.AppendLine("!PaletteIDTables #= read3(!PaletteTables)");
+                sb.AppendLine("!PaletteAddrTables = !PaletteIDTables+(!PaletteTableSize*2)");
                 sb.Append('\n');
             }
             if(Options.Instance.DrawingSystem && frameInfos != null && frameInfos.Count > 0)
@@ -384,13 +387,12 @@ namespace DynamicXLibrary
             }
             if (Options.Instance.PaletteEffects)
             {
-                sb.AppendLine($"!NumberOfPaletteEffects = ${(palEffects == null ? 0 : palEffects.Count):X4}");
                 if (palEffects != null && palEffects.Count > 0)
                 {
                     string[] split;
                     string name;
                     int size;
-                    int count = 0;
+                    int count = 1;
                     foreach (var pal in palEffects)
                     {
                         split = pal.Split(',');
@@ -399,7 +401,8 @@ namespace DynamicXLibrary
                         for (int i = 0; i < size; i++, count++)
                             sb.AppendLine($"!PaletteEffectID{name}{i} = ${count:X4}");
                     }
-            }
+                    sb.AppendLine($"!NumberOfPaletteEffects = ${(palEffects == null ? 0 : count):X4}");
+                }
             }
             File.WriteAllText(Path.Combine("TMP", "DynamicXDefines.asm"), sb.ToString());
 
@@ -541,7 +544,7 @@ namespace DynamicXLibrary
                 for (int i = 0;i < dyninfo.Palettes.Length;i++)
                 {
                     index = palettes.IndexOf(Path.GetFileNameWithoutExtension(dyninfo.Palettes[i]));
-                    position = SNESROMUtils.PCtoSNES(paletteReferences[index].Position, mapper);
+                    position = SNESROMUtils.PCtoSNES(paletteReferences[index].Position + 8, mapper);
                     current.Add((count, index, position));
                     binIDs.Add((byte)index);
                     binIDs.Add((byte)(index >> 8));

@@ -7,9 +7,9 @@ AssignPalette:
     STA $00
 
 .UnrolledFindPal
-    !i = $01
+    !i = $00
 while !i < $08
-    LDA DX_Dynamic_Palettes_ID+!i+!i
+    LDA DX_Dynamic_Palettes_ID+$10+!i+!i
     CMP $00
     BNE +
     SEP #$20
@@ -21,22 +21,24 @@ RTL
 endif
 
 .UnrolledFindFreePal
-    !i = $01
+    !i = $00
 while !i < $08
-    LDA DX_Dynamic_Palettes_ID+!i+!i
-    CMP #$FFFF
+    LDA DX_Dynamic_Palettes_ID+$10+!i+!i
+    CMP #$FFFE
+    BEQ +
+    LDA DX_Dynamic_Palettes_Updated+$08+!i
+    AND #$00FF
     BNE +
     LDA $00
-    STA DX_Dynamic_Palettes_ID+!i+!i
+    STA DX_Dynamic_Palettes_ID+$10+!i+!i
     SEP #$20
-    LDA #$00
-    STA DX_Dynamic_Palettes_Updated+!i
     LDY #!i
     CLC
 RTL
 +
     !i #= !i+$01
 endif
+    SEP #$20
     LDY #$FF
     CLC
 RTL

@@ -63,18 +63,19 @@ if !sa1
     JML $00806B|!rom
 endif
 .init
-    LDA #$00
+    REP #$20
+    LDA #$0000
     STA DX_Dynamic_Palettes_Updated+$00
-    STA DX_Dynamic_Palettes_Updated+$01
     STA DX_Dynamic_Palettes_Updated+$02
-    STA DX_Dynamic_Palettes_Updated+$03
     STA DX_Dynamic_Palettes_Updated+$04
-    STA DX_Dynamic_Palettes_Updated+$05
     STA DX_Dynamic_Palettes_Updated+$06
-    STA DX_Dynamic_Palettes_Updated+$07
-
+    STA DX_Dynamic_Palettes_Updated+$08
+    STA DX_Dynamic_Palettes_Updated+$0A
+    STA DX_Dynamic_Palettes_Updated+$0C
+    STA DX_Dynamic_Palettes_Updated+$0E
+	SEP #$20
     !i = $00
-while !i < $08
+while !i < $10
     LDA DX_Dynamic_Palettes_DisableTimer+!i
     BEQ +
     DEC A
@@ -93,6 +94,7 @@ endif
 	%ProcessPalette($04,$05,DX_Dynamic_Palettes_GlobalBGEnable,DX_PPU_CGRAM_BGPaletteCopyLoaded,DX_PPU_CGRAM_BGPaletteCopyLoaded)
 	%ProcessPalette($02,$06,DX_Dynamic_Palettes_GlobalBGEnable,DX_PPU_CGRAM_BGPaletteCopyLoaded,DX_PPU_CGRAM_BGPaletteCopyLoaded)
 	%ProcessPalette($01,$07,DX_Dynamic_Palettes_GlobalBGEnable,DX_PPU_CGRAM_BGPaletteCopyLoaded,DX_PPU_CGRAM_BGPaletteCopyLoaded)
+
     LDA DX_Dynamic_Palettes_GlobalSPEnable
 	%ProcessPalette($80,$08,DX_Dynamic_Palettes_GlobalSPEnable,DX_PPU_CGRAM_SPPaletteCopyLoaded,DX_PPU_CGRAM_SPPaletteCopyLoaded)
 	%ProcessPalette($40,$09,DX_Dynamic_Palettes_GlobalSPEnable,DX_PPU_CGRAM_SPPaletteCopyLoaded,DX_PPU_CGRAM_SPPaletteCopyLoaded)
@@ -337,13 +339,14 @@ RTS
 
 ;Input:
 ;   Use REP #$30 before the routine
-;   DX_PPU_CGRAM_PaletteCopy =  Put the colors of the palette here (is a buffer of 512 bytes, every 2 bytes is 1 color in BGR555)
-;                               You can use !LoadPaletteOnBuffer or use macro TransferToCGRAMBuffer(CGRAMOffset, Lenght)
+;   $06-$08 = Source (24 bits) Put the colors of the palette here (is a buffer of 512 bytes, every 2 bytes is 1 color in BGR555)
+;             You can use !LoadPaletteOnBuffer or use macro TransferToCGRAMBuffer(CGRAMOffset, Lenght)
 ;   $00 = Color ID (PPPP CCCC)
 ;       PPPP : Palette ID
 ;       CCCC : Color on the Palette
 ;   $02 = Number Of Colors
 ;   A = Palette Effect ID (16 bits)
+;	Overflow: Set => Load on CGRAM, Clear => Dont Load on 
 ;   Carry : Set => Load (RGB or HSL) Base. If it is the first time that you use a effect that you need to use it, but the others times
 ;                   it is not needed. The base for RGB and the base for HSL are separate.
 ;Output:
@@ -352,38 +355,113 @@ RTS
 ;   This changes X value
 ApplyPaletteEffect:
     TAX
-    STZ $01
-    STZ $03
+	LDA $06
+	PHA
     LDA $02
+	AND #$00FF
+	STA $02
     PHA
     LDA $00
+	AND #$00FF
+	STA $00
     PHA
     SEP #$20
+	LDA $08
+	PHA
+
+	PHP
+	CPX #$0000
+	BNE +
+	PLP
+
+	BVS ++
+	PLA
+	REP #$20
+	PLA
+	PLA
+	PLA
+	SEP #$20
+	SEC
+RTL
+++
+
+	PLA
+	REP #$20
+	PLA
+	PLA
+	PLA
+
+	LDA $00
+    ASL
+    CLC
+    ADC #DX_PPU_CGRAM_PaletteWriteMirror
+    STA $04
+	LDA $02
+	ASL
+	STA $02
+	SEP #$30
+	%TransferToCGRAM($00, $04, "#DX_PPU_CGRAM_BaseHSLPalette>>16", $02)
+RTL
++
+	DEX
+	PLP
+	PHP
     LDA !PaletteEffectsTypes,x
     BEQ .RGB
 	JMP .HSL
 .RGB
     BCC ..skipSetBase
     PHX
-    %SetRGBBaseDefault($00,$02)
+
+	REP #$20
+	LDA $00
+	ASL
+	CLC
+	ADC $00
+	CLC
+	ADC #DX_PPU_CGRAM_BaseRGBPalette
+	STA $09
+	SEP #$20
+    %SetRGBBase($06,$08,$09,"#DX_PPU_CGRAM_BaseRGBPalette>>16",$02)
     REP #$10
     PLX
 
 ..skipSetBase
 
-	%MixRGBDefault("!PaletteEffectsRatios1,x","!PaletteEffectsRatios2,x","!PaletteEffectsRatios3,x","!PaletteEffectsChannels1,x","!PaletteEffectsChannels2,x","!PaletteEffectsChannels3,x", "$01,s", "$03,s")
+	%MixRGBDefault("!PaletteEffectsRatios1,x","!PaletteEffectsRatios2,x","!PaletteEffectsRatios3,x","!PaletteEffectsChannels1,x","!PaletteEffectsChannels2,x","!PaletteEffectsChannels3,x", "$03,s", "$05,s")
 
     BRA .End
 .HSL
     BCC ..skipSetBase
     PHX
-    %SetHSLBaseDefault($00,$02)
+	REP #$20
+	LDA $00
+	ASL
+	CLC
+	ADC $00
+	CLC
+	ADC #DX_PPU_CGRAM_BaseHSLPalette
+	STA $09
+	SEP #$20
+    %SetHSLBase($06,$08,$09,"#DX_PPU_CGRAM_BaseHSLPalette>>16",$02)
     REP #$10
     PLX
 ..skipSetBase
-	%MixHSLDefault("!PaletteEffectsRatios1,x","!PaletteEffectsRatios2,x","!PaletteEffectsRatios3,x","!PaletteEffectsChannels1,x","!PaletteEffectsChannels2,x","!PaletteEffectsChannels3,x", "$01,s", "$03,s")
+	%MixHSLDefault("!PaletteEffectsRatios1,x","!PaletteEffectsRatios2,x","!PaletteEffectsRatios3,x","!PaletteEffectsChannels1,x","!PaletteEffectsChannels2,x","!PaletteEffectsChannels3,x", "$03,s", "$05,s")
 
 .End
+	PLP
+	BVS +
+	PLA
+	REP #$20
+	PLA
+	PLA
+	PLA
+	SEP #$20
+	SEC
+RTL
++
+	PLA 
     REP #$20
     PLA 
     STA $00
@@ -392,63 +470,41 @@ ApplyPaletteEffect:
     ADC #DX_PPU_CGRAM_PaletteWriteMirror
     STA $04
     PLA 
+	ASL
     STA $02
+	PLA
     SEP #$20
 
-    %TransferToCGRAM($00, $04,"#DX_PPU_CGRAM_PaletteWriteMirror>>16", $02)
+	%TransferToCGRAM($00, $04, "#DX_PPU_CGRAM_PaletteWriteMirror>>16", $02)
 RTL
 
 ;Input:
 ;   $00 = Color ID (PPPP CCCC)
 ;       PPPP : Palette
 ;       CCCC : Color on the Palette
-;   $02-$04 = Palette Address (16 bits)
+;   $02-$04 = Palette Address (24 bits)
 ;   $05 = Number Of Colors
+;	$06-$08 = Destination (24 bits)
 ;Output:
-;   The palette is loaded on DX_PPU_CGRAM_PaletteCopy
+;   The palette is loaded on Destination
 ;   This changes X value
 LoadPaletteOnBuffer:
-if !sa1
-    LDA.B #.init				; \ Put the SNES pointer to run
-    STA $0183				; | in $0183-$0185.
-    LDA.B #.init/256			; |
-    STA $0184				; | (Remember that $0000-$07FF
-    LDA.B #.init/65536			; |  is same as $3000-$37FF).
-    STA $0185				; /
-    LDA #$D0				; \ Invoke/Call SNES
-    STA $2209				; /
-    .Wait					; \ Wait for SNES.
-    LDA $018A				; |
-    BEQ .Wait				; |
-    STZ $018A				; /
-RTL
-endif
-.init
-    STZ $01
-    LDA #$00
-    XBA
-    LDA $05
-    REP #$20
-    STA $4305
+	LDA #$00
+	XBA
+	LDA $05
+	REP #$30
+	DEC A
+	ASL
+	TAY
 
-    LDA #$8000
-    STA $4300
+.Loop
 
-    LDA $02
-    STA $4302
-
-    LDA $00
-    ASL
-    CLC
-    ADC.w #DX_PPU_CGRAM_PaletteCopy  ;Get lower 16-bits of destination ptr
-    STA $2181                        ;Set WRAM offset
-    SEP #$20
-
-    LDA.b #DX_PPU_CGRAM_PaletteCopy>>16
-    STA $2183                        ;Set WRAM bank (only LSB is significant)
-
-    LDA #$01                         ;DMA transfer mode=auto increment
-    STA $420B                        ;Initiate transfer using channel 0
+	LDA [$02],y
+	STA [$06],y
+	DEY
+	DEY
+	BPL .Loop
+	SEP #$30
 RTL
 
 print dec(snestopc(Start))

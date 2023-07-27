@@ -1,3 +1,5 @@
+!Version = !ExtendedVersion
+
 !PoseIndex = !ExtendedPoseIndex
 !LastPoseIndex = !ExtendedLastPoseIndex
 !AnimationIndex = !ExtendedAnimationIndex
@@ -20,8 +22,7 @@
 !PlayerIsAbove = !ExtendedPlayerIsAbove
 
 !RenderBox = %DXExtendedRenderBox()
-!PaletteAutoAssign = %DXExtendedPaletteAutoAssign()
-!PaletteAutoAssignWithLevelEffects = %DXExtendedPaletteAutoAssignWithLevelEffects()
+!PaletteAssignment = %DXExtendedPaletteAssignment()
 !Upload = %DXExtendedUpload()
 !DXDraw = %DXExtendedDraw()
 !DXDrawWithOffset = %DXExtendedDrawWithOffset()

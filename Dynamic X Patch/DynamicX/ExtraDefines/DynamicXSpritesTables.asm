@@ -95,4 +95,28 @@
 
 !ExtendedLastFlip = !ClusterLastFlip+$14
 
-!End = !ExtendedLastFlip+$0C
+!NormalVersion = !ExtendedLastFlip+$0C
+
+!ClusterVersion = !NormalVersion+!MaxSprites
+
+!ExtendedVersion = !ClusterVersion+$14
+
+!NormalPaletteAssignment = !extra_prop_2
+
+!ClusterPaletteAssignment = !ExtendedVersion+$0C
+
+!ExtendedPaletteAssignment = !ClusterPaletteAssignment+$14
+
+!NormalPaletteOption = !ExtraByte1
+
+!ClusterPaletteOption = !ExtendedPaletteAssignment+$0C
+
+!ExtendedPaletteOption = !ClusterPaletteOption+$14
+
+!NormalBasePaletteLoaded = !ExtendedPaletteOption+$0C
+
+!ClusterBasePaletteLoaded = !NormalBasePaletteLoaded+!MaxSprites
+
+!ExtendedBasePaletteLoaded = !ClusterBasePaletteLoaded+$14
+
+!End = !ExtendedBasePaletteLoaded+$0C

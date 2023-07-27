@@ -1,6 +1,6 @@
 !SpriteNoFlipActionTimer = !SpriteDecTimer5
 
-!Version = !SpriteMiscTable3
+!Version = !NormalVersion
 !SpriteActionFlag = !SpriteMiscTable4
 
 !PoseIndex = !NormalPoseIndex
@@ -25,8 +25,7 @@
 !PlayerIsAbove = !NormalPlayerIsAbove
 
 !RenderBox = %DXNormalRenderBox()
-!PaletteAutoAssign = %DXNormalPaletteAutoAssign()
-!PaletteAutoAssignWithLevelEffects = %DXNormalPaletteAutoAssignWithLevelEffects()
+!PaletteAssignment = %DXNormalPaletteAssignment()
 !Upload = %DXNormalUpload()
 !DXDraw = %DXNormalDraw()
 !DXDrawWithOffset = %DXNormalDrawWithOffset()
