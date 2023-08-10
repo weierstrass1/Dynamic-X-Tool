@@ -14,14 +14,16 @@ namespace DynamicXLibrary
             Dictionary<string, (string, string)[]> subTables = new();
             foreach (var table in tables)
                 subTables.Add(table.Item1.Replace(":", "").Trim(), split(table.Item2, subTableRegex));
+            if (subTables.Count == 0)
+                return new(contextName);
             DynamicInfo di = new(contextName)
             {
-                ResourceSizes = new int[subTables["ResourceSize"].Length * 2]
+                ResourceSizes = new int[subTables["PosesChunksSizes"].Length * 2]
             };
             int[] values;
-            for (int i = 0; i < subTables["ResourceSize"].Length; i++)
+            for (int i = 0; i < subTables["PosesChunksSizes"].Length; i++)
             {
-                values = getValues(i, subTables["ResourceSize"])!;
+                values = getValues(i, subTables["PosesChunksSizes"])!;
                 di.ResourceSizes[i * 2] = values[0];
                 di.ResourceSizes[(i * 2) + 1] = values[1];
             }

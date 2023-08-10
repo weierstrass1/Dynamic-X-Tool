@@ -113,9 +113,12 @@ else
 endif
 if read3($00821F) == $1B80A3
     dl $000000
+    dl $000000
 elseif !DynamicPoses
     dl !PaletteTables
+    dl !DynamicPoseSpaceConfig
 else 
+    dl $000000
     dl $000000
 endif
 if !GraphicChange || !PaletteChange
@@ -271,7 +274,9 @@ if !PaletteChange
     STA.w DX_Dynamic_Palettes_ID+$1A
     STA.w DX_Dynamic_Palettes_ID+$1C
     STA.w DX_Dynamic_Palettes_ID+$1E
+if !PlayerFeatures
     STA DX_PPU_CGRAM_LastPlayerPal
+endif
     LDA #$FFFE
     STA.w DX_Dynamic_Palettes_ID+$10
     LDA #$FFFF
@@ -334,21 +339,16 @@ if !PaletteEffects
 endif
 
 if !DynamicPoses
-    LDA #$3F|$80
+    LDA #$5F|$80
     STA.w DX_Dynamic_Tile_Size
-    STA.w DX_Dynamic_Tile_Size+$3F
-    LDA #$1F|$80
-    STA.w DX_Dynamic_Tile_Size+$40
     STA.w DX_Dynamic_Tile_Size+$5F
+    LDA #$1F|$80
     STA.w DX_Dynamic_Tile_Size+$60
     STA.w DX_Dynamic_Tile_Size+$7F
     LDA #$80
     STA.w DX_Dynamic_Tile_Offset
-    STA.w DX_Dynamic_Tile_Offset+$3F
-    LDA #$40
-    STA.w DX_Dynamic_Tile_Offset+$40
     STA.w DX_Dynamic_Tile_Offset+$5F
-    LDA #$E0
+    LDA #$60
     STA.w DX_Dynamic_Tile_Offset+$60
     STA.w DX_Dynamic_Tile_Offset+$7F
 endif

@@ -7,33 +7,53 @@ namespace DynamicXLibrary
         public string ContextName { get; set; }
         public int[]? ResourceSizes { get; set; }
         public int[]? ResourceLastRow { get; set; }
-        public string[]? Resources { get; set; }
+        public string[]? Poses { get; set; }
         public string[]? Palettes { get; set; }
+        public string[]? Resources { get; set; }
         public DynamicInfo(string contextName) 
         {
             ContextName = contextName;
         }
         public string Validate(out bool validation)
         {
-            if (Resources == null)
-            {
-                validation = false;
-                return "";
-            }
             StringBuilder sb = new();
+            if(Palettes != null)
+            {
+                for (int i = 0; i < Palettes.Length; i++)
+                {
+                    if (!File.Exists(Path.Combine("DynamicResources", Palettes[i]))) 
+                        sb.AppendLine($"{Palettes[i]} Not Found");
+                }
+            }
+            if(Resources != null)
+            {
+                for (int i = 0; i < Resources.Length; i++)
+                {
+                    if (!File.Exists(Path.Combine("DynamicResources", Resources[i])))
+                        sb.AppendLine($"{Resources[i]} Not Found");
+                }
+            }
+            if (Poses == null)
+            {
+                validation = sb.ToString().Equals(string.Empty);
+                return sb.ToString();
+            }
+            for (int i = 0; i < Poses.Length; i++)
+            {
+                if (!File.Exists(Path.Combine("DynamicResources", Poses[i])))
+                    sb.AppendLine($"{Poses[i]} Not Found");
+            }
             if (ResourceSizes == null)
                 sb.AppendLine($"{ContextName} Includes Dynamic Graphics but doesn't includes ResourceSize");
-            if (ResourceLastRow == null)
-                sb.AppendLine($"{ContextName} Includes Dynamic Graphics but doesn't includes ResourceLastRow");
 
             validation = sb.ToString().Equals(string.Empty);
             return sb.ToString();
         }
-        public static Dictionary<string, byte[]> GetFramesData(List<DynamicInfo> dis)
+        public static Dictionary<string, byte[]> GetPosesData(List<DynamicInfo> dis)
         {
             Dictionary<string, byte[]> frames = new();
             foreach(var di in dis)
-                foreach(var frame in di.GetResourceData())
+                foreach(var frame in di.GetPosesData())
                     frames.TryAdd(frame.Key, frame.Value);
             return frames;
         }
@@ -41,9 +61,17 @@ namespace DynamicXLibrary
         {
             Dictionary<string, byte[]> pals = new();
             foreach (var di in dis)
-                foreach(var pal in di.GetPaletteData())
+                foreach (var pal in di.GetPaletteData())
                     pals.TryAdd(pal.Key, pal.Value);
             return pals;
+        }
+        public static Dictionary<string, byte[]> GetResourceData(List<DynamicInfo> dis)
+        {
+            Dictionary<string, byte[]> result = new();
+            foreach (var di in dis)
+                foreach (var res in di.GetResourceData())
+                    result.TryAdd(res.Key, res.Value);
+            return result;
         }
         public Dictionary<string, byte[]> GetPaletteData()
         {
@@ -60,7 +88,20 @@ namespace DynamicXLibrary
         }
         public Dictionary<string, byte[]> GetResourceData()
         {
-            if (Resources == null || Resources.Length == 0)
+            if(Resources == null || Resources.Length == 0)
+                return new();
+            byte[] b;
+            Dictionary<string, byte[]> result = new();
+            foreach (var path in Resources)
+            {
+                b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
+                result.Add(path, b);
+            }
+            return result;
+        }
+        public Dictionary<string, byte[]> GetPosesData()
+        {
+            if (Poses == null || Poses.Length == 0)
                 return new();
             if (ResourceSizes == null)
                 return new();
@@ -73,11 +114,11 @@ namespace DynamicXLibrary
             }
             totalLength *= 32;
             byte[] wholeGFX = new byte[totalLength];
-            int[] lens = new int[Resources.Length];
+            int[] lens = new int[Poses.Length];
             byte[] b;
             int index = 0;
             int i = 0;
-            foreach (var path in Resources)
+            foreach (var path in Poses)
             {
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
                 b.CopyTo(wholeGFX, index);
@@ -101,7 +142,7 @@ namespace DynamicXLibrary
                     fInd = 0;
                     size = b.Length;
                 }
-                frames.Add($"{Path.GetFileNameWithoutExtension(Resources[gfxInd])}{fInd:D3}", b);
+                frames.Add($"{Path.GetFileNameWithoutExtension(Poses[gfxInd])}{fInd:D3}", b);
                 fInd++;
                 index = newVal;
             }
@@ -156,7 +197,8 @@ namespace DynamicXLibrary
         {
             List<int> res = new();
             foreach (var di in dis)
-                res.AddRange(di.ResourceSizes!.Select(x => x * 32).ToList());
+                if (di.ResourceSizes != null)
+                    res.AddRange(di.ResourceSizes!.Select(x => x * 32).ToList());
             return res.ToArray();
         }
         public int[] GetLastRow()
@@ -176,6 +218,21 @@ namespace DynamicXLibrary
             foreach (var di in dis)
                 res.AddRange(di.GetLastRow());
             return res.ToArray();
+        }
+        public void GenerateLastRow()
+        {
+            if (ResourceSizes == null || ResourceSizes.Length <= 0)
+                return;
+            ResourceLastRow = new int[ResourceSizes.Length / 2];
+            int val;
+            for (int i = 0; i < ResourceSizes.Length; i += 2) 
+            {
+                val = ResourceSizes[i] / 32;
+                val *= 2;
+                val++;
+                val *= 16;
+                ResourceLastRow[i / 2] = val;
+            }
         }
     }
 }

@@ -11,10 +11,14 @@
 !GlobalFlip = !NormalGlobalFlip
 !LocalFlip = !NormalLocalFlip
 !Palette = !NormalPalette
+!PaletteAssignmentOption = !NormalPaletteAssignment
+!PaletteOption = !NormalPaletteOption
 !LastPoseHashIndex = !NormalLastPoseHashIndex
 
 !RenderXDistanceOutOfScreen = !NormalRenderXDistanceOutOfScreen
 !RenderYDistanceOutOfScreen = !NormalRenderYDistanceOutOfScreen
+
+!LastFlip = !NormalLastFlip
 
 !State = !NormalState
 
@@ -23,6 +27,8 @@
 !HitboxTableL = !NormalHitboxTableL
 
 !PlayerIsAbove = !NormalPlayerIsAbove
+
+!BasePaletteLoaded = !NormalBasePaletteLoaded
 
 !RenderBox = %DXNormalRenderBox()
 !PaletteAssignment = %DXNormalPaletteAssignment()

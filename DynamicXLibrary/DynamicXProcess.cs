@@ -2,6 +2,7 @@
 using Dynamic_X_Patch;
 using DynamicXSNES;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
@@ -30,14 +31,17 @@ namespace DynamicXLibrary
         private byte[] rom;
         private readonly List<FrameInfo> frameInfos = new();
         private readonly List<DynamicInfo> dynamicInfos = new();
-        private List<ResourceReference>? resourceReferences;
+        private List<ResourceReference>? posesReferences;
         private List<ResourceReference>? paletteReferences;
+        private List<ResourceReference>? resourceReferences;
         private List<ResourceReference>? bufferReferences;
         private List<string>? palEffects;
-        private List<string>? graphics;
-        private List<int>? graphicsSize;
+        private List<string>? poses;
+        private List<int>? posesSize;
         private List<string>? palettes;
         private List<int>? palettesSize;
+        private List<string>? resources;
+        private List<int>? resourcesSize;
         private List<byte[]>? buffers;
         private List<int>? graphicRoutinesPosition;
         private List<int>? graphicRoutinesSize;
@@ -80,6 +84,12 @@ namespace DynamicXLibrary
             if (!Directory.Exists(Path.GetDirectoryName(output)))
                 return DynamicXErrors.OutputDirectoryNotFound;
             string? log = Process();
+            if (log != null)
+            {
+                Log.WriteLine(log);
+                Log.WriteLine("Installation failed");
+                return null;
+            }
             SaveROM(output);
             return log;
         }
@@ -93,7 +103,7 @@ namespace DynamicXLibrary
             string log = GetDynamicInfo(out bool validation);
             if (!validation)
                 return log;
-            log = GetFramesInfo(out validation);
+            log = GetDrawInfos(out validation);
             if (!validation)
                 return log;
             if (Options.Instance.DynamicPoses)
@@ -255,30 +265,38 @@ namespace DynamicXLibrary
         {
             Log.WriteLine("\n################# Summary #################\n");
             Log.WriteLine($"Dynamic X Installation: {dynamicXSize} bytes ({Math.Round(dynamicXSize / 327.68f) / 100} banks)");
-            if (Options.Instance.DynamicPoses)
-            {
-                Log.WriteLine($"Dynamic Poses Inserted: {graphics!.Count}");
-                Log.WriteLine($"Palettes Inserted: {palettes!.Count}");
-            }
+            if (poses != null)
+                Log.WriteLine($"Dynamic Poses Inserted: {poses.Count}");
+            if (palettes != null)
+                Log.WriteLine($"Palettes Inserted: {palettes.Count}");
+            if(resources != null)
+                Log.WriteLine($"Resources Inserted: {resources.Count}");
             if (Options.Instance.DrawingSystem)
                 Log.WriteLine($"Drawable Poses Inserted: {frameInfos.Count}");
             int countdyn = 0;
             int count = 0;
             int countp = paletteTablesSize;
             int countpeff = 0;
-            if (Options.Instance.DynamicPoses && graphicsSize != null)
+            int countRes = 0;
+            if (posesSize != null)
             {
-                foreach (var sz in graphicsSize)
+                foreach (var sz in posesSize)
                     countdyn += sz;
                 countdyn += dynamicRoutinesSize;
                 countdyn += buffers!.Count * 11 + 11;
                 Log.WriteLine($"Space Used in Dynamic Poses: {countdyn} bytes ({Math.Round(countdyn / 327.68f) / 100} banks)");
             }
-            if (Options.Instance.PaletteChange && palettesSize != null)
+            if (palettesSize != null)
             {
                 foreach (var sz in palettesSize)
                     countp += sz;
                 Log.WriteLine($"Space Used in Palettes: {countp} bytes ({Math.Round(countp / 327.68f) / 100} banks)");
+            }
+            if (resourcesSize != null)
+            {
+                foreach (var sz in resourcesSize)
+                    countRes += sz;
+                Log.WriteLine($"Space Used in Resources: {countRes} bytes ({Math.Round(countRes / 327.68f) / 100} banks)");
             }
             if (Options.Instance.DrawingSystem && graphicRoutinesSize != null)
             {
@@ -294,7 +312,7 @@ namespace DynamicXLibrary
                 Log.WriteLine($"Space Used in PaletteEffects: {countpeff} bytes ({Math.Round(countpeff / 327.68f) / 100} banks)");
             }
             Log.WriteLine("");
-            int total = dynamicXSize + countdyn + countp + count + countpeff;
+            int total = dynamicXSize + countdyn + countp + count + countpeff + countRes;
             Log.WriteLine($"Total Space Used: {total} bytes ({Math.Round(total / 327.68f) / 100} banks)");
         }
         public void GenerateDefines()
@@ -311,26 +329,26 @@ namespace DynamicXLibrary
                 }
                 sb.Append('\n');
             }
-            if (Options.Instance.DynamicPoses && resourceReferences != null && graphics != null)
+            if (posesReferences != null && poses != null)
             {
-                sb.AppendLine($"!NumberOfGraphics = ${resourceReferences.Count:X4}");
+                sb.AppendLine($"!NumberOfGraphics = ${posesReferences.Count:X4}");
                 sb.Append('\n');
                 int i = 0;
-                foreach (var resRef in resourceReferences)
+                foreach (var resRef in posesReferences)
                 {
-                    sb.AppendLine($"!DynamicPose{graphics[i]} = ${SNESROMUtils.PCtoSNES(resRef.Position + 8, mapper):X6}");
+                    sb.AppendLine($"!DynamicPose{poses[i]} = ${SNESROMUtils.PCtoSNES(resRef.Position + 8, mapper):X6}");
                     i++;
                 }
                 sb.Append('\n');
                 i = 0;
-                foreach (var resRef in resourceReferences)
+                foreach (var resRef in posesReferences)
                 {
-                    sb.AppendLine($"!DynamicPoseID{graphics[i]} = ${i:X4}");
+                    sb.AppendLine($"!DynamicPoseID{poses[i]} = ${i:X4}");
                     i++;
                 }
                 sb.Append('\n');
             }
-            if(Options.Instance.DynamicPoses && paletteReferences != null && palettes != null)
+            if(paletteReferences != null && palettes != null)
             {
                 sb.AppendLine($"!NumberOfPalettes = ${paletteReferences.Count:X4}");
                 sb.Append('\n');
@@ -362,6 +380,25 @@ namespace DynamicXLibrary
                 sb.AppendLine($"!PaletteTableSize = ${palCounter:X4}");
                 sb.AppendLine("!PaletteIDTables #= read3(!PaletteTables)");
                 sb.AppendLine("!PaletteAddrTables = !PaletteIDTables+(!PaletteTableSize*2)");
+                sb.Append('\n');
+            }
+            if(resourceReferences != null && resources != null && resourcesSize != null)
+            {
+                sb.AppendLine($"!NumberOfResources = ${resourceReferences.Count:X4}");
+                sb.Append('\n');
+                int i = 0;
+                foreach (var resRef in resourceReferences)
+                {
+                    sb.AppendLine($"!Resource{resources[i]} = ${SNESROMUtils.PCtoSNES(resRef.Position + 8, mapper):X6}");
+                    i++;
+                }
+                sb.Append('\n');
+                i = 0;
+                foreach (var resRef in resourceReferences)
+                {
+                    sb.AppendLine($"!Resource{resources[i]}Size = ${resourcesSize[i]:X6}");
+                    i++;
+                }
                 sb.Append('\n');
             }
             if(Options.Instance.DrawingSystem && frameInfos != null && frameInfos.Count > 0)
@@ -432,9 +469,9 @@ namespace DynamicXLibrary
         }
         public void GenerateDynamicPoseData()
         {
-            if (resourceReferences == null)
+            if (posesReferences == null)
                 return;
-            string content = DynamicPoseDataGenerator.GenerateData(mapper, resourceReferences, dynamicInfos);
+            string content = DynamicPoseDataGenerator.GenerateData(mapper, posesReferences, dynamicInfos);
             string tablePath = Path.Combine("DynamicX", "Data", "DynamicPoseData.asm");
             if (File.Exists(tablePath))
                 File.Delete(tablePath);
@@ -483,8 +520,6 @@ namespace DynamicXLibrary
             string patchPath = Path.Combine("TMP", "PaletteEffects.asm");
             string palDataPath = Path.Combine("TMP", "PaletteEffectsData.bin");
             var palsColls = PaletteEffectExtension.GetCollections();
-            if (palsColls.Count <= 0)
-                return;
             palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
             byte[] bin = PaletteEffectExtension.ToBin(palsColls);
             if (File.Exists(palDataPath))
@@ -516,8 +551,6 @@ namespace DynamicXLibrary
         {
             if (rom == null)
                 return;
-            if (palettes == null || paletteReferences == null)
-                return;
             int patchLocation = GetPatchLocation();
             if (patchLocation < 0)
                 return;
@@ -525,8 +558,7 @@ namespace DynamicXLibrary
             string patchPath = Path.Combine("TMP", "PosePaletteTables.asm");
             string palDataPath = Path.Combine("TMP", "PosePaletteTables.bin");
             var palsColls = PaletteEffectExtension.GetCollections();
-            if (palsColls.Count <= 0)
-                return;
+
             palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
             List<byte> binIDs = new();
             List<byte> binAddrs = new();
@@ -555,6 +587,8 @@ namespace DynamicXLibrary
                 count++;
             }
             binIDs = binIDs.Concat(binAddrs).ToList();
+            if (binIDs.Count == 0)
+                binIDs.Add(0);
             if (File.Exists(palDataPath))
                 File.Delete(palDataPath);
             File.WriteAllBytes(palDataPath, binIDs.ToArray());
@@ -690,8 +724,9 @@ namespace DynamicXLibrary
             var spaces = SNESROMUtils.FindFreeSpace(rom!);
             spaces.Sort(comp);
             (int, int) space;
-            List<ResourceReference> resRefs;
+            List<ResourceReference> posesRefs;
             List<ResourceReference> palRefs;
+            List<ResourceReference> resRefs;
             bufferReferences = new();
             int i = 0;
             foreach(var buf in buffers)
@@ -702,25 +737,53 @@ namespace DynamicXLibrary
                 spaces.Remove(space);
                 SNESROMUtils.InsertDataWithRats(rom, space.Item1, buf);
                 bufferReferences.Add(new(i, i, space.Item1));
-                resRefs = resourceReferences!
-                            .Where(x => x.BufferID == i)
-                            .ToList();
-                palRefs = paletteReferences!
-                            .Where(x => x.BufferID == i)
-                            .ToList();
-                foreach (var resRef in resRefs)
-                    resRef.Position += space.Item1;
-                foreach (var palRef in palRefs)
-                    palRef.Position += space.Item1;
+                if (posesReferences != null)
+                {
+                    posesRefs = posesReferences!
+                                .Where(x => x.BufferID == i)
+                                .ToList();
+                    foreach (var resRef in posesRefs)
+                        resRef.Position += space.Item1;
+                }
+                if (paletteReferences != null)
+                {
+                    palRefs = paletteReferences
+                                .Where(x => x.BufferID == i)
+                                .ToList();
+                    foreach (var palRef in palRefs)
+                        palRef.Position += space.Item1;
+                }
+                if (resourceReferences != null)
+                {
+                    resRefs = resourceReferences
+                                .Where(x => x.BufferID == i)
+                                .ToList();
+                    foreach (var resRef in resRefs)
+                        resRef.Position += space.Item1;
+                }
                 i++;
             }
-            Log.WriteLine("\n############## Pose Insertion #############\n");
-            foreach (var resRef in resourceReferences!)
-                Log.WriteLine($"GFX {graphics![resRef.ID]} Inserted at ${SNESROMUtils.PCtoSNES(resRef.Position, mapper):X6} (PC: {resRef.Position:X6}): {graphicsSize![resRef.ID]} bytes");
-            Log.WriteLine("\n############ Palette Insertion ############\n");
-            foreach (var palRef in paletteReferences!)
-                Log.WriteLine($"Palette {palettes![palRef.ID - graphics!.Count]} Inserted at ${SNESROMUtils.PCtoSNES(palRef.Position, mapper):X6} (PC: {palRef.Position:X6}): {palettesSize![palRef.ID - graphics!.Count]} bytes");
-
+            if (posesReferences != null)
+            {
+                Log.WriteLine("\n############## Pose Insertion #############\n");
+                foreach (var resRef in posesReferences!)
+                    Log.WriteLine($"GFX {poses![resRef.ID]} Inserted at ${SNESROMUtils.PCtoSNES(resRef.Position, mapper):X6} (PC: {resRef.Position:X6}): {posesSize![resRef.ID]} bytes");
+            }
+            if (paletteReferences != null)
+            {
+                int disp = poses != null ? poses.Count : 0;
+                Log.WriteLine("\n############ Palette Insertion ############\n");
+                foreach (var palRef in paletteReferences!)
+                    Log.WriteLine($"Palette {palettes![palRef.ID - disp]} Inserted at ${SNESROMUtils.PCtoSNES(palRef.Position, mapper):X6} (PC: {palRef.Position:X6}): {palettesSize![palRef.ID - disp]} bytes");
+            }
+            if (resourceReferences != null)
+            {
+                int disp = poses != null ? poses.Count : 0;
+                disp += palettes != null ? palettes.Count : 0;
+                Log.WriteLine("\n############ Resource Insertion ###########\n");
+                foreach (var resRef in resourceReferences!)
+                    Log.WriteLine($"Resource {resources![resRef.ID - disp]} Inserted at ${SNESROMUtils.PCtoSNES(resRef.Position, mapper):X6} (PC: {resRef.Position:X6}): {resourcesSize![resRef.ID - disp]} bytes");
+            }
             return null;
         }
         private static int comp((int, int) x1, (int, int) x2)
@@ -742,30 +805,42 @@ namespace DynamicXLibrary
         }
         public void GenerateBuffers()
         {
-            var resdata = DynamicInfo.GetFramesData(dynamicInfos);
+            var posedata = DynamicInfo.GetPosesData(dynamicInfos);
             var paldata = DynamicInfo.GetPaletteData(dynamicInfos);
-            graphics = resdata.Keys.ToList();
-            graphicsSize = resdata.Values.Select(x => x.Length).ToList();
+            var resdata = DynamicInfo.GetResourceData(dynamicInfos);
+            poses = posedata.Keys.ToList();
+            posesSize = posedata.Values.Select(x => x.Length).ToList();
             palettes = paldata.Keys.Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
             palettesSize = paldata.Values.Select(x => x.Length).ToList();
+            resources = resdata.Keys.Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
+            resourcesSize = resdata.Values.Select(x => x.Length).ToList();
+            List<byte[]> res = resdata.Values.ToList();
             List<byte[]> pals = paldata.Values.ToList();
             List<byte[]> all = new();
-            all.AddRange(resdata.Values.ToList());
+            all.AddRange(posedata.Values.ToList());
             all.AddRange(pals);
+            all.AddRange(res);
             var mergedata = SNESROMUtils.MergeResources(all);
 
-            resourceReferences = mergedata.Item1
-                                    .Where(x => x.Item1 < graphics.Count)
+            posesReferences = mergedata.Item1
+                                    .Where(x => x.Item1 < poses.Count)
                                     .Select(x => new ResourceReference(x.Item1, x.Item2, x.Item3))
                                     .ToList();
             paletteReferences = mergedata.Item1
-                                    .Where(x => x.Item1 >= graphics.Count)
+                                    .Where(x => x.Item1 >= poses.Count && x.Item1 < poses.Count + palettes.Count)
                                     .Select(x => new ResourceReference(x.Item1, x.Item2, x.Item3))
                                     .ToList();
-            resourceReferences.Sort((x1, x2) => x1.ID < x2.ID ? -1 :
+            resourceReferences = mergedata.Item1
+                                    .Where(x => x.Item1 >= poses.Count + palettes.Count)
+                                    .Select(x => new ResourceReference(x.Item1, x.Item2, x.Item3))
+                                    .ToList();
+            posesReferences.Sort((x1, x2) => x1.ID < x2.ID ? -1 :
                                                 x1.ID > x2.ID ? 1 :
                                                 0);
             paletteReferences.Sort((x1, x2) => x1.ID < x2.ID ? -1 :
+                                                x1.ID > x2.ID ? 1 :
+                                                0);
+            resourceReferences.Sort((x1, x2) => x1.ID < x2.ID ? -1 :
                                                 x1.ID > x2.ID ? 1 :
                                                 0);
             buffers = mergedata.Item2;
@@ -791,20 +866,20 @@ namespace DynamicXLibrary
             }
             return sb.ToString();
         }
-        public string GetFramesInfo(out bool validation)
+        public string GetDrawInfos(out bool validation)
         {
             if(!Options.Instance.DrawingSystem)
             {
                 validation = true;
                 return "";
             }
-            string[] paths = Directory.GetFiles("FramesInfo");
+            string[] paths = Directory.GetFiles("DrawInfo");
             FrameInfo[] fis;
             validation = true;
             StringBuilder sb = new();
             foreach (string path in paths)
             {
-                if (Path.GetExtension(path) != ".framesinfo")
+                if (Path.GetExtension(path) != ".drawinfo")
                     continue;
                 fis = ReadInfo.ReadFrameInfo(path);
                 foreach (FrameInfo fi in fis)

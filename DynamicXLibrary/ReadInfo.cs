@@ -6,13 +6,13 @@ namespace DynamicXLibrary
     public partial class ReadInfo
     {
         private const string DYNAMIC_FLAG_PATTERN = @"\s*Dynamic:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
-        private const string GFXS_PATTERN = @"\s*GFXS:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
+        private const string POSES_PATTERN = @"\s*PosesGraphics:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private const string PALETTES_PATTERN = @"\s*Palettes:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
-        private const string LASTROW_PATTERN = @"\s*ResourceLastRow:\s*\n(\s*db\s*\$[A-Fa-z0-9]{2}(\s*,\s*\$[A-Fa-z0-9]{2})*\s*(\n|$))*";
+        private const string RESOURCES_PATTERN = @"\s*Resources:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private static readonly Regex dynamicFlagRegex = getDynamicFlagRegex();
-        private static readonly Regex gfxsRegex = getGFXsRegex();
+        private static readonly Regex posesRegex = getPosesRegex();
         private static readonly Regex palettesRegex = getPalettesRegex();
-        private static readonly Regex lastRowRegex = getLastRowRegex();
+        private static readonly Regex resourcesRegex = getResourcesRegex();
         public static DynamicInfo ReadDynamicInfo(string path)
         {
             string dynamicInfo = File.ReadAllText(path).Replace("\r", "");
@@ -28,12 +28,12 @@ namespace DynamicXLibrary
                                             ltrim[0] != ';';
                                     }));
 
-            Match gfxsMatch = gfxsRegex.Match(dynamicInfo);
+            Match posesMatch = posesRegex.Match(dynamicInfo);
             Match palettesMatch = palettesRegex.Match(dynamicInfo);
-            Match lastRowMatch = lastRowRegex.Match(dynamicInfo);
+            Match resourcesMatch = resourcesRegex.Match(dynamicInfo);
 
-            string[]? gfxsPaths = gfxsMatch.Success ?
-                gfxsMatch
+            string[]? posesPaths = posesMatch.Success ?
+                posesMatch
                     .ToString()
                     .Split('\n', StringSplitOptions.RemoveEmptyEntries)[1..] :
                     null;
@@ -42,14 +42,17 @@ namespace DynamicXLibrary
                     .ToString()
                     .Split('\n', StringSplitOptions.RemoveEmptyEntries)[1..] :
                     null;
-            int[]? lastrow = lastRowMatch.Success ?
-                HexReader.GetValues(lastRowMatch.ToString()) :
-                null;
+            string[]? resourcesPaths = resourcesMatch.Success ?
+                resourcesMatch
+                    .ToString()
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries)[1..] :
+                    null;
             string SpriteName = Path.GetFileNameWithoutExtension(path);
             DynamicInfo DynamicInfo = TablesReader.ReadDynamicInfoTables(SpriteName, dynamicInfo);
             DynamicInfo.Palettes = palettesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
-            DynamicInfo.Resources = gfxsPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
-            DynamicInfo.ResourceLastRow = lastrow;
+            DynamicInfo.Poses = posesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
+            DynamicInfo.Resources = resourcesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
+            DynamicInfo.GenerateLastRow();
             return DynamicInfo;
         }
         public static FrameInfo[] ReadFrameInfo(string path)
@@ -82,11 +85,11 @@ namespace DynamicXLibrary
         }
         [GeneratedRegex(DYNAMIC_FLAG_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
         private static partial Regex getDynamicFlagRegex();
-        [GeneratedRegex(GFXS_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
-        private static partial Regex getGFXsRegex();
+        [GeneratedRegex(POSES_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
+        private static partial Regex getPosesRegex();
         [GeneratedRegex(PALETTES_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
         private static partial Regex getPalettesRegex();
-        [GeneratedRegex(LASTROW_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
-        private static partial Regex getLastRowRegex();
+        [GeneratedRegex(RESOURCES_PATTERN, RegexOptions.IgnoreCase | RegexOptions.Multiline)]
+        private static partial Regex getResourcesRegex();
     }
 }

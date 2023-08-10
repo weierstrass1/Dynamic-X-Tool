@@ -15,6 +15,9 @@ org !Routines+$00
 org !Routines+$2D
     dl SetPropertyAndOffset|!rom
 
+org !Routines+$45
+    dl DynamicPoseSpaceConfig|!rom
+
 reset freespaceuse
 freecode cleaned
 
@@ -28,16 +31,10 @@ Start:
 ;   Carry Clear if the request failed.
 TakeDynamicRequest:
 
-    LDA #$00
-    XBA
-
     JSR FindPose
     BCC .NotFound
 
     SEP #$30
-    TXA
-    LSR
-    TAX
 
     JSL SetPropertyAndOffset
     SEC
@@ -95,10 +92,9 @@ RTL
 
     JSR ClearSlot
 
-    JSR UpdateSpace
-
     LDX $45
     JSR GetSlotPosition
+    JSR UpdateSpace
     JSR UpdateSlot
 
     JSR DynamicRoutine
@@ -122,20 +118,18 @@ RTL
 ;Output:
 ;   Carry Set if the pose was found, clear if not.
 FindPose:
-    ;If hashmap is empty then return carry clear
-    LDA DX_Dynamic_Pose_Length
-    BNE .NotEmpty
-    TYA
-    AND #$7F
-    TAX
-    CLC
-RTS
-.NotEmpty
     LDA #$00
     XBA
     TYA
     AND #$7F
     TAX
+
+    ;If hashmap is empty then return carry clear
+    LDA DX_Dynamic_Pose_Length
+    BNE .NotEmpty
+    CLC
+RTS
+.NotEmpty
 
     ;If Hash Value wasn't found in the hashmap then return carry clear
     LDA DX_Dynamic_Pose_HashSize,x
@@ -151,21 +145,19 @@ RTS
     STA $04
     ASL
     TAX
+    BRA .cmp
 
     ;$00 = Pose ID
     ;$02 = Number of values with the same hash value, it is used to limit the loop
     ;$04 = Hash Value
 
     ;Starts checking current position
-    BRA .cmp
 .loop
     ;add F to the position
     TXA
-    LSR
     CLC
-    ADC #!OffsetBetweenSameHash
-    AND #$007F
-    ASL
+    ADC #!OffsetBetweenSameHash*2
+    AND #$00FE
     TAX
 .cmp
     ;If the current position has the requested pose
@@ -174,6 +166,9 @@ RTS
     CMP $00
     BNE .next
 
+    TXA
+    LSR
+    TAX
     SEP #$20
     SEC
 RTS
@@ -190,6 +185,9 @@ RTS
     DEC $02
     BNE .loop
 
+    TXA
+    LSR
+    TAX
     SEP #$20
     CLC
 RTS
@@ -406,6 +404,8 @@ RTS
 -
     PLX
     SEP #$20
+    LDA #$00
+    XBA
     LDA DX_Dynamic_Tile_Offset,x
     TAX
 
@@ -469,6 +469,8 @@ RTS
     STA $0A
 ..Finish2
 
+    LDA #$00
+    XBA
     LDA DX_Dynamic_Tile_Offset,x
     TAX
     STA $09
@@ -516,14 +518,18 @@ RTS
 
 ClearSlot:
     STZ $0E
+    ;X = X Offset of the best candidate's first tile
     LDX $0D
+    ;Amount of 8x8 tiles checked
     STZ $08
-    LDA #$00
-    XBA
 
 .Loop
+    LDA #$00
+    XBA
+    ;check if space is free or used
     LDA DX_Dynamic_Tile_Size,x
     BPL .NotFreeSpace
+    ;If space is free then add the space to $08
 .FreeSpace
     AND #$7F
     INC A
@@ -531,44 +537,51 @@ ClearSlot:
     ADC $08
     STA $08
     CMP $0C
+    ;If 08 less than total space required then go to next space
     BCC .next
 RTS
 .NotFreeSpace
+    ;Save X Offset of the current space's first tile in Stack
     PHX
     REP #$20
     ASL
     TAX
+    ;X = Hash index *2 to check pose id
     PHX
+    ;X = Hash code to know the Hash Size
     LDA DX_Dynamic_Pose_ID,x
     AND #$007F
     TAX
 
     SEP #$20
+    ;We decrease the hash size because we are clearing this slot
     LDA DX_Dynamic_Pose_HashSize,x
     DEC A
     STA DX_Dynamic_Pose_HashSize,x
+    ;Recovers X = X Offset of the current space's first tile
     PLX
 
     REP #$20
     LDA DX_Dynamic_Pose_ID,x
+    ;A = Pose ID
     PHA
     SEP #$20
 
+    ;We put FF on Pose IF to remove the pose from the hash table
     LDA #$FF
     STA DX_Dynamic_Pose_ID,x
     STA DX_Dynamic_Pose_ID+1,x
 
+    ;We decrease the number of poses saved in the hash table
     LDA DX_Dynamic_Pose_Length
     DEC A
     STA DX_Dynamic_Pose_Length
 
+    ;X = Pose ID
     PLX
     ;Compare the space of the block with the space of the requested pose
     LDA Pose16x16Blocks,x
     PLX
-    STA $04
-
-    LDA $04
     CLC
     ADC $08
     STA $08
@@ -614,6 +627,7 @@ UpdateSpace:
     LDA #$00
     XBA
     LDA $0D
+    ;X = X offset of the space's first tile
     TAX
 
     LDA $45
@@ -976,6 +990,237 @@ RTS
 RTS
 
 incsrc "../DynamicX/Data/DynamicPoseData.asm"
+
+
+DynamicPoseSpaceConfig:
+    ASL
+    TAX
+
+    PHB
+    PHK
+    PLB
+    JSR (.Configs,x)
+    PLB
+RTL
+
+.Configs
+    dw ..SecondHalfSSP4
+    dw ..SP4
+    dw ..SecondHalfSP3
+    dw ..FirstHalfSP3
+    dw ..SP3
+    dw ..SecondHalfSP2
+    dw ..FirstHalfSP2
+    dw ..SP2
+    dw ..SecondHalfSP1
+    dw ..FirstHalfSP1
+    dw ..SP1
+    dw ..FirstHalfSP1WithPlayer
+    dw ..SP11WithPlayer
+    dw ..SecondHalfSP3ndSP4
+    dw ..SP34
+    dw ..SecondHalfSP2andSP34
+    dw ..SP234
+    dw ..SecondHalfSP1andSP234
+    dw ..SP1234
+    dw ..SecondHalfSP1andSP234WithPlayer
+    dw ..SP1234WithPlayer
+    dw ..SecondHalfSP3ndSP4WithDSX
+    dw ..SP34WithDSX
+    dw ..SecondHalfSP2andSP34WithDSX
+    dw ..SP234WithDSX
+    dw ..SecondHalfSP1andSP234WithDSX
+    dw ..SP1234WithDSX
+    dw ..SecondHalfSP1andSP234WithPlayerAndDSX
+    dw ..SP1234WithPlayerAndDSX
+
+macro zone(init,end,restricted)
+    LDA #(<end>-<init>)|$80
+    STA DX_Dynamic_Tile_Size+<init>
+    STA DX_Dynamic_Tile_Size+<end>
+    LDA #<init>|<restricted>
+    STA DX_Dynamic_Tile_Offset+<init>
+    STA DX_Dynamic_Tile_Offset+<end>
+endmacro
+
+..SecondHalfSSP4
+    %zone($00,$6F,$80)
+    %zone($70,$7F,$00)
+RTS
+
+..SP4
+    %zone($00,$5F,$80)
+    %zone($60,$7F,$00)
+RTS
+
+..SecondHalfSP3
+    %zone($00,$4F,$80)
+    %zone($50,$5F,$00)
+    %zone($60,$7F,$80)
+RTS
+
+..FirstHalfSP3
+    %zone($00,$3F,$80)
+    %zone($40,$4F,$00)
+    %zone($50,$7F,$80)
+RTS
+
+..SP3
+    %zone($00,$3F,$80)
+    %zone($40,$5F,$00)
+    %zone($60,$7F,$80)
+RTS
+
+..SecondHalfSP2
+    %zone($00,$2F,$80)
+    %zone($30,$3F,$00)
+    %zone($40,$7F,$80)
+RTS
+
+..FirstHalfSP2
+    %zone($00,$1F,$80)
+    %zone($20,$2F,$00)
+    %zone($30,$7F,$80)
+RTS
+
+..SP2
+    %zone($00,$1F,$80)
+    %zone($20,$3F,$00)
+    %zone($40,$7F,$80)
+RTS
+
+..SecondHalfSP1
+    %zone($00,$0F,$80)
+    %zone($10,$1F,$00)
+    %zone($20,$7F,$80)
+RTS
+
+..FirstHalfSP1
+    %zone($00,$0F,$00)
+    %zone($10,$7F,$80)
+RTS
+
+..SP1
+    %zone($00,$1F,$00)
+    %zone($20,$7F,$80)
+RTS
+
+..FirstHalfSP1WithPlayer
+    %zone($00,$04,$80)
+    %zone($05,$0F,$00)
+    %zone($10,$7F,$80)
+RTS
+
+..SP11WithPlayer
+    %zone($00,$04,$80)
+    %zone($05,$14,$00)
+    %zone($15,$17,$80)
+    %zone($18,$1E,$00)
+    %zone($1F,$7F,$80)
+RTS
+
+..SecondHalfSP3ndSP4
+    %zone($00,$4F,$80)
+    %zone($50,$7F,$00)
+RTS
+
+..SP34
+    %zone($00,$3F,$80)
+    %zone($40,$7F,$00)
+RTS
+
+..SecondHalfSP2andSP34
+    %zone($00,$2F,$80)
+    %zone($30,$7F,$00)
+RTS
+
+..SP234
+    %zone($00,$1F,$80)
+    %zone($20,$7F,$00)
+RTS
+
+..SecondHalfSP1andSP234
+    %zone($00,$0F,$80)
+    %zone($10,$7F,$00)
+RTS
+
+..SP1234
+    %zone($00,$7F,$00)
+RTS
+
+..SecondHalfSP1andSP234WithPlayer
+    %zone($00,$0F,$80)
+    %zone($10,$14,$00)
+    %zone($15,$17,$80)
+    %zone($18,$1E,$00)
+    %zone($1F,$1F,$80)
+    %zone($20,$7F,$00)
+RTS
+
+..SP1234WithPlayer
+    %zone($00,$04,$80)
+    %zone($05,$14,$00)
+    %zone($15,$17,$80)
+    %zone($18,$1E,$00)
+    %zone($1F,$1F,$80)
+    %zone($20,$7F,$00)
+RTS
+
+..SecondHalfSP3ndSP4WithDSX
+    %zone($00,$4F,$80)
+    %zone($50,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SP34WithDSX
+    %zone($00,$3F,$80)
+    %zone($40,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SecondHalfSP2andSP34WithDSX
+    %zone($00,$2F,$80)
+    %zone($30,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SP234WithDSX
+    %zone($00,$1F,$80)
+    %zone($20,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SecondHalfSP1andSP234WithDSX
+    %zone($00,$0F,$80)
+    %zone($10,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SP1234WithDSX
+    %zone($00,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SecondHalfSP1andSP234WithPlayerAndDSX
+    %zone($00,$0F,$80)
+    %zone($10,$14,$00)
+    %zone($15,$17,$80)
+    %zone($18,$1E,$00)
+    %zone($1F,$1F,$80)
+    %zone($20,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
+..SP1234WithPlayerAndDSX
+    %zone($00,$04,$80)
+    %zone($05,$14,$00)
+    %zone($15,$17,$80)
+    %zone($18,$1E,$00)
+    %zone($1F,$1F,$80)
+    %zone($20,$6F,$00)
+    %zone($70,$7F,$80)
+RTS
+
 
 End:
 

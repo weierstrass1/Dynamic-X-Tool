@@ -101,10 +101,7 @@
     <None Update="Routines\DXClusterDrawWithOffset.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Routines\DXClusterPaletteAutoAssign.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\DXClusterPaletteAutoAssignWithLevelEffects.asm">
+    <None Update="Routines\DXClusterPaletteAssignment.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DXClusterRenderBox.asm">
@@ -122,10 +119,7 @@
     <None Update="Routines\DXExtendedDrawWithOffset.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Routines\DXExtendedPaletteAutoAssign.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\DXExtendedPaletteAutoAssignWithLevelEffects.asm">
+    <None Update="Routines\DXExtendedPaletteAssignment.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DXExtendedRenderBox.asm">
@@ -143,10 +137,7 @@
     <None Update="Routines\DXNormalDrawWithOffset.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Routines\DXNormalPaletteAutoAssign.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\DXNormalPaletteAutoAssignWithLevelEffects.asm">
+    <None Update="Routines\DXNormalPaletteAssignment.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DXNormalRenderBox.asm">
@@ -215,25 +206,7 @@
     <None Update="Routines\GetGhostState.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Routines\InitSpriteLevelPalette.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\InitSpriteLevelPaletteWithLength.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Routines\SetSpeed.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\SpriteLevelPalette.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\SpriteLevelPaletteWithCheck.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\SpriteLevelPaletteWithCheckAndLength.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Routines\SpriteLevelPaletteWithLength.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\SQRT.asm">

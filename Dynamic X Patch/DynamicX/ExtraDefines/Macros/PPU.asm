@@ -79,6 +79,30 @@ macro TransferToVRAM(VRAMOffset, ResourceAddr, ResourceBNK, Lenght)
 ?++
 endmacro
 
+macro ForcedTransferToVRAMFromAddr(VRAMOffset, addr, Lenght)
+    %ForcedTransferToVRAM("<VRAMOffset>", #<addr>, #((<addr>>>16)&$00FF), "<Lenght>")
+endmacro
+
+macro ForcedTransferResourceToVRAMWithLenght(VRAMOffset, ResourceName, Lenght)
+    %ForcedTransferToVRAMFromAddr("<VRAMOffset>", "!Resource<ResourceName>", "<Lenght>")
+endmacro
+
+macro ForcedTransferResourceToVRAM(VRAMOffset, ResourceName)
+    %ForcedTransferToVRAMFromAddr("<VRAMOffset>", "!Resource<ResourceName>", "#!Resource<ResourceName>Size")
+endmacro
+
+macro TransferToVRAMFromAddr(VRAMOffset, addr, Lenght)
+    %TransferToVRAM("<VRAMOffset>", #<addr>, #((<addr>>>16)&$00FF), "<Lenght>")
+endmacro
+
+macro TransferResourceToVRAMWithLenght(VRAMOffset, ResourceName, Lenght)
+    %TransferToVRAMFromAddr("<VRAMOffset>", "!Resource<ResourceName>", "<Lenght>")
+endmacro
+
+macro TransferResourceToVRAM(VRAMOffset, ResourceName)
+    %TransferToVRAMFromAddr("<VRAMOffset>", "!Resource<ResourceName>", "#!Resource<ResourceName>Size")
+endmacro
+
 macro ForcedTransferToCGRAM(CGRAMOffset, TableAddr, TableBNK, Lenght)
 
     SEP #$30
@@ -148,13 +172,37 @@ macro TransferToCGRAM(CGRAMOffset, TableAddr, TableBNK, Lenght)
     SEP #$30
     
     PLX
-    LDA.b <TableBNK>
+    LDA <TableBNK>
     STA.l DX_PPU_CGRAM_Transfer_SourceBNK,x
 
     LDA.b <CGRAMOffset>
     STA.l DX_PPU_CGRAM_Transfer_Offset,x
     SEC
 ?++
+endmacro
+
+macro ForcedTransferToCGRAMFromAddr(CGRAMOffset, addr, Lenght)
+    %ForcedTransferToCGRAM("<CGRAMOffset>", #<addr>, #<addr>>>16, "<Lenght>")
+endmacro
+
+macro ForcedTransferResourceToCGRAMWithLenght(CGRAMOffset, ResourceName, Lenght)
+    %ForcedTransferToCGRAMFromAddr("<CGRAMOffset>", "!Resource<ResourceName>", "<Lenght>")
+endmacro
+
+macro ForcedTransferResourceToCGRAM(CGRAMOffset, ResourceName)
+    %ForcedTransferToCGRAMFromAddr("<CGRAMOffset>", "!Resource<ResourceName>", "#!Resource<ResourceName>Size")
+endmacro
+
+macro TransferToCGRAMFromAddr(CGRAMOffset, addr, Lenght)
+    %TransferToCGRAM("<CGRAMOffset>", #<addr>, #<addr>>>16, "<Lenght>")
+endmacro
+
+macro TransferResourceToCGRAMWithLenght(CGRAMOffset, ResourceName, Lenght)
+    %TransferToCGRAMFromAddr("<CGRAMOffset>", "!Resource<ResourceName>", "<Lenght>")
+endmacro
+
+macro TransferResourceToCGRAM(CGRAMOffset, ResourceName)
+    %TransferToCGRAMFromAddr("<CGRAMOffset>", "!Resource<ResourceName>", "#!Resource<ResourceName>Size")
 endmacro
 
 macro TransferToCGRAMBuffer(CGRAMOffset, Lenght)
@@ -194,7 +242,7 @@ macro TransferToCGRAMBuffer(CGRAMOffset, Lenght)
     SEP #$30
     
     PLX
-    LDA.b #DX_PPU_CGRAM_PaletteCopy>>16
+    LDA #DX_PPU_CGRAM_PaletteCopy>>16
     STA.l DX_PPU_CGRAM_BufferTransfer_DestinationBNK,x
 
     LDA.b #<CGRAMOffset>
@@ -244,7 +292,7 @@ macro TransferToCGRAMBufferNoConstant(CGRAMOffset, Lenght)
     SEP #$30
     
     PLX
-    LDA.b #DX_PPU_CGRAM_PaletteCopy>>16
+    LDA #DX_PPU_CGRAM_PaletteCopy>>16
     STA DX_PPU_CGRAM_BufferTransfer_DestinationBNK,x
 
     LDA <CGRAMOffset>
