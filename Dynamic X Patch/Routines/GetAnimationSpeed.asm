@@ -1,24 +1,20 @@
 
 ;A = Animation Pixels Per Frame
-?GetAnimationSpeed:
+GetAnimationSpeed:
     STA $00
 
     LDA !SpriteXSpeed,x
-    BNE ?+
+    BNE +
     LDA #$FF
 RTL
-?+
-    BPL ?+
++
+    BPL +
     EOR #$FF
     INC A
-?+
++
     STA $02
     STZ $01
 
     %DivW(" $01", " $00", " $02")
-
     LDA !DivisionResult
-    BEQ ?+
-    DEC A
-?+
 RTL

@@ -37,7 +37,16 @@ namespace DynamicXLibrary
             foreach (var table in tables)
                 subTables.Add(table.Item1.Replace(":","").Trim(), split(table.Item2, subTableRegex));
 
-            int l = subTables["Tiles"].Length;
+            string longestSubTable = "";
+            int l = 0;
+            foreach (var table in subTables)
+            {
+                if(l < table.Value.Length)
+                {
+                    longestSubTable = table.Key;
+                    l = table.Value.Length;
+                }
+            }
 
             Dictionary<string, FrameInfo> fis = new();
             int[]? tiles, xdisp, ydisp, props, sizes;
@@ -45,21 +54,20 @@ namespace DynamicXLibrary
 
             for (int i = 0; i < l; i++)
             {
-                frameName = subTables["Tiles"][i].Item1
+                frameName = subTables[longestSubTable][i].Item1
                     .Split('_')[0]
                     .Replace("FlipX", "")
                     .Replace("FlipY", "")
                     .Replace("FlipXY", "")
                     .Replace(":", "")
                     .Trim();
-                if (subTables.TryGetValue("XDisplacements", out (string, string)[]? xds) && xds[i].Item1.Contains("FlipX"))
+                if((subTables.TryGetValue("XDisplacements", out (string, string)[]? xds) && xds.Length > i && xds[i].Item1.Contains("FlipX")) ||
+                    (subTables.TryGetValue("YDisplacements", out (string, string)[]? yds) && yds.Length > i && yds[i].Item1.Contains("FlipY")))
                 {
-                    fis[frameName].FlipXDisplacements = HexReader.GetValues(xds[i].Item2);
-                    continue;
-                }
-                if (subTables.TryGetValue("YDisplacements", out (string, string)[]? yds) && yds[i].Item1.Contains("FlipY"))
-                {
-                    fis[frameName].FlipYDisplacements = HexReader.GetValues(yds[i].Item2);
+                    if (subTables.TryGetValue("XDisplacements", out xds) && xds.Length > i && xds[i].Item1.Contains("FlipX"))
+                        fis[frameName].FlipXDisplacements = HexReader.GetValues(xds[i].Item2);
+                    if (subTables.TryGetValue("YDisplacements", out yds) && yds.Length > i && yds[i].Item1.Contains("FlipY"))
+                        fis[frameName].FlipYDisplacements = HexReader.GetValues(yds[i].Item2);
                     continue;
                 }
                 tiles = getValues("Tiles", i, subTables);
@@ -80,8 +88,8 @@ namespace DynamicXLibrary
             return fis.Values.ToArray();
         }
         private static int[]? getValues(int id, (string, string)[]? values)
-            => values != null?
-                    HexReader.GetValues(values![id].Item2) :
+            => values != null ?
+                    HexReader.GetValues(values![id % values.Length].Item2) :
                     null;
         private static int[]? getValues(string prop, int id, Dictionary<string, (string, string)[]> dic)
         {

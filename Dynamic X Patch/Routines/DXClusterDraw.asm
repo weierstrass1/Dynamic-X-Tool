@@ -16,39 +16,9 @@
 ;$8A = X Offset
 ;$8B = Y Offset
 ;A = Base Pose ID, 16 bits
-?DXClusterDraw:
-    STA !PoseID
-    SEP #$20
-
-    LDA !ClusterGlobalFlip,x
-    EOR !ClusterLocalFlip,x
-    ROR
-    ROR
-    ROR
-    AND #$C0
-    ORA !Property
-    ORA !PropParam
-    ORA !ClusterPalette,x
-    STA !Property
-
-    LDA !cluster_y_high,x
-    XBA
-    LDA !cluster_y_low,x
-    REP #$20
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    LDA !cluster_x_high,x
-    XBA
-    LDA !cluster_x_low,x
-    REP #$20
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    JSL !Draw
-    SEC
+DXClusterDraw:
+    JSR .draw
 RTL
+
+.draw
+    %StandardSpriteDraw(0, "Cluster")

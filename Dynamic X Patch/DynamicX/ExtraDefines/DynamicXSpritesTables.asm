@@ -20,31 +20,31 @@
 !ClusterLastPoseHashIndex = !ClusterPoseIndex+(8*$14)
 
 !ExtendedPoseIndex = !ClusterPoseIndex+(9*$14)
-!ExtendedLastPoseIndex = !ExtendedPoseIndex+($0C)
-!ExtendedAnimationIndex = !ExtendedPoseIndex+(2*$0C)
-!ExtendedAnimationPoseIndex = !ExtendedPoseIndex+(3*$0C)
-!ExtendedAnimationTimer = !ExtendedPoseIndex+(4*$0C)
-!ExtendedPalette = !ExtendedPoseIndex+(5*$0C)
-!ExtendedGlobalFlip = !ExtendedPoseIndex+(6*$0C)
-!ExtendedLocalFlip = !ExtendedPoseIndex+(7*$0C)
-!ExtendedLastPoseHashIndex = !ExtendedPoseIndex+(8*$0C)
+!ExtendedLastPoseIndex = !ExtendedPoseIndex+($0A)
+!ExtendedAnimationIndex = !ExtendedPoseIndex+(2*$0A)
+!ExtendedAnimationPoseIndex = !ExtendedPoseIndex+(3*$0A)
+!ExtendedAnimationTimer = !ExtendedPoseIndex+(4*$0A)
+!ExtendedPalette = !ExtendedPoseIndex+(5*$0A)
+!ExtendedGlobalFlip = !ExtendedPoseIndex+(6*$0A)
+!ExtendedLocalFlip = !ExtendedPoseIndex+(7*$0A)
+!ExtendedLastPoseHashIndex = !ExtendedPoseIndex+(8*$0A)
 
-!NormalRenderXDistanceOutOfScreen = !ExtendedPoseIndex+(9*$0C)
+!NormalRenderXDistanceOutOfScreen = !ExtendedPoseIndex+(9*$0A)
 !NormalRenderYDistanceOutOfScreen = !NormalRenderXDistanceOutOfScreen+!MaxSprites
 
 !ClusterRenderXDistanceOutOfScreen = !NormalRenderXDistanceOutOfScreen+(2*!MaxSprites)
 !ClusterRenderYDistanceOutOfScreen = !ClusterRenderXDistanceOutOfScreen+$14
 
 !ExtendedRenderXDistanceOutOfScreen = !ClusterRenderXDistanceOutOfScreen+(2*$14)
-!ExtendedRenderYDistanceOutOfScreen = !ExtendedRenderXDistanceOutOfScreen+$0C
+!ExtendedRenderYDistanceOutOfScreen = !ExtendedRenderXDistanceOutOfScreen+$0A
 
-!NormalState = !ExtendedRenderXDistanceOutOfScreen+(2*$0C)
+!NormalState = !ExtendedRenderXDistanceOutOfScreen+(2*$0A)
 
 !ClusterState = !NormalState+!MaxSprites
 
 !ExtendedState = !ClusterState+$14
 
-!NormalHitboxTableB = !ExtendedState+$0C
+!NormalHitboxTableB = !ExtendedState+$0A
 !NormalHitboxTableH = !NormalHitboxTableB+!MaxSprites
 !NormalHitboxTableL = !NormalHitboxTableH+(2*!MaxSprites)
 
@@ -53,23 +53,23 @@
 !ClusterHitboxTableL = !ClusterHitboxTableH+(2*$14)
 
 !ExtendedHitboxTableB = !ClusterHitboxTableL+(3*$14)
-!ExtendedHitboxTableH = !ExtendedHitboxTableB+$0C
-!ExtendedHitboxTableL = !ExtendedHitboxTableH+(2*$0C)
+!ExtendedHitboxTableH = !ExtendedHitboxTableB+$0A
+!ExtendedHitboxTableL = DX_FreeRams2
 
-!NormalPlayerIsAbove = !ExtendedHitboxTableL+(3*$0C)
+!NormalPlayerIsAbove = !ExtendedHitboxTableL+$0A
 
 !ClusterPlayerIsAbove = !NormalPlayerIsAbove+!MaxSprites
 
 !ExtendedPlayerIsAbove = !ClusterPlayerIsAbove+$14
 
-!NormalSafeFrameLowByte = !ExtendedPlayerIsAbove+$0C
+!NormalSafeFrameLowByte = !ExtendedPlayerIsAbove+$0A
 !NormalSafeFrameHighByte = !NormalSafeFrameLowByte+!MaxSprites
 
 !ClusterSafeFrameLowByte = !NormalSafeFrameHighByte+!MaxSprites
 !ClusterSafeFrameHighByte = !NormalSafeFrameLowByte+$14
 
 !ExtendedSafeFrameLowByte = !ClusterSafeFrameHighByte+$14
-!ExtendedSafeFrameHighByte = !ExtendedSafeFrameLowByte+$0C
+!ExtendedSafeFrameHighByte = !ExtendedSafeFrameLowByte+$0A
 
 !NormalHitboxXOffset = !NormalHitboxTableB
 !NormalHitboxYOffset = !NormalHitboxTableH
@@ -83,19 +83,19 @@
 !ExtendedHitboxYOffset = !ExtendedHitboxTableH
 !ExtendedHitboxWidth = !ExtendedHitboxTableL
 
-!NormalHitboxHeight = DX_FreeRams2
+!NormalHitboxHeight = !ExtendedSafeFrameHighByte+$0A
 
 !ClusterHitboxHeight = !NormalHitboxHeight+!MaxSprites
 
 !ExtendedHitboxHeight = !ClusterHitboxHeight+$14
 
-!NormalLastFlip = !ExtendedHitboxHeight+$0C
+!NormalLastFlip = !ExtendedHitboxHeight+$0A
 
 !ClusterLastFlip = !NormalLastFlip+!MaxSprites
 
 !ExtendedLastFlip = !ClusterLastFlip+$14
 
-!NormalVersion = !ExtendedLastFlip+$0C
+!NormalVersion = !ExtendedLastFlip+$0A
 
 !ClusterVersion = !NormalVersion+!MaxSprites
 
@@ -103,20 +103,20 @@
 
 !NormalPaletteAssignment = !extra_prop_2
 
-!ClusterPaletteAssignment = !ExtendedVersion+$0C
+!ClusterPaletteAssignment = !ExtendedVersion+$0A
 
 !ExtendedPaletteAssignment = !ClusterPaletteAssignment+$14
 
 !NormalPaletteOption = !ExtraByte1
 
-!ClusterPaletteOption = !ExtendedPaletteAssignment+$0C
+!ClusterPaletteOption = !ExtendedPaletteAssignment+$0A
 
 !ExtendedPaletteOption = !ClusterPaletteOption+$14
 
-!NormalBasePaletteLoaded = !ExtendedPaletteOption+$0C
+!NormalLastVersion = !ExtendedPaletteOption+$0A
 
-!ClusterBasePaletteLoaded = !NormalBasePaletteLoaded+!MaxSprites
+!ClusterLastVersion = !NormalLastVersion+!MaxSprites
 
-!ExtendedBasePaletteLoaded = !ClusterBasePaletteLoaded+$14
+!ExtendedLastVersion = !ClusterLastVersion+$14
 
-!End = !ExtendedBasePaletteLoaded+$0C
+!End = !ExtendedLastVersion+$0A

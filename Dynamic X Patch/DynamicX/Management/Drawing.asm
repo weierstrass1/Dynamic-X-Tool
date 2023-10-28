@@ -155,6 +155,13 @@ RemapOamTile:
     BEQ .skipFix
     PLA
     PLP
+    BCC +
+    PHP
+    CLC
+    ADC #$10
+    STA $8A
+    BRA .prop
++
     CLC
     ADC #$10
     PHP
@@ -167,7 +174,7 @@ RemapOamTile:
     PLP
     LDA !Property
     BCC .ZeroProp
-    INC A
+    ORA #$01
 .ZeroProp
 RTL
 

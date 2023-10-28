@@ -1,6 +1,4 @@
-?DXExtendedRenderBox:
-    STZ !SpriteHOffScreenFlag,x
-    STZ !SpriteVOffScreenFlag,x
+DXExtendedRenderBox:
     LDA !extended_x_high,x
     XBA
     LDA !extended_x_low,x
@@ -8,18 +6,17 @@
     SEC
     SBC $1A
     SBC #$0080
-    BPL ?+
+    BPL +
     EOR #$FFFF
     INC A
-?+
++
     SEC
     SBC #$0080
     SEP #$20
-    BMI ?+
+    BMI +
     CMP !ExtendedRenderXDistanceOutOfScreen,x
-    BCC ?+
-    INC !SpriteHOffScreenFlag,x
-?+
+    BCS .OutOfScreen
++
     LDA !extended_y_high,x
     XBA
     LDA !extended_y_low,x
@@ -27,23 +24,29 @@
     SEC
     SBC $1C
     SBC #$0070
-    BPL ?+
+    BPL +
     EOR #$FFFF
     INC A
-?+
++
     SEC
     SBC #$0070
     SEP #$20
-    BMI ?+
+    BMI +
     CMP !ExtendedRenderYDistanceOutOfScreen,x
-    BCC ?+
-    INC !SpriteVOffScreenFlag,x
-?+
-    LDA !SpriteHOffScreenFlag,x
-    ORA !SpriteVOffScreenFlag,x
-    BEQ ?+
-    CLC
-RTL
-?+
+    BCS .OutOfScreen
++
     SEC
+RTL
+
+.OutOfScreen
+    LDA #$FF
+    STA !ExtendedPalette,x
+    STA !ExtendedLastPoseIndex,x
+    STA !ExtendedLastPoseHashIndex,x
+    STA !ExtendedLastVersion,x
+
+    LDA !ExtendedGlobalFlip,x
+    EOR !ExtendedLocalFlip,x
+    STA !ExtendedLastFlip,x
+    CLC
 RTL

@@ -13,6 +13,10 @@ while !i < $08
     CMP $00
     BNE +
     SEP #$20
+    LDA DX_Dynamic_Palettes_DisableTimer+$08+!i
+    REP #$20
+    BEQ +
+    SEP #$20
     LDY #!i
     SEC
 RTL
@@ -26,15 +30,18 @@ while !i < $08
     LDA DX_Dynamic_Palettes_ID+$10+!i+!i
     CMP #$FFFE
     BEQ +
-    LDA DX_Dynamic_Palettes_Updated+$08+!i
-    AND #$00FF
-    BNE +
+    SEP #$20
+    LDA DX_Dynamic_Palettes_DisableTimer+$08+!i
+    BNE ++
+    REP #$20
     LDA $00
     STA DX_Dynamic_Palettes_ID+$10+!i+!i
     SEP #$20
     LDY #!i
     CLC
 RTL
+++
+    REP #$20
 +
     !i #= !i+$01
 endif

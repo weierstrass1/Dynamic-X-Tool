@@ -1,14 +1,14 @@
-?DamagePlayer:	
+DamagePlayer:	
 	PHX
 
 	LDA $187A|!addr		;if the player is not riding yoshi then damage the player
-	BEQ ?+				;otherwise dismount yoshi
+	BEQ +				;otherwise dismount yoshi
 	JSR .FindYoshi
-	BCC ?+
+	BCC +
 	JSR .DismountYoshi
 	PLX
 RTL
-?+
++
 	JSL $00F5B7|!rom
 	PLX
 RTL

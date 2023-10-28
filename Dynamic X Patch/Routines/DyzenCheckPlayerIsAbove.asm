@@ -1,51 +1,51 @@
-?DyzenCheckPlayerIsAbove:
+DyzenCheckPlayerIsAbove:
 	LDA $4F
-	BEQ ?+
+	BEQ +
 RTL
-?+
++
 	LDA $4D
 	ASL
 	TAX
 
 	REP #$20
-	JSR (?.CalculateDist,x)
-	BCS ?+
+	JSR (.CalculateDist,x)
+	BCS +
 	SEP #$20
 RTL
-?+
++
 	PHA
 	SEP #$20
 
 	LDA $65
-	BEQ ?.checkBox
+	BEQ .checkBox
 	CMP #$07
-	BNE ?.BoxWithPriority
+	BNE .BoxWithPriority
 
-?.BoxWithoutPriority
+.BoxWithoutPriority
 
 	LDA $4D
 	CMP #$07
-	BEQ ?.changeBox
+	BEQ .changeBox
 
-	BRA ?.checkBox
+	BRA .checkBox
 
-?.BoxWithPriority
+.BoxWithPriority
 	LDA $4D
 	CMP #$07
-	BEQ ?.checkBox
-?.Return
+	BEQ .checkBox
+.Return
 	PLA
 	PLA
 RTL	
-?.checkBox
+.checkBox
 	REP #$20
 	LDA $68
 	CMP $01,s
 	SEP #$20
-	BCS ?.changeBox
-	BRA ?.Return
+	BCS .changeBox
+	BRA .Return
 
-?.changeBox
+.changeBox
 
 	LDA $4D
 	STA $65
@@ -58,130 +58,130 @@ RTL
 	SEP #$20
 RTL
 
-?.CalculateDist
-	dw ?.Not
-	dw ?.Not
-	dw ?.Not
-	dw ?.Not
+.CalculateDist
+	dw .Not
+	dw .Not
+	dw .Not
+	dw .Not
 
-	dw ?.Not
-	dw ?.DownRight
-	dw ?.DownLeft
-	dw ?.Down
+	dw .Not
+	dw .DownRight
+	dw .DownLeft
+	dw .Down
 
-	dw ?.Not
-	dw ?.UpRight
-	dw ?.UpLeft
-	dw ?.Up
+	dw .Not
+	dw .UpRight
+	dw .UpLeft
+	dw .Up
 
-	dw ?.Not
-	dw ?.Right
-	dw ?.Left
-	dw ?.Not
+	dw .Not
+	dw .Right
+	dw .Left
+	dw .Not
 
-?.Not
+.Not
 	CLC
 RTS
 
-?.DownRight
-	LDA $47		;HB2?.Top - HB1?.Bottom
+.DownRight
+	LDA $47		;HB2.Top - HB1.Bottom
 	SEC
 	SBC $0C
 	PHA
 
-	LDA $45		;HB2?.Left - HB1?.Right
+	LDA $45		;HB2.Left - HB1.Right
 	SEC
 	SBC $02
 	CMP $01,s
-	BCS ?+
+	BCS +
 
 	STA $01,s
 
-?+
++
 	PLA
 	SEC
 RTS
 
-?.DownLeft
-	LDA $47		;HB2?.Top - HB1?.Bottom
+.DownLeft
+	LDA $47		;HB2.Top - HB1.Bottom
 	SEC
 	SBC $0C
 	PHA
 
-	LDA $00		;HB1?.Left - HB2?.Right
+	LDA $00		;HB1.Left - HB2.Right
 	SEC
 	SBC $49
 	CMP $01,s
-	BCS ?+
+	BCS +
 
 	STA $01,s
 
-?+
++
 	PLA
 	SEC
 RTS
 
-?.Down
-	LDA $47		;HB2?.Top - HB1?.Bottom
+.Down
+	LDA $47		;HB2.Top - HB1.Bottom
 	SEC
 	SBC $0C
 	SEC
 RTS
 
-?.UpRight
-	LDA $08		;HB1?.Top - HB2?.Bottom
+.UpRight
+	LDA $08		;HB1.Top - HB2.Bottom
 	SEC
 	SBC $4B
 	PHA
 
-	LDA $45		;HB2?.Left - HB1?.Right
+	LDA $45		;HB2.Left - HB1.Right
 	SEC
 	SBC $02
 	CMP $01,s
-	BCS ?+
+	BCS +
 
 	STA $01,s
 
-?+
++
 	PLA
 	SEC
 RTS
 
-?.UpLeft
-	LDA $08		;HB1?.Top - HB2?.Bottom
+.UpLeft
+	LDA $08		;HB1.Top - HB2.Bottom
 	SEC
 	SBC $4B
 	PHA
 
-	LDA $00		;HB1?.Left - HB2?.Right
+	LDA $00		;HB1.Left - HB2.Right
 	SEC
 	SBC $49
 	CMP $01,s
-	BCS ?+
+	BCS +
 
 	STA $01,s
 
-?+
++
 	PLA
 	SEC
 RTS
 
-?.Up
-	LDA $08		;HB1?.Top - HB2?.Bottom
+.Up
+	LDA $08		;HB1.Top - HB2.Bottom
 	SEC
 	SBC $4B
 	SEC
 RTS
 
-?.Right
-	LDA $45		;HB2?.Left - HB1?.Right
+.Right
+	LDA $45		;HB2.Left - HB1.Right
 	SEC
 	SBC $02
 	SEC
 RTS
 
-?.Left
-	LDA $00		;HB1?.Left - HB2?.Right
+.Left
+	LDA $00		;HB1.Left - HB2.Right
 	SEC
 	SBC $49
 	SEC

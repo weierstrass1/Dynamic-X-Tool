@@ -123,11 +123,11 @@ else
 endif
 if !GraphicChange || !PaletteChange
 GameModeTable:
-    db $00,$00,$01,$01,$01,$01,$01,$01
+    db $00,$00,$01,$01,$01,$01,$00,$01
     ;  g00,g01,g02,g03,g04,g05,g06,g07
     db $01,$01,$01,$00,$02,$02,$02,$00
     ;  g08,g09,g0A,g0B,g0C,g0D,g0E,g0F
-    db $00,$00,$00,$01,$01,$01,$00,$00
+    db $00,$01,$01,$01,$01,$01,$00,$00
     ;  g10,g11,g12,g13,g14,g15,g16,g17
     db $00,$00,$00,$01,$01,$01,$01,$01
     ;  g18,g19,g1A,g1B,g1C,g1D,g1E,g1F
@@ -237,6 +237,7 @@ if !PaletteChange
     STA.w DX_Dynamic_Palettes_DisableTimer+$0E
 endif
 if !PaletteEffects
+    STA.w DX_Dynamic_Palettes_GlobalEffectID
     STA.w DX_Dynamic_Palettes_GlobalBGEnable
     STA DX_PPU_CGRAM_BGPaletteCopyLoaded
 	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
@@ -279,6 +280,7 @@ if !PlayerFeatures
 endif
     LDA #$FFFE
     STA.w DX_Dynamic_Palettes_ID+$10
+    STA.w DX_Dynamic_Palettes_ID+$12
     LDA #$FFFF
 endif
 if !PaletteEffects
@@ -339,17 +341,11 @@ if !PaletteEffects
 endif
 
 if !DynamicPoses
-    LDA #$5F|$80
-    STA.w DX_Dynamic_Tile_Size
-    STA.w DX_Dynamic_Tile_Size+$5F
-    LDA #$1F|$80
-    STA.w DX_Dynamic_Tile_Size+$60
+    LDA #$7F|$80
+    STA.w DX_Dynamic_Tile_Size+$00
     STA.w DX_Dynamic_Tile_Size+$7F
-    LDA #$80
-    STA.w DX_Dynamic_Tile_Offset
-    STA.w DX_Dynamic_Tile_Offset+$5F
-    LDA #$60
-    STA.w DX_Dynamic_Tile_Offset+$60
+    LDA #$00
+    STA.w DX_Dynamic_Tile_Offset+$00
     STA.w DX_Dynamic_Tile_Offset+$7F
 endif
 if !PlayerFeatures
@@ -433,8 +429,7 @@ while !i < $10
     !i #= !i+$01
 endif
 endif
-    STZ $10
-    JML $00806B|!rom
+    JML $008075|!rom
     dl $000000,$000000
 endif
 

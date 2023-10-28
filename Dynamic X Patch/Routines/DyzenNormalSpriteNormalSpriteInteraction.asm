@@ -1,4 +1,4 @@
-?DyzenNormalSpriteNormalSpriteInteraction:
+DyzenNormalSpriteNormalSpriteInteraction:
     PHY
     %DyzenNormalSpriteClippingRoutine()				; MarioClipping
 	PLY
@@ -6,11 +6,11 @@
     LDX !SpriteIndex
     PHY
     %DyzenNormalSpriteInteraction()
-    BCS ?+
+    BCS +
     PLY
     CLC
 RTL
-?+
++
     PLY
     SEC
 RTL

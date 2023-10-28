@@ -9,7 +9,7 @@ endif
 !MaxFallSpeed = #$40
 
 ;A = X Offset
-?CalculateXYSpeedForAimedJumpBasedOnJumpForce:
+CalculateXYSpeedForAimedJumpBasedOnJumpForce:
 	PHA
 
 	LDA !SpriteYSpeed,x
@@ -75,7 +75,7 @@ endif
 	INC A
 	STA $00
 	SEP #$20
-	BMI ?.TargetPosUseLessThanMaxSpeed
+	BMI .TargetPosUseLessThanMaxSpeed
 
 	%DivW(" !Scratch1", " !Scratch0", " !MaxFallSpeed")
 
@@ -83,8 +83,8 @@ endif
 	CLC
 	ADC $02
 	STA $02
-	JMP ?.CalculateXSpeed
-?.TargetPosUseLessThanMaxSpeed
+	JMP .CalculateXSpeed
+.TargetPosUseLessThanMaxSpeed
 
 	LDA !SpriteYSpeed,x
 	EOR #$FF
@@ -140,7 +140,7 @@ endif
 	ASL
 	STA $08
 	SEP #$20
-	BMI ?.CalculateXSpeed
+	BMI .CalculateXSpeed
 
 	%DivW(" !Scratch9", " !Scratch8", " !Gravity")
 
@@ -153,15 +153,15 @@ endif
 	ADC $02
 	STA $02
 
-?.CalculateXSpeed
+.CalculateXSpeed
 
 	STZ $0F
 	PLA
 	STA $0E
-	BPL ?.negOffset
+	BPL .negOffset
 	LDA #$FF
 	STA $0F
-?.negOffset
+.negOffset
 	LDA !SpriteXHigh,x
 	XBA
 	LDA !SpriteXLow,x
@@ -170,10 +170,10 @@ endif
 	ADC $0E
 	SEC
 	SBC !PlayerX
-	BPL ?.posXDiff
+	BPL .posXDiff
 	EOR #$FFFF
 	INC A
-?.posXDiff
+.posXDiff
 	ASL
 	ASL
 	ASL
@@ -185,9 +185,9 @@ endif
 
 	REP #$20
 	LDA !DivisionResult								;X Speed
-	BPL ?.posNewXSpeed
+	BPL .posNewXSpeed
 	LDA #$7F
-?.posNewXSpeed
+.posNewXSpeed
 	STA $04
 	SEP #$20
 
@@ -199,13 +199,13 @@ endif
 	ADC $0E
 	CMP !PlayerX
 	SEP #$20
-	BCC ?.playerOnRight
+	BCC .playerOnRight
 	LDA $04
 	EOR #$FF
 	INC A
 	STA !SpriteXSpeed,x
 RTL
-?.playerOnRight
+.playerOnRight
 	LDA $04
 	STA !SpriteXSpeed,x
 RTL

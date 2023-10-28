@@ -7,7 +7,7 @@
 ;$02 = Right
 ;$08 = Top
 ;$0C = Bottom
-?DyzenPrepareContactEffect:
+DyzenPrepareContactEffect:
     REP #$20
 	LDA $1487|!addr
 	SEC

@@ -1,24 +1,24 @@
-?DyzenDetectPlayerIsAbove:
+DyzenDetectPlayerIsAbove:
 	LDA $65
 	AND #$0C
 	CMP #$0C
-	BNE ?+
+	BNE +
 
 	LDA !NormalPlayerIsAbove,x
-	BEQ ?++
+	BEQ ++
 
 	LDA #$01
 	STA !NormalPlayerIsAbove,x
 
-?++
+++
 RTL
-?+
++
 	
 	AND #$04
-	BEQ ?+
+	BEQ +
 
 	LDA #$01
 	STA !NormalPlayerIsAbove,x
 
-?+
++
 RTL

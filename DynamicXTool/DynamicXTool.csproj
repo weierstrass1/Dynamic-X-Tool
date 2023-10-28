@@ -1,47 +1,54 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
-
+	
   <ItemGroup>
-    <ProjectReference Include="..\Dynamic X Patch\Dynamic X Patch.csproj" />
-    <ProjectReference Include="..\DynamicXLibrary\DynamicXLibrary.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="DynamicResources\DKCKlaptrap.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicResources\DKCKlaptrapPal1.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicResources\DKCKlaptrapPal2.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicResources\DKCKlaptrapPal3.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicResources\DKCKlaptrapPal4.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DynamicResources\DKCKlaptrapPal5.bin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DrawInfo\DKCKlaptrap.drawinfo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="PaletteEffects\effect.paleffect">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\Dynamic X Patch\Dynamic X Patch.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DynamicXLibrary\DynamicXLibrary.csproj">
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="DynamicInfo\" />
+    <Folder Include="DynamicResources\" />
+    <Folder Include="PaletteEffects\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DrawInfo\MMXDigLabour.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawInfo\MMXDigLabourSection1.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawInfo\MMXDigLabourSection2.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawInfo\MMXDigLabourSection3.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawInfo\MMXDigLabourSection4.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawInfo\MMXDigLabourSection5.drawinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

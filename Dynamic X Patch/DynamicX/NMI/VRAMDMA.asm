@@ -8,10 +8,11 @@ RTS
     LDX #$80                
 	STX $2115
 
-    REP #$30
     DEC A
     ASL
     TAX
+
+    REP #$20
 	LDA #$1801              
 	STA $20             ;parameter of DMA
 -
@@ -33,7 +34,7 @@ RTS
     DEX 
     BPL -
 
-    SEP #$30
+    SEP #$20
     LDA #$00
     STA DX_PPU_VRAM_Transfer_Length
 RTS

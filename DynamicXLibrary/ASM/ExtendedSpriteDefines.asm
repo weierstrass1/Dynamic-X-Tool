@@ -1,4 +1,5 @@
 !Version = !ExtendedVersion
+!LastVersion = !ExtendedLastVersion
 
 !PoseIndex = !ExtendedPoseIndex
 !LastPoseIndex = !ExtendedLastPoseIndex
@@ -8,9 +9,9 @@
 !GlobalFlip = !ExtendedGlobalFlip
 !LocalFlip = !ExtendedLocalFlip
 !Palette = !ExtendedPalette
-!PaletteAssignmentOption = !ExtendedPaletteAssignment
-!PaletteOption = !ExtendedPaletteOption
 !LastPoseHashIndex = !ExtendedLastPoseHashIndex
+!SafeFrameLowByte = !ExtendedSafeFrameLowByte
+!SafeFrameHighByte = !ExtendedSafeFrameHighByte
 
 !RenderXDistanceOutOfScreen = !ExtendedRenderXDistanceOutOfScreen
 !RenderYDistanceOutOfScreen = !ExtendedRenderYDistanceOutOfScreen
@@ -24,8 +25,6 @@
 !HitboxTableL = !ExtendedHitboxTableL
 
 !PlayerIsAbove = !ExtendedPlayerIsAbove
-
-!BasePaletteLoaded = !ExtendedBasePaletteLoaded
 
 !RenderBox = %DXExtendedRenderBox()
 !PaletteAssignment = %DXExtendedPaletteAssignment()

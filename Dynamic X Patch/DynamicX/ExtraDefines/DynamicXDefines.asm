@@ -19,7 +19,7 @@ if read1($00FFD5) == $23
     !addr = $6000
     !rom = $000000
     !Variables = $40C000
-    !Variables2 = $418B80  
+    !Variables2 = $418AFF  
     !MultiplicationResult = $2306
     !DivisionResult = $2306
     !RemainderResult = $2308
@@ -69,7 +69,7 @@ org !Variables
                 GlobalBGEnable: skip 1
                 GlobalSPEnable: skip 1
                 GlobalEffectID: skip 2
-                LastGlobalEffectID: skip 16
+                LastGlobalEffectID: skip 32
                 ID: skip 32
                 Updated: skip 16
                 DisableTimer: skip 16

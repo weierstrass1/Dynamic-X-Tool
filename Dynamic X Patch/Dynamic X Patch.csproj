@@ -17,9 +17,6 @@
     <None Update="asar.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="ASM\ResourceTableTemplate.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="DynamicX\Data\DynamicPoseData.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -221,8 +218,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DynamicX\Macros\" />
     <Folder Include="DynamicX\Management\GraphicRoutineVersions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

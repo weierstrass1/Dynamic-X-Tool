@@ -1,4 +1,4 @@
-?DyzenPlayerClusterSpriteInteraction:
+DyzenPlayerClusterSpriteInteraction:
 	PHY
 	%DyzenPlayerClippingRoutine()				; MarioClipping
 	PLY

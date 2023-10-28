@@ -1,4 +1,5 @@
 !Version = !ClusterVersion
+!LastVersion = !ClusterLastVersion
 
 !PoseIndex = !ClusterPoseIndex
 !LastPoseIndex = !ClusterLastPoseIndex
@@ -15,6 +16,9 @@
 !RenderXDistanceOutOfScreen = !ClusterRenderXDistanceOutOfScreen
 !RenderYDistanceOutOfScreen = !ClusterRenderYDistanceOutOfScreen
 
+!SafeFrameLowByte = !ClusterSafeFrameLowByte
+!SafeFrameHighByte = !ClusterSafeFrameHighByte
+
 !LastFlip = !ClusterLastFlip
 
 !State = !ClusterState
@@ -25,10 +29,9 @@
 
 !PlayerIsAbove = !ClusterPlayerIsAbove
 
-!BasePaletteLoaded = !ClusterBasePaletteLoaded
-
 !RenderBox = %DXClusterRenderBox()
 !PaletteAssignment = %DXClusterPaletteAssignment()
 !Upload = %DXClusterUpload()
+!UploadWithoutPoseOffset = %DXClusterUploadWithoutPoseOffset()
 !DXDraw = %DXClusterDraw()
 !DXDrawWithOffset = %DXClusterDrawWithOffset()

@@ -1,9 +1,4 @@
 ﻿using DynamicXPaletteCreatorLibrary;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DynamicXLibrary
 {
@@ -27,6 +22,10 @@ namespace DynamicXLibrary
         }
         public static byte[] ToBin(List<PaletteEffectCollection> effects)
         {
+            if(effects == null || effects.Count == 0)
+            {
+                return new byte[] { 0, 0, 0, 0 };
+            }
             List<byte> type = new();
             List<byte> c1 = new();
             List<byte> c2 = new();

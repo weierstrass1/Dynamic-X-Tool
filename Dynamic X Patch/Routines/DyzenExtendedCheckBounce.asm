@@ -1,4 +1,4 @@
-DyzenCheckBounce:	
+DyzenExtendedCheckBounce:	
 	REP #$20
 	LDA #$0001
 	STA $4F
@@ -18,7 +18,7 @@ DyzenCheckBounce:
 +
 	SEP #$20
 
-	LDA !NormalPlayerIsAbove,x
+	LDA !ExtendedPlayerIsAbove,x
 	CMP #$01
 	BEQ +
 
@@ -38,7 +38,7 @@ DyzenCheckBounce:
 	BCS +
 
 	LDA #$02
-	STA !NormalPlayerIsAbove,x
+	STA !ExtendedPlayerIsAbove,x
 
 +
 RTL

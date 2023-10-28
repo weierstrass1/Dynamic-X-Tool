@@ -1,4 +1,4 @@
-?DyzenFixClippingForInteraction:
+DyzenFixClippingForInteraction:
     LDA $08
     PHA
     LDA $01

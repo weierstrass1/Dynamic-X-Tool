@@ -75,7 +75,7 @@ PlayerDynamicRoutine:
     LDA.l DX_Dynamic_Player_Palette_Enable
     BNE +
     LDA.B #$0A                
-    STA.W $0D84     
+    STA.W $0D84|!addr     
 JML $00F69E|!rom
 +
     REP #$20
@@ -100,7 +100,7 @@ JML $00F69E|!rom
 ++
     SEP #$20
     LDA.B #$0A                
-    STA.W $0D84               
+    STA.W $0D84|!addr               
 
 JML $00F69E|!rom
 +
@@ -118,7 +118,7 @@ JML $00F69E|!rom
                 ; Accum (8 bit) 
 
     LDA.B #$0A                
-    STA.W $0D84               
+    STA.W $0D84|!addr               
 
 JML $00F69E|!rom
 .WithPalEffect
@@ -183,7 +183,7 @@ JML $00F69E|!rom
     STA DX_PPU_CGRAM_SPPaletteCopyLoaded
 
     LDA.B #$0A                
-    STA.W $0D84            
+    STA.W $0D84|!addr            
 
 JML $00F69E|!rom
 else
@@ -193,7 +193,7 @@ else
                 ; Accum (8 bit) 
 
     LDA.B #$0A                
-    STA.W $0D84               
+    STA.W $0D84|!addr               
 
 JML $00F69E|!rom
 endif

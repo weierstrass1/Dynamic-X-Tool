@@ -1,24 +1,24 @@
-?GetGhostGraphicState:
+GetGhostGraphicState:
     PHA
     %GetGhostState()
     BIT #$04
-    BNE ?.Draw
+    BNE .Draw
     BIT #$02
-    BNE ?.Flash
-?.noDraw
+    BNE .Flash
+.noDraw
     PLA
-?.noDraw2
+.noDraw2
     CLC
 RTL
-?.Flash
+.Flash
     PLA
     CLC 
     ADC $13
     AND #$01
-    BEQ ?.noDraw2
+    BEQ .noDraw2
     SEC
 RTL
-?.Draw
+.Draw
     PLA
     SEC
 RTL

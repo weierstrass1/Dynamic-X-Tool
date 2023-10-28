@@ -59,8 +59,7 @@ if !sa1
 	LDA.b #.init>>16
 	STA $3182
 	JSR $1E80
-    STZ $10
-    JML $00806B|!rom
+    JML $008075|!rom
 endif
 .init
     REP #$20
@@ -108,8 +107,7 @@ endif
 if !sa1
 RTL
 else
-    STZ $10
-    JML $00806B|!rom
+    JML $008075|!rom
 endif
 
 LoadFixedColorEffect:
@@ -394,13 +392,13 @@ RTL
 	LDA $00
     ASL
     CLC
-    ADC #DX_PPU_CGRAM_PaletteWriteMirror
+    ADC #DX_PPU_CGRAM_PaletteCopy
     STA $04
 	LDA $02
 	ASL
 	STA $02
 	SEP #$30
-	%TransferToCGRAM($00, $04, "#DX_PPU_CGRAM_BaseHSLPalette>>16", $02)
+	%TransferToCGRAM($00, $04, "#DX_PPU_CGRAM_PaletteCopy>>16", $02)
 RTL
 +
 	DEX

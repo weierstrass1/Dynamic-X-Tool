@@ -1,5 +1,5 @@
 ;Carry Set = Player at the left, Carry Clear = Player at the right
-?DyzenCheckPlayerSide:
+DyzenCheckPlayerSide:
 	LDA !SpriteXHigh,x
 	XBA
 	LDA !SpriteXLow,x

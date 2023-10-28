@@ -1,4 +1,4 @@
-?UpdateNormalSpriteSpeedWithGravityAndFloorCheck:
+UpdateNormalSpriteSpeedWithGravityAndFloorCheck:
     LDA !SpriteBlockedStatus_ASB0UDLR,x	
     AND #$24
     STA !Scratch45
@@ -13,27 +13,27 @@
     PHA
 
     LDA !SpriteYSpeed,x
-    BMI ?+
+    BMI +
 
     LDA !SpriteBlockedStatus_ASB0UDLR,x
     AND #$24
-    BEQ ?+
+    BEQ +
 
     LDA #$20
     STA !SpriteYSpeed,x
 
-?+
++
     JSL $01802A|!rom
     
     LDA !SpriteYSpeed,x
-    BMI ?+
+    BMI +
 
     LDA !SpriteBlockedStatus_ASB0UDLR,x	
     AND #$24
-    BNE ?+
+    BNE +
 
     LDA !Scratch45
-    BEQ ?+
+    BEQ +
 
     LDA !SpriteBlockedStatus_ASB0UDLR,x	
     ORA #$24
@@ -49,7 +49,7 @@
     STA !SpriteXLow,x
     SEC
 RTL
-?+
++
     PLA
     PLA
     PLA

@@ -520,6 +520,7 @@ namespace DynamicXLibrary
             string patchPath = Path.Combine("TMP", "PaletteEffects.asm");
             string palDataPath = Path.Combine("TMP", "PaletteEffectsData.bin");
             var palsColls = PaletteEffectExtension.GetCollections();
+            Log.WriteLine($"{palsColls.Count}");
             palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
             byte[] bin = PaletteEffectExtension.ToBin(palsColls);
             if (File.Exists(palDataPath))
@@ -558,7 +559,7 @@ namespace DynamicXLibrary
             string patchPath = Path.Combine("TMP", "PosePaletteTables.asm");
             string palDataPath = Path.Combine("TMP", "PosePaletteTables.bin");
             var palsColls = PaletteEffectExtension.GetCollections();
-
+            Log.WriteLine($"{palsColls.Count}");
             palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
             List<byte> binIDs = new();
             List<byte> binAddrs = new();
@@ -642,6 +643,15 @@ namespace DynamicXLibrary
             SaveROM(rompath);
             string patchPath = Path.Combine("DynamicX", "DynamicX.asm");
             string[] res = PatchApplier.Apply(rompath, patchPath).Split('\n');
+            string? symbs = Asar.GetSymbolsFile();
+            string sympath = Path.Combine(Path.GetDirectoryName(Options.Instance.OutputROMPath)!,
+                                           Path.GetFileNameWithoutExtension(Options.Instance.OutputROMPath)!);
+            if (File.Exists($"{sympath}.sym"))
+                File.Delete($"{sympath}.sym");
+            if (File.Exists($"{sympath}.sa1.sym"))
+                File.Delete($"{sympath}.sa1.sym");
+            File.WriteAllText($"{sympath}.sym", symbs);
+            File.WriteAllText($"{sympath}.sa1.sym", symbs);
             var err = Asar.GetErrors();
             rom = File.ReadAllBytes(rompath);
             if (res == null || res.Length < 2)

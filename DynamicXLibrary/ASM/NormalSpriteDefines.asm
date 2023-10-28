@@ -1,6 +1,7 @@
 !SpriteNoFlipActionTimer = !SpriteDecTimer5
 
 !Version = !NormalVersion
+!LastVersion = !NormalLastVersion
 !SpriteActionFlag = !SpriteMiscTable4
 
 !PoseIndex = !NormalPoseIndex
@@ -14,6 +15,8 @@
 !PaletteAssignmentOption = !NormalPaletteAssignment
 !PaletteOption = !NormalPaletteOption
 !LastPoseHashIndex = !NormalLastPoseHashIndex
+!SafeFrameLowByte = !NormalSafeFrameLowByte
+!SafeFrameHighByte = !NormalSafeFrameHighByte
 
 !RenderXDistanceOutOfScreen = !NormalRenderXDistanceOutOfScreen
 !RenderYDistanceOutOfScreen = !NormalRenderYDistanceOutOfScreen
@@ -28,10 +31,9 @@
 
 !PlayerIsAbove = !NormalPlayerIsAbove
 
-!BasePaletteLoaded = !NormalBasePaletteLoaded
-
 !RenderBox = %DXNormalRenderBox()
 !PaletteAssignment = %DXNormalPaletteAssignment()
 !Upload = %DXNormalUpload()
+!UploadWithoutPoseOffset = %DXNormalUploadWithoutPoseOffset()
 !DXDraw = %DXNormalDraw()
 !DXDrawWithOffset = %DXNormalDrawWithOffset()

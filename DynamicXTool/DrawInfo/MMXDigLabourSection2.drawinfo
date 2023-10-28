@@ -1,0 +1,81 @@
+Dynamic: 
+	true
+
+Tiles:
+Idle_Tiles:
+	db $00
+Throw0_Tiles:
+	db $00,$10
+Throw1_Tiles:
+	db $00
+Pose3_Tiles:
+	db $00,$01,$11
+Throw4_Tiles:
+	db $00,$01,$11
+Laugh0_Tiles:
+	db $00,$10
+Laugh1_Tiles:
+	db $00,$10
+
+XDisplacements:
+Idle_XDisp:
+	db $F8
+Throw0_XDisp:
+	db $01,$01
+Throw1_XDisp:
+	db $00
+Pose3_XDisp:
+	db $00,$08,$08
+Throw4_XDisp:
+	db $FF,$05,$06
+Laugh0_XDisp:
+	db $F8,$F8
+Laugh1_XDisp:
+	db $F8,$F8
+Idle_XDispFlipX:
+	db $08
+Throw0_XDispFlipX:
+	db $07,$07
+Throw1_XDispFlipX:
+	db $00
+Pose3_XDispFlipX:
+	db $08,$00,$00
+Throw4_XDispFlipX:
+	db $09,$03,$02
+Laugh0_XDispFlipX:
+	db $10,$10
+Laugh1_XDispFlipX:
+	db $10,$10
+
+YDisplacements:
+Idle_YDisp:
+	db $08
+Throw0_YDisp:
+	db $08,$10
+Throw1_YDisp:
+	db $09
+Pose3_YDisp:
+	db $08,$08,$10
+Throw4_YDisp:
+	db $09,$08,$10
+Laugh0_YDisp:
+	db $07,$0F
+Laugh1_YDisp:
+	db $06,$0E
+
+Sizes:
+Idle_Sizes:
+	db $02
+Throw0_Sizes:
+	db $00,$00
+Throw1_Sizes:
+	db $02
+Pose3_Sizes:
+	db $00,$00,$00
+Throw4_Sizes:
+	db $00,$00,$00
+Laugh0_Sizes:
+	db $00,$00
+Laugh1_Sizes:
+	db $00,$00
+

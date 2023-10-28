@@ -1,4 +1,4 @@
-?DyzenPrepareBounce:
+DyzenPrepareBounce:
     STZ $65		;Hitbox Direction
 	LDA #$FF
 	STA $66		;Top

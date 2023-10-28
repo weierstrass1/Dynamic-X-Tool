@@ -1,186 +1,92 @@
-macro Draw(PoseID, FlipAndObjectPriority, Palette, XOffset, YOffset, MaxTilePriority)
-    LDA !Property
-    ORA <FlipAndObjectPriority>
-    ORA <Palette>
-    STA !Property
+!XOffSet = $00
+!YOffSet = $02
+!Property = $04
+!Tile = $05
+!PoseID = $06
+!PoseOffset = $08
+!MaxTilePriority = $0A
 
-    REP #$20
-    LDA <XOffset>
-    STA !XOffSet
+!PropParam = $52
+!MaxTilePriorityParam = $0A
+!XOffsetParam = $8A
+!YOffsetParam = $8B
 
-    LDA <YOffset>
-    STA !YOffSet
-
-    LDA <PoseID>
+;$52 = Property (YXCC ----)
+;$0A = Max Tile Priority ($00 = Maximum, $01 = High, $02 = Cluster, $03 = Lowest)
+;$8A = X Offset
+;$8B = Y Offset
+;A = Base Pose ID, 16 bits
+macro Draw(offset, sprite, lastPoseHashIndex, lastFlip, palette, xl, xh, yl, yh)
+?DXDraw:
     STA !PoseID
     SEP #$20
 
-    LDA <MaxTilePriority>
-    STA !MaxTilePriority
+    LDA <lastPoseHashIndex>
+    CMP #$FF
+    BNE ?.continue
+RTS
+?.continue
+    TAX
+    JSL !SetPropertyAndOffset
+if <sprite> == 1
+    LDX !SpriteIndex
+endif
 
-    JSL !Draw
-endmacro
-
-macro DrawWithoutOffset(PoseID, FlipAndObjectPriority, Palette, MaxTilePriority)
-    LDA !Property
-    ORA <FlipAndObjectPriority>
-    ORA <Palette>
+    LDA <lastFlip>
+    ROR
+    ROR
+    ROR
+    AND #$C0
+    ORA !Property
+    ORA !PropParam
+    ORA <palette>
     STA !Property
 
+if <offset> == 1
+    STZ !YOffsetParam+1
+    LDA !YOffsetParam
+    BPL ?.skipYNeg
+    DEC !YOffsetParam+1
+?.skipYNeg
+endif
+
+    LDA <yh>
+    XBA
+    LDA <yl>
     REP #$20
-    LDA <PoseID>
-    STA !PoseID
+if <offset> == 1
+    CLC
+    ADC !YOffsetParam
+endif
+    SEC
+    SBC $1C
+    STA !YOffSet
     SEP #$20
 
-    LDA <MaxTilePriority>
-    STA !MaxTilePriority
+if <offset> == 1
+    STZ !XOffsetParam+1
+    LDA !XOffsetParam
+    BPL ?.skipXNeg
+    DEC !XOffsetParam+1
+?.skipXNeg
+endif
+
+    LDA <xh>
+    XBA
+    LDA <xl>
+    REP #$20
+if <offset> == 1
+    CLC
+    ADC !XOffsetParam
+endif
+    SEC
+    SBC $1A
+    STA !XOffSet
+    SEP #$20
 
     JSL !Draw
+RTS
 endmacro
-
-macro DrawNormalSprite(PoseID, FlipAndObjectPriority, Palette, MaxTilePriority)
-
-    LDA !sprite_x_high,x
-    XBA
-    LDA !sprite_x_low,x
-    REP #$20
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !sprite_y_high,x
-    XBA
-    LDA !sprite_y_low,x
-    REP #$20
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
-endmacro
-
-macro DrawNormalSpriteWithOffset(PoseID, FlipAndObjectPriority, Palette, XOffset, YOffset, MaxTilePriority)
-    LDA !sprite_x_high,x
-    XBA
-    LDA !sprite_x_low,x
-    REP #$20
-    CLC
-    ADC <XOffset>
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !sprite_y_high,x
-    XBA
-    LDA !sprite_y_low,x
-    REP #$20
-    CLC
-    ADC <YOffset>
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
-endmacro
-
-macro DrawClusterSprite(PoseID, FlipAndObjectPriority, Palette, MaxTilePriority)
-
-    LDA !cluster_x_high,x
-    XBA
-    LDA !cluster_x_low,x
-    REP #$20
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !cluster_y_high,x
-    XBA
-    LDA !cluster_y_low,x
-    REP #$20
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
-endmacro
-
-macro DrawClusterSpriteWithOffset(PoseID, FlipAndObjectPriority, Palette, XOffset, YOffset, MaxTilePriority)
-    LDA !cluster_x_high,x
-    XBA
-    LDA !cluster_x_low,x
-    REP #$20
-    CLC
-    ADC <XOffset>
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !cluster_y_high,x
-    XBA
-    LDA !cluster_y_low,x
-    REP #$20
-    CLC
-    ADC <YOffset>
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
-endmacro
-
-macro DrawExtendedSprite(PoseID, FlipAndObjectPriority, Palette, MaxTilePriority)
-
-    LDA !extended_x_high,x
-    XBA
-    LDA !extended_x_low,x
-    REP #$20
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !extended_y_high,x
-    XBA
-    LDA !extended_y_low,x
-    REP #$20
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
-endmacro
-
-macro DrawExtendedSpriteWithOffset(PoseID, FlipAndObjectPriority, Palette, XOffset, YOffset, MaxTilePriority)
-    LDA !extended_x_high,x
-    XBA
-    LDA !extended_x_low,x
-    REP #$20
-    CLC
-    ADC <XOffset>
-    SEC
-    SBC $1A
-    STA !XOffSet
-    SEP #$20
-
-    LDA !extended_y_high,x
-    XBA
-    LDA !extended_y_low,x
-    REP #$20
-    CLC
-    ADC <YOffset>
-    SEC
-    SBC $1C
-    STA !YOffSet
-    SEP #$20
-
-    %DrawWithoutOffset("<PoseID>", "<FlipAndObjectPriority>", "<Palette>", "<MaxTilePriority>")
+macro StandardSpriteDraw(offset, type)
+    %Draw("<offset>", 1, "!<type>LastPoseHashIndex,x", "!<type>LastFlip,x", "!<type>Palette,x", "!<type>XLow,x", "!<type>XHigh,x", "!<type>YLow,x", "!<type>YHigh,x")
 endmacro

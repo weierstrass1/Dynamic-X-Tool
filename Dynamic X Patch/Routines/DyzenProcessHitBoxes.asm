@@ -38,7 +38,7 @@
 
 !RoutineAddress = $146C|!addr
 
-?DyzenProcessHitBoxes:
+DyzenProcessHitBoxes:
     PHX
     TYX
 
@@ -105,14 +105,14 @@
 
     PLY
 
-?-
+-
     PHY
     SEP #$20
 	LDA #$00
 	XBA
 	LDA !FrameHitBoxes,y		;FrameHitBoxes[Y]
     CMP #$FF
-    BNE ?+
+    BNE +
 
     PLY
     SEP #$10
@@ -120,95 +120,95 @@
     PLX
 
     LDA $4F
-    BEQ ?.clear
-?.set
+    BEQ .clear
+.set
     SEC
 RTL
-?.clear
+.clear
     CLC
 RTL
-?+
++
 
     REP #$20
     ASL
     TAY
 
-	LDA !HitboxXOffset,y		;Hitboxes[Y]?.XOffset
+	LDA !HitboxXOffset,y		;Hitboxes[Y].XOffset
 	CLC
-	ADC !X				        ;A = Hitboxes[Y]?.XOffset + X
+	ADC !X				        ;A = Hitboxes[Y].XOffset + X
     STA !Left                   ;Left
     CLC
     ADC !HitboxWidth,y
     STA !Right                  ;Right
 
-	LDA !HitboxYOffset,y		;Hitboxes[Y]?.YOffset
+	LDA !HitboxYOffset,y		;Hitboxes[Y].YOffset
 	CLC
-	ADC !Y				        ;A = Hitboxes[Y]?.YOffset + Y
+	ADC !Y				        ;A = Hitboxes[Y].YOffset + Y
 	STA !Top  			        ;Top
     CLC
     ADC !HitboxHeight,y
     STA !Bottom                 ;Bottom
 
-?.checkXAxys
+.checkXAxys
 	LDA !Right
 	CMP !Left2
-	BCC ?.left			        ;if HB 2 is at the left of HB 1
+	BCC .left			        ;if HB 2 is at the left of HB 1
 
 	LDA !Right2
 	CMP !Left
-	BCC ?.right			        ;if HB 2 is at the right of HB 1
+	BCC .right			        ;if HB 2 is at the right of HB 1
 
-?.touchingHorizontal		    ;HB2 is touching HB1 in X axys
+.touchingHorizontal		    ;HB2 is touching HB1 in X axys
 	LDA #$0003
-	BRA ?+
-?.left
+	BRA +
+.left
 	LDA #$0002
-	BRA ?+
-?.right
+	BRA +
+.right
 	LDA #$0001
-?+
++
 	STA !HBStatus
 
-?.checkYAxys
+.checkYAxys
 	LDA !Bottom
 	CMP !Top2
-	BCC ?.up				;if HB 2 is above of HB 1
+	BCC .up				;if HB 2 is above of HB 1
 
 	LDA !Bottom2
 	CMP !Top
-	BCC ?.down			    ;if HB 2 is below of HB 1
+	BCC .down			    ;if HB 2 is below of HB 1
 
-?.touchingVertical		    ;HB 2 is touching HB2 in Y axys
+.touchingVertical		    ;HB 2 is touching HB2 in Y axys
 	LDA #$000C
-	BRA ?+
-?.up
+	BRA +
+.up
 	LDA #$0008
-	BRA ?+
-?.down
+	BRA +
+.down
 	LDA #$0004
-?+
++
 	ORA !HBStatus
 	STA !HBStatus
 
 	PHY
-?.contact				;HB 2 is touching HB 1
+.contact				;HB 2 is touching HB 1
 	LDA !HBStatus
 	CMP #$000F
-	BNE ?.ThereIsntContact
+	BNE .ThereIsntContact
 
-?.ThereIsContact
+.ThereIsContact
 
 	LDA !HitboxAction1,y
 	TAY 
 
-	BRA ?.execRoutine
+	BRA .execRoutine
 
-?.ThereIsntContact
+.ThereIsntContact
 
 	LDA !HitboxAction2,y
 	TAY
 
-?.execRoutine
+.execRoutine
 	LDA !Actions,y
 	STA !RoutineAddress
 
@@ -225,14 +225,14 @@ RTL
 	STA !RoutineAddress+2
 
 	PHK
-	LDA.b #(?.returnRoutine-1)>>8
+	LDA.b #(.returnRoutine-1)>>8
 	PHA
-	LDA.b #(?.returnRoutine-1)
+	LDA.b #(.returnRoutine-1)
 	PHA
 	JML [!RoutineAddress]
-?.returnRoutine
+.returnRoutine
 
 	REP #$10
 	PLY
 	INY
-	JMP ?-
+	JMP -
