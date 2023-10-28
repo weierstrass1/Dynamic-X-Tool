@@ -198,6 +198,7 @@ else
 JML $00F69E|!rom
 endif
 PodooboDMA:
+    PHX
     REP #$20                  ; Accum (16 bit) 
     LDA.W #$0008              
     ASL                       
@@ -212,13 +213,12 @@ PodooboDMA:
     ADC.W #$0200   
     %CheckAndSendDMA($0D95, #$6160, #$007E, #$0040)                          
     SEP #$20                  ; Accum (8 bit) 
+    PLX
 JML $01E1B7|!rom
 
 YoshiDMA:
-    PHP
-    REP #$30                  ; Accum (16 bit)
-    PHY : PHX
-    SEP #$10
+    PHX
+    REP #$20                  ; Accum (16 bit)
     LDA $00
     ASL
     ASL
@@ -243,11 +243,12 @@ YoshiDMA:
     CLC
     ADC.W #$0200
     %CheckAndSendDMA($0D97, #$6180, #$007E, #$0040)
-    REP #$10
-    PLX : PLY : PLP
+    SEP #$20
+    PLX
 JML $01EED8|!rom
 
 IDKDMA:
+    PHX
     REP #$20                  ; Accum (16 bit) 
     LDA $00                   
     ASL                       
@@ -262,4 +263,5 @@ IDKDMA:
     ADC.W #$0200              
     %CheckAndSendDMA($0D95, #$6160, #$007E, #$0040)                
     SEP #$20                  ; Accum (8 bit) 
+    PLX
 JML $02EA4D|!rom
