@@ -9,7 +9,7 @@ incsrc "../DynamicX/ExtraDefines/DynamicXDefines.asm"
 !OffsetBetweenSameHash = $000F
 
 org !Routines+$00
-    dl $000000
+    dl Start
     dl TakeDynamicRequest|!rom
 
 org !Routines+$2D

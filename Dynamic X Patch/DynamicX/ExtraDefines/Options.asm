@@ -8,7 +8,7 @@
 !ControllerOptimization = !True
 !FixedColorOptimization = !True
 !ScrollingOptimization = !True
-!StatusBarOptimization = !False
+!StatusBarOptimization = !True
 !PlayerFeatures = !True
 !Desinstallation = 0
 

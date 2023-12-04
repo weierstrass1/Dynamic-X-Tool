@@ -1,0 +1,22 @@
+PosesGraphics:
+	MSRebelSoldierDeath.bin
+Palettes:
+    MSRebelSoldierPal.bin
+	
+PosesChunksSizes:
+Frame0_PosesChunksSizes:
+	db $06,$06
+Frame1_PosesChunksSizes:
+	db $09,$08
+Frame2_PosesChunksSizes:
+	db $09,$08
+Frame3_PosesChunksSizes:
+	db $08,$08
+Frame4_PosesChunksSizes:
+	db $04,$04
+Frame5_PosesChunksSizes:
+	db $0B,$0A
+Frame6_PosesChunksSizes:
+	db $0B,$0A
+Frame7_PosesChunksSizes:
+	db $0B,$0A

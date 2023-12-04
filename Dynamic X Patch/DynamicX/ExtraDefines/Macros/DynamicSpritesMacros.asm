@@ -1,4 +1,4 @@
-macro GeneralUpload(Pose16, sprite, flip, safeCheck, withoutOffset, safeLow, safeHigh, poseIndex, lastPoseIndex, lastPoseHashIndex, globalFlip, localFlip, lastFlip)
+macro GeneralUpload(Pose16, checkLast, sprite, flip, safeCheck, withoutOffset, safeLow, safeHigh, poseIndex, lastPoseIndex, lastPoseHashIndex, globalFlip, localFlip, lastFlip)
 ?DXUpload:
     STA $00
     SEP #$20
@@ -71,6 +71,20 @@ if <flip> == 1
     EOR <localFlip>
     STA <lastFlip>
 endif
+
+	LDA <lastPoseHashIndex>
+    ASL
+    TAX
+
+    LDA DX_Timer
+    STA DX_Dynamic_Pose_TimeLastUse,x
+    LDA DX_Timer+1
+    STA DX_Dynamic_Pose_TimeLastUse+1,x
+
+if <sprite> != 0
+    LDX !SpriteIndex
+endif
+
     SEC
 RTS
 ?.Request
@@ -101,13 +115,26 @@ endif
 if <sprite> != 0
     LDX !SpriteIndex
 endif
+if <checkLast>
     LDA <lastPoseHashIndex>
     CMP #$FF
     BNE ?.UseOld
     CLC
 RTS
 ?.UseOld
+    ASL
+    TAX
+
+    LDA DX_Timer
+    STA DX_Dynamic_Pose_TimeLastUse,x
+    LDA DX_Timer+1
+    STA DX_Dynamic_Pose_TimeLastUse+1,x
+
+if <sprite> != 0
+    LDX !SpriteIndex
+endif
     SEC
+endif
 RTS
 ?.Found
     TXA
@@ -115,6 +142,17 @@ if <sprite> != 0
     LDX !SpriteIndex
 endif
     STA <lastPoseHashIndex>
+    ASL
+    TAX
+
+    LDA DX_Timer
+    STA DX_Dynamic_Pose_TimeLastUse,x
+    LDA DX_Timer+1
+    STA DX_Dynamic_Pose_TimeLastUse+1,x
+
+if <sprite> != 0
+    LDX !SpriteIndex
+endif
 
 if <sprite> != 2
     if <Pose16> == 0
@@ -148,9 +186,9 @@ RTS
     ;   28  29  2A  2B  2C  2D  2E  2F
     db $00,$01,$00,$00,$00,$00,$00,$00
 endmacro
-macro Upload(sprite, flip, safeCheck, withoutOffset, safeLow, safeHigh, poseIndex, lastPoseIndex, lastPoseHashIndex, globalFlip, localFlip, lastFlip)
-    %GeneralUpload(0, "<sprite>", "<flip>", "<safeCheck>", "<withoutOffset>", "<safeLow>", "<safeHigh>", "<poseIndex>", "<lastPoseIndex>", "<lastPoseHashIndex>", "<globalFlip>", "<localFlip>", "<lastFlip>")
+macro Upload(sprite, checkLast, flip, safeCheck, withoutOffset, safeLow, safeHigh, poseIndex, lastPoseIndex, lastPoseHashIndex, globalFlip, localFlip, lastFlip)
+    %GeneralUpload(0, "<checkLast>", "<sprite>", "<flip>", "<safeCheck>", "<withoutOffset>", "<safeLow>", "<safeHigh>", "<poseIndex>", "<lastPoseIndex>", "<lastPoseHashIndex>", "<globalFlip>", "<localFlip>", "<lastFlip>")
 endmacro
 macro StandardSpriteUpload(withoutOffset, type)
-    %Upload(1, 1, 1, "<withoutOffset>", "!<type>SafeFrameLowByte,x", "!<type>SafeFrameHighByte,x", "!<type>PoseIndex,x", "!<type>LastPoseIndex,x", "!<type>LastPoseHashIndex,x", "!<type>GlobalFlip,x", "!<type>LocalFlip,x", "!<type>LastFlip,x")
+    %Upload(1, 1, 1, 1, "<withoutOffset>", "!<type>SafeFrameLowByte,x", "!<type>SafeFrameHighByte,x", "!<type>PoseIndex,x", "!<type>LastPoseIndex,x", "!<type>LastPoseHashIndex,x", "!<type>GlobalFlip,x", "!<type>LocalFlip,x", "!<type>LastFlip,x")
 endmacro

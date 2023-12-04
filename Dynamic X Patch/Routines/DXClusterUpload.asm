@@ -1,6 +1,6 @@
-DXClusterUpload:
-    JSR .upload
+?DXClusterUpload:
+    JSR ?.upload
 RTL
 
-.upload
+?.upload
     %StandardSpriteUpload(0, "Cluster")

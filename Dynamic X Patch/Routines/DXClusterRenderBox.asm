@@ -1,4 +1,4 @@
-DXClusterRenderBox:
+?DXClusterRenderBox:
     LDA !cluster_x_high,x
     XBA
     LDA !cluster_x_low,x
@@ -6,17 +6,17 @@ DXClusterRenderBox:
     SEC
     SBC $1A
     SBC #$0080
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0080
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !ClusterRenderXDistanceOutOfScreen,x
-    BCS .OutOfScreen
-+
+    BCS ?.OutOfScreen
+?+
     LDA !cluster_y_high,x
     XBA
     LDA !cluster_y_low,x
@@ -24,21 +24,21 @@ DXClusterRenderBox:
     SEC
     SBC $1C
     SBC #$0070
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0070
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !ClusterRenderYDistanceOutOfScreen,x
-    BCS .OutOfScreen
-+
+    BCS ?.OutOfScreen
+?+
     SEC
 RTL
 
-.OutOfScreen
+?.OutOfScreen
     LDA #$FF
     STA !ClusterPalette,x
     STA !ClusterLastPoseIndex,x

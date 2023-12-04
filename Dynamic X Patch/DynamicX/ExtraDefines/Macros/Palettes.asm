@@ -49,15 +49,15 @@ RTL
     ADC $00
     TAX
 
-    LDA !PaletteAddrTables,x
+    LDA.l !PaletteAddrTables,x
     STA $02
-    LDA !PaletteAddrTables+1,x
+    LDA.l !PaletteAddrTables+1,x
     STA $03
 
     LDA $00
     ASL
     TAX
-    LDA !PaletteIDTables,x
+    LDA.l !PaletteIDTables,x
     STA $00
     SEP #$30
 

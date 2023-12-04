@@ -1,0 +1,142 @@
+PosesGraphics:
+	MSBazookaRebelSoldier.bin
+Palettes:
+    MSRebelSoldierPal.bin
+	
+PosesChunksSizes:
+Frame0_PosesChunksSizes:
+	db $0C,$0B
+Frame1_PosesChunksSizes:
+	db $0D,$0C
+Frame2_PosesChunksSizes:
+	db $0C,$0C
+Frame3_PosesChunksSizes:
+	db $0A,$0A
+Frame4_PosesChunksSizes:
+	db $0A,$09
+Frame5_PosesChunksSizes:
+	db $0C,$0A
+Frame6_PosesChunksSizes:
+	db $0C,$0A
+Frame7_PosesChunksSizes:
+	db $0C,$0A
+Frame8_PosesChunksSizes:
+	db $0A,$0A
+Frame9_PosesChunksSizes:
+	db $0D,$0C
+Frame10_PosesChunksSizes:
+	db $0C,$0A
+Frame11_PosesChunksSizes:
+	db $0B,$0A
+Frame12_PosesChunksSizes:
+	db $0C,$0C
+Frame13_PosesChunksSizes:
+	db $0C,$0C
+Frame14_PosesChunksSizes:
+	db $0B,$0A
+Frame15_PosesChunksSizes:
+	db $0B,$0A
+Frame16_PosesChunksSizes:
+	db $0C,$0A
+Frame17_PosesChunksSizes:
+	db $0C,$0C
+Frame18_PosesChunksSizes:
+	db $20,$00
+Frame19_PosesChunksSizes:
+	db $0E,$0E
+Frame20_PosesChunksSizes:
+	db $0D,$0C
+Frame21_PosesChunksSizes:
+	db $0C,$0A
+Frame22_PosesChunksSizes:
+	db $0D,$0C
+Frame23_PosesChunksSizes:
+	db $0E,$0E
+Frame24_PosesChunksSizes:
+	db $0C,$0B
+Frame25_PosesChunksSizes:
+	db $0C,$0C
+Frame26_PosesChunksSizes:
+	db $0E,$0D
+Frame27_PosesChunksSizes:
+	db $0D,$0C
+Frame28_PosesChunksSizes:
+	db $0D,$0C
+Frame29_PosesChunksSizes:
+	db $0D,$0C
+Frame30_PosesChunksSizes:
+	db $0E,$0C
+Frame31_PosesChunksSizes:
+	db $0E,$0C
+Frame32_PosesChunksSizes:
+	db $0F,$0E
+Frame33_PosesChunksSizes:
+	db $0C,$0A
+Frame34_PosesChunksSizes:
+	db $0E,$0C
+Frame35_PosesChunksSizes:
+	db $0E,$0D
+Frame36_PosesChunksSizes:
+	db $0F,$0E
+Frame37_PosesChunksSizes:
+	db $0C,$0B
+Frame38_PosesChunksSizes:
+	db $0C,$0B
+Frame39_PosesChunksSizes:
+	db $0E,$0C
+Frame40_PosesChunksSizes:
+	db $0E,$0C
+Frame41_PosesChunksSizes:
+	db $0D,$0C
+Frame42_PosesChunksSizes:
+	db $0C,$0C
+Frame43_PosesChunksSizes:
+	db $0B,$0A
+Frame44_PosesChunksSizes:
+	db $0B,$0A
+Frame45_PosesChunksSizes:
+	db $0C,$0B
+Frame46_PosesChunksSizes:
+	db $0A,$09
+Frame47_PosesChunksSizes:
+	db $0C,$0A
+Frame48_PosesChunksSizes:
+	db $0C,$0A
+Frame49_PosesChunksSizes:
+	db $08,$08
+Frame50_PosesChunksSizes:
+	db $0A,$08
+Frame51_PosesChunksSizes:
+	db $0B,$0A
+Frame52_PosesChunksSizes:
+	db $0B,$0A
+Frame53_PosesChunksSizes:
+	db $0A,$0A
+Frame54_PosesChunksSizes:
+	db $09,$08
+Frame55_PosesChunksSizes:
+	db $09,$08
+Frame56_PosesChunksSizes:
+	db $08,$06
+Frame57_PosesChunksSizes:
+	db $09,$08
+Frame58_PosesChunksSizes:
+	db $08,$07
+Frame59_PosesChunksSizes:
+	db $0A,$08
+Frame60_PosesChunksSizes:
+	db $0C,$0A
+Frame61_PosesChunksSizes:
+	db $0A,$08
+Frame62_PosesChunksSizes:
+	db $09,$08
+Frame63_PosesChunksSizes:
+	db $08,$07
+Frame64_PosesChunksSizes:
+	db $08,$06
+Frame65_PosesChunksSizes:
+	db $0A,$08
+Frame66_PosesChunksSizes:
+	db $08,$08
+Frame67_PosesChunksSizes:
+	db $0A,$09

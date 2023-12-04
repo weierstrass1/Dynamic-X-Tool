@@ -105,6 +105,7 @@ namespace DynamicXLibrary
                 return new();
             if (ResourceSizes == null)
                 return new();
+            Log.WriteLine($"Processing {ContextName}");
             Dictionary<string, byte[]> frames = new();
 
             int totalLength = 0;

@@ -678,7 +678,7 @@ namespace DynamicXLibrary
             int patchLocation = GetPatchLocation();
             if (patchLocation < 0)
                 return;
-            int dynRouts = patchLocation + 0x03;
+            int dynRouts = patchLocation + 0x00;
             int drawRout = patchLocation + 0x06;
             int resTab = patchLocation + 0x18;
             int gfxroutsTab = patchLocation + 0x1B;

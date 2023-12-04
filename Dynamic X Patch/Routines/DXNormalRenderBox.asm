@@ -1,4 +1,4 @@
-DXNormalRenderBox:
+?DXNormalRenderBox:
     STZ !SpriteHOffScreenFlag,x
     STZ !SpriteVOffScreenFlag,x
     LDA !sprite_x_high,x
@@ -8,18 +8,18 @@ DXNormalRenderBox:
     SEC
     SBC $1A
     SBC #$0080
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0080
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !NormalRenderXDistanceOutOfScreen,x
-    BCC +
+    BCC ?+
     INC !SpriteHOffScreenFlag,x
-+
+?+
     LDA !sprite_y_high,x
     XBA
     LDA !sprite_y_low,x
@@ -27,21 +27,21 @@ DXNormalRenderBox:
     SEC
     SBC $1C
     SBC #$0070
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0070
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !NormalRenderYDistanceOutOfScreen,x
-    BCC +
+    BCC ?+
     INC !SpriteVOffScreenFlag,x
-+
+?+
     LDA !SpriteHOffScreenFlag,x
     ORA !SpriteVOffScreenFlag,x
-    BEQ +
+    BEQ ?+
 
     LDA #$FF
     STA !NormalPalette,x
@@ -54,6 +54,6 @@ DXNormalRenderBox:
     STA !NormalLastFlip,x
     CLC
 RTL
-+
+?+
     SEC
 RTL

@@ -1,3 +1,3 @@
 ;A = Palette Table ID, 16 bits
-DXNormalPaletteAssignment:
+?DXNormalPaletteAssignment:
     %StandardSpritePaletteAssignment("Normal", #$FE, "!CustomSpriteNumber,x")

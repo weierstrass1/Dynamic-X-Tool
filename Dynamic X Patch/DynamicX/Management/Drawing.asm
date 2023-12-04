@@ -148,34 +148,23 @@ RemapOamTile:
     STA $8A
     CLC
     ADC !PoseOffset
-    PHP
     PHA
     EOR $8A
     AND #$10
-    BEQ .skipFix
+    BEQ +
     PLA
-    PLP
-    BCC +
-    PHP
     CLC
     ADC #$10
-    STA $8A
-    BRA .prop
+    BRA ++
 +
-    CLC
-    ADC #$10
-    PHP
-    STA $8A
-    BRA .prop
-.skipFix
     PLA
+++
+    CMP !PoseOffset
     STA $8A
-.prop
-    PLP
     LDA !Property
-    BCC .ZeroProp
+    BCS +
     ORA #$01
-.ZeroProp
++
 RTL
 
 Draw:

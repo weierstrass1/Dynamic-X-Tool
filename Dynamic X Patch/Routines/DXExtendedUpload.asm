@@ -1,6 +1,6 @@
-DXExtendedUpload:
-    JSR .upload
+?DXExtendedUpload:
+    JSR ?.upload
 RTL
 
-.upload
+?.upload
     %StandardSpriteUpload(0, "Extended")

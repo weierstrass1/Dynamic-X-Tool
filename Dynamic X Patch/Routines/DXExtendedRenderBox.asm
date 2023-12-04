@@ -1,4 +1,4 @@
-DXExtendedRenderBox:
+?DXExtendedRenderBox:
     LDA !extended_x_high,x
     XBA
     LDA !extended_x_low,x
@@ -6,17 +6,17 @@ DXExtendedRenderBox:
     SEC
     SBC $1A
     SBC #$0080
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0080
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !ExtendedRenderXDistanceOutOfScreen,x
-    BCS .OutOfScreen
-+
+    BCS ?.OutOfScreen
+?+
     LDA !extended_y_high,x
     XBA
     LDA !extended_y_low,x
@@ -24,21 +24,21 @@ DXExtendedRenderBox:
     SEC
     SBC $1C
     SBC #$0070
-    BPL +
+    BPL ?+
     EOR #$FFFF
     INC A
-+
+?+
     SEC
     SBC #$0070
     SEP #$20
-    BMI +
+    BMI ?+
     CMP !ExtendedRenderYDistanceOutOfScreen,x
-    BCS .OutOfScreen
-+
+    BCS ?.OutOfScreen
+?+
     SEC
 RTL
 
-.OutOfScreen
+?.OutOfScreen
     LDA #$FF
     STA !ExtendedPalette,x
     STA !ExtendedLastPoseIndex,x

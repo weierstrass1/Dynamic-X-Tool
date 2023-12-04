@@ -341,11 +341,17 @@ if !PaletteEffects
 endif
 
 if !DynamicPoses
-    LDA #$7F|$80
+    LDA #$5F|$80
     STA.w DX_Dynamic_Tile_Size+$00
-    STA.w DX_Dynamic_Tile_Size+$7F
-    LDA #$00
+    STA.w DX_Dynamic_Tile_Size+$5F
+    LDA #$00|$80
     STA.w DX_Dynamic_Tile_Offset+$00
+    STA.w DX_Dynamic_Tile_Offset+$5F
+    LDA #$1F|$80
+    STA.w DX_Dynamic_Tile_Size+$60
+    STA.w DX_Dynamic_Tile_Size+$7F
+    LDA #$60
+    STA.w DX_Dynamic_Tile_Offset+$60
     STA.w DX_Dynamic_Tile_Offset+$7F
 endif
 if !PlayerFeatures
@@ -408,6 +414,13 @@ endif
 
 .End
 if !PaletteChange
+	LDA $0100|!addr
+	CMP #$14
+	BNE +
+	LDA $13D4|!addr
+    BEQ +
+	JMP ..skipPalSetup
++
     REP #$20
     LDA #$0000
     STA DX_Dynamic_Palettes_Updated+$00
@@ -428,6 +441,7 @@ while !i < $10
 +
     !i #= !i+$01
 endif
+..skipPalSetup
 endif
     JML $008075|!rom
     dl $000000,$000000

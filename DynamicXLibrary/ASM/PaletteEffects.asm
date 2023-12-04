@@ -62,6 +62,13 @@ if !sa1
     JML $008075|!rom
 endif
 .init
+	LDA $0100|!addr
+	CMP #$14
+	BNE +
+	LDA $13D4|!addr
+    BEQ +
+	JMP ..skipPalSetup
++
     REP #$20
     LDA #$0000
     STA DX_Dynamic_Palettes_Updated+$00
@@ -82,7 +89,7 @@ while !i < $10
 +
     !i #= !i+$01
 endif
-
+..skipPalSetup
 	JSR LoadFixedColorEffect
     LDA DX_Dynamic_Palettes_GlobalBGEnable
 	%ProcessPalette($80,$00,DX_Dynamic_Palettes_GlobalBGEnable,DX_PPU_CGRAM_BGPaletteCopyLoaded,DX_PPU_CGRAM_BGPaletteCopyLoaded)

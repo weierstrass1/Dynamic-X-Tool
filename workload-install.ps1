@@ -51,6 +51,7 @@ $LatestVersionMap = @{
     "$ManifestBaseName-8.0.100-rc.1" = "7.0.124";
     "$ManifestBaseName-8.0.100-rc.2" = "7.0.125";
     "$ManifestBaseName-8.0.100-rtm" = "7.0.127";
+    "$ManifestBaseName-8.0.100" = "7.0.129";
 }
 
 function New-TemporaryDirectory {
@@ -71,29 +72,29 @@ function Ensure-Directory([string]$TestDir) {
 }
 
 function Get-LatestVersion([string]$Id) {
+    $attempts=3
+    $sleepInSeconds=3
+    do
+    {
+        try
+        {
+            $Response = Invoke-WebRequest -Uri https://api.nuget.org/v3-flatcontainer/$Id/index.json -UseBasicParsing | ConvertFrom-Json
+            return $Response.versions | Select-Object -Last 1
+        }
+        catch {
+            Write-Host "Id: $Id"
+            Write-Host "An exception was caught: $($_.Exception.Message)"
+        }
+
+        $attempts--
+        if ($attempts -gt 0) { Start-Sleep $sleepInSeconds }
+    } while ($attempts -gt 0)
+
     if ($LatestVersionMap.ContainsKey($Id))
     {
         Write-Host "Return cached latest version."
         return $LatestVersionMap.$Id
     } else {
-        $attempts=3
-        $sleepInSeconds=3
-        do
-        {
-            try
-            {
-                $Response = Invoke-WebRequest -Uri https://api.nuget.org/v3-flatcontainer/$Id/index.json -UseBasicParsing | ConvertFrom-Json
-                return $Response.versions | Select-Object -Last 1
-            }
-            catch {
-                Write-Host "Id: $Id"
-                Write-Host "An exception was caught: $($_.Exception.Message)"
-            }
-
-            $attempts--
-            if ($attempts -gt 0) { Start-Sleep $sleepInSeconds }
-        } while ($attempts -gt 0)
-
         Write-Error "Wrong Id: $Id"
     }
 }

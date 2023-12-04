@@ -1,6 +1,6 @@
-DXClusterUploadWithoutPoseOffset:
-    JSR .upload
+?DXClusterUploadWithoutPoseOffset:
+    JSR ?.upload
 RTL
 
-.upload
+?.upload
     %StandardSpriteUpload(1, "Cluster")

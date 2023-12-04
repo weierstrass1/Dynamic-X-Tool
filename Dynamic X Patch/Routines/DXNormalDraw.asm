@@ -21,9 +21,9 @@
 ;$8A = X Offset
 ;$8B = Y Offset
 ;A = Base Pose ID, 16 bits
-DXNormalDraw:
-    JSR .draw
+?DXNormalDraw:
+    JSR ?.draw
 RTL
 
-.draw
+?.draw
     %StandardSpriteDraw(0, "Normal")

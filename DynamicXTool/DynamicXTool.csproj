@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DrawInfo\" />
     <Folder Include="DynamicInfo\" />
-    <Folder Include="DynamicResources\" />
     <Folder Include="PaletteEffects\" />
   </ItemGroup>
 
@@ -31,22 +31,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="DrawInfo\MMXDigLabour.drawinfo">
+    <None Update="DynamicInfo\MSBazookaRebelSoldier.dynamicinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DrawInfo\MMXDigLabourSection1.drawinfo">
+    <None Update="DynamicInfo\MSRebelSoldierDeath.dynamicinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DrawInfo\MMXDigLabourSection2.drawinfo">
+    <None Update="DynamicResources\MSBazookaRebelSoldier.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DrawInfo\MMXDigLabourSection3.drawinfo">
+    <None Update="DynamicResources\MSRebelSoldierDeath.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DrawInfo\MMXDigLabourSection4.drawinfo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="DrawInfo\MMXDigLabourSection5.drawinfo">
+    <None Update="DynamicResources\MSRebelSoldierPal.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

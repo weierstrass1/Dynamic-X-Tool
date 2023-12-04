@@ -1,3 +1,3 @@
 ;A = Palette Table ID, 16 bits
-DXClusterPaletteAssignment:
+?DXClusterPaletteAssignment:
     %StandardSpritePaletteAssignment("Cluster", #$FC, "!ClusterNumber,x")

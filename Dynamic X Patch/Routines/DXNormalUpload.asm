@@ -1,6 +1,6 @@
-DXNormalUpload:
-    JSR .upload
+?DXNormalUpload:
+    JSR ?.upload
 RTL
 
-.upload
+?.upload
     %StandardSpriteUpload(0, "Normal")

@@ -1,6 +1,6 @@
-DXExtendedUploadWithoutPoseOffset:
-    JSR .upload
+?DXExtendedUploadWithoutPoseOffset:
+    JSR ?.upload
 RTL
 
-.upload
+?.upload
     %StandardSpriteUpload(1, "Extended")
