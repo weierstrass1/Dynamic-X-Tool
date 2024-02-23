@@ -163,6 +163,14 @@ RTS
     INC A
     STA DX_Timer
 
+    LDA $9D
+    ORA $13D4|!addr
+    BNE +
+    LDA DX_SyncTimer
+    INC A
+    STA DX_SyncTimer
++
+
 	LDA #$4300
 	TCD                 ;direct page = 4300 for speed
 
@@ -190,9 +198,6 @@ Start:
     PHX
     PHY
 
-    LDA #$00
-    STA DX_Timer
-    STA DX_Timer+1
     JSR Init
 
     PLY
@@ -218,6 +223,8 @@ endif
 endif
     REP #$20
     LDA #$0000
+    STA.w DX_Timer
+    STA.w DX_SyncTimer
 if !PaletteChange
     STA.w DX_Dynamic_Palettes_Updated+$00
     STA.w DX_Dynamic_Palettes_Updated+$02
@@ -280,7 +287,6 @@ if !PlayerFeatures
 endif
     LDA #$FFFE
     STA.w DX_Dynamic_Palettes_ID+$10
-    STA.w DX_Dynamic_Palettes_ID+$12
     LDA #$FFFF
 endif
 if !PaletteEffects

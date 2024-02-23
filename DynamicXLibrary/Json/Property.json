@@ -9,8 +9,8 @@
     "PreLoop": [ "" ],
     "PreLoopSize": 0,
     "InLoop": [
-      "Properties,y",
-      " ORA !Property"
+      " !Property",
+      "EOR Properties,y"
     ],
     "InLoopSize": 5
   }

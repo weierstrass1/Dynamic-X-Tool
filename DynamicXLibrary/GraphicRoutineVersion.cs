@@ -19,6 +19,7 @@ namespace DynamicXLibrary
         public bool EqualYdisp { get; private set; }
         public bool EqualSize { get; private set; }
         public bool Size16 { get; private set; }
+        public bool IsDynamic { get; private set; }
         private static readonly Dictionary<int, GraphicRoutineVersion> instances = new();
         public static List<GraphicRoutineVersion> GraphicRoutineVersions { get => instances.Values.ToList(); }
         public string Content { get; private set; }
@@ -54,7 +55,7 @@ namespace DynamicXLibrary
             gr = gr.Replace("<Position_PreLoop>", posRep.PreLoop.Code);
             ls = ls.Replace("<Position_InLoop>", posRep.InLoop.Code);
 
-            SimpleJSON tileRep = JSON.JSON.Tile.SelectReplacement(true, equalTile);
+            SimpleJSON tileRep = JSON.JSON.Tile.SelectReplacement(fi.IsDynamic, equalTile);
 
             gr = gr.Replace("<Tile_PreLoop>", tileRep.PreLoop.Code);
             ls = ls.Replace("<Tile_InLoop>", tileRep.InLoop.Code);
@@ -95,6 +96,7 @@ namespace DynamicXLibrary
             grvValue.EqualYdisp = equalYdisp ;
             grvValue.EqualSize = equalSize ;
             grvValue.Size16 = fi.AllSizesAre16();
+            grvValue.IsDynamic = fi.IsDynamic;
 
             grvValue.FramesInfo.Add(fi);
             return grvValue;

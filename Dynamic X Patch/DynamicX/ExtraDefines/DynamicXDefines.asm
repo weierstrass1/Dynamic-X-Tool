@@ -38,6 +38,7 @@ namespace nested on
 org !Variables
     namespace DX
         Timer: skip 2
+        SyncTimer: skip 2
         namespace Dynamic
             ;Number of bytes send with DMA during the current SNES Frame
             CurrentDataSend: skip 2

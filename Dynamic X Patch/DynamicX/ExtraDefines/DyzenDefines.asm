@@ -115,7 +115,7 @@ endif
 !PlayerCarryingFlag = $1470|!addr
 !PlayerCarryingFlagImage = $148F|!addr
 !PlayerAnimationTimer = $1496|!addr
-!PlayerFlashingTimer = $1F2B|!addr;$1497|!addr
+!PlayerFlashingTimer = $1497|!addr
 !P1PowerUp = $0DB8|!addr
 !P2PowerUp = $0DB9|!addr
 !P1Lives = $0DB4|!addr

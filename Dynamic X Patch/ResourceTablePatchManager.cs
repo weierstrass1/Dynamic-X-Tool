@@ -1,5 +1,4 @@
 ﻿using DynamicXSNES;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Dynamic_X_Patch

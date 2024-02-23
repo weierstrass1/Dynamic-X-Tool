@@ -1,11 +1,6 @@
 ﻿using AsarCLR;
 using Dynamic_X_Patch;
 using DynamicXSNES;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -96,7 +91,10 @@ namespace DynamicXLibrary
         public string? Process()
         {
             if (!Directory.Exists("TMP"))
+            {
                 Directory.CreateDirectory("TMP");
+                File.Copy(Options.Instance.InputROMPath!, Path.Combine("TMP", "tmp.smc"));
+            }
             Remove();
             PatchDynamicX();
             

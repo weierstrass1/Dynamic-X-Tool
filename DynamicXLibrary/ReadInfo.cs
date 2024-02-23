@@ -5,7 +5,7 @@ namespace DynamicXLibrary
 {
     public partial class ReadInfo
     {
-        private const string DYNAMIC_FLAG_PATTERN = @"\s*Dynamic:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
+        private const string DYNAMIC_FLAG_PATTERN = @"\s*Dynamic:\s*\n\s*(true|false)";
         private const string POSES_PATTERN = @"\s*PosesGraphics:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private const string PALETTES_PATTERN = @"\s*Palettes:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
         private const string RESOURCES_PATTERN = @"\s*Resources:\s*\n([\sA-Za-z0-9]+\.bin\s*(\n|$))+";
@@ -76,7 +76,10 @@ namespace DynamicXLibrary
             FrameInfo[] fis = TablesReader.ReadFrameInfoTables(SpriteName, framesInfo);
 
             foreach (var fi in fis)
-                fi.IsDynamic = dynFlagMatch.Success && bool.Parse(dynFlagMatch.ToString());
+            {
+                fi.IsDynamic = dynFlagMatch.Success && bool.Parse(Regex.Match(dynFlagMatch.Value, "(true|false)").Value);
+                Log.WriteLine(fi.IsDynamic.ToString());
+            }
 
             TextInfo info = CultureInfo.CurrentCulture.TextInfo;
             SpriteName = info.ToTitleCase(SpriteName).Replace(" ", string.Empty);

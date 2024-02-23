@@ -43,6 +43,7 @@
       "InLoop": [
         "LDA Tiles,y",
         " JSL !RemapOamTile",
+        " ORA <Property_InLoop>",
         " STA $400003,x",
         " LDA $8A",
         " STA $400002,x"

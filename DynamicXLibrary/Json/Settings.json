@@ -1,4 +1,4 @@
-﻿{
+{
   "InputROMPath": "",
   "OutputROMPath": "",
   "PixiPath": "",
@@ -11,7 +11,7 @@
   "DrawingSystem": true,
   "ControllerOptimization": true,
   "FixedColorOptimization": true,
-  "StatusBarOptimization": true,
+  "StatusBarOptimization": false,
   "ScrollingOptimization": false,
   "PlayerFeatures": false
 }

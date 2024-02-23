@@ -102,6 +102,7 @@ namespace DynamicXLibrary
             key += AllYDisplacementsAreEquals() ? 64 : 0;
             key += AllSizesAreEquals() ? 128 : 0;
             key += AllSizesAre16() ? 256 : 0;
+            key += IsDynamic ? 512 : 0;
             return key;
         }
         public override string ToString() => Name;

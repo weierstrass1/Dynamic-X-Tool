@@ -119,4 +119,15 @@
 
 !ExtendedLastVersion = !ClusterLastVersion+$14
 
-!End = !ExtendedLastVersion+$0A
+!SmokePoseIndex = !ClusterLastVersion+$0A
+!SmokeLastPoseIndex = !SmokePoseIndex+$04
+!SmokeGlobalFlip = !SmokeLastPoseIndex+$04
+!SmokeLocalFlip = !SmokeGlobalFlip+$04
+!SmokePalette = !SmokeLocalFlip+$04
+!SmokeLastPoseHashIndex = !SmokePalette+$04
+!SmokeSafeFrameLowByte = !SmokeLastPoseHashIndex+$04
+!SmokeSafeFrameHighByte = !SmokeSafeFrameLowByte+$04
+
+!SmokeLastFlip = !SmokeSafeFrameHighByte+$04
+
+!End = !SmokeLastFlip+$04

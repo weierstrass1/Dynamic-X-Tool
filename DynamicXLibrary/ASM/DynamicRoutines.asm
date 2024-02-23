@@ -187,16 +187,20 @@ RTS
 RTS
 
 ..FirstHalfSP1WithPlayer
-    %zone($00,$04,$80)
-    %zone($05,$0F,$00)
+    %zone($00,$06,$80)
+    %zone($07,$08,$00)
+    %zone($09,$09,$80)
+    %zone($0A,$0F,$80)
     %zone($10,$7F,$80)
 RTS
 
 ..SP11WithPlayer
-    %zone($00,$04,$80)
-    %zone($05,$14,$00)
-    %zone($15,$17,$80)
-    %zone($18,$1E,$00)
+    %zone($00,$06,$80)
+    %zone($07,$08,$00)
+    %zone($09,$09,$80)
+    %zone($0A,$14,$80)
+    %zone($15,$15,$80)
+    %zone($16,$1E,$00)
     %zone($1F,$7F,$80)
 RTS
 
@@ -231,18 +235,22 @@ RTS
 
 ..SecondHalfSP1andSP234WithPlayer
     %zone($00,$0F,$80)
-    %zone($10,$14,$00)
-    %zone($15,$17,$80)
-    %zone($18,$1E,$00)
+    %zone($07,$08,$00)
+    %zone($09,$09,$80)
+    %zone($0A,$14,$80)
+    %zone($15,$15,$80)
+    %zone($16,$1E,$00)
     %zone($1F,$1F,$80)
     %zone($20,$7F,$00)
 RTS
 
 ..SP1234WithPlayer
-    %zone($00,$04,$80)
-    %zone($05,$14,$00)
-    %zone($15,$17,$80)
-    %zone($18,$1E,$00)
+    %zone($00,$06,$80)
+    %zone($07,$08,$00)
+    %zone($09,$09,$80)
+    %zone($0A,$14,$80)
+    %zone($15,$15,$80)
+    %zone($16,$1E,$00)
     %zone($1F,$1F,$80)
     %zone($20,$7F,$00)
 RTS
@@ -285,18 +293,20 @@ RTS
 ..SecondHalfSP1andSP234WithPlayerAndDSX
     %zone($00,$0F,$80)
     %zone($10,$14,$00)
-    %zone($15,$17,$80)
-    %zone($18,$1E,$00)
+    %zone($15,$15,$80)
+    %zone($16,$1E,$00)
     %zone($1F,$1F,$80)
     %zone($20,$6F,$00)
     %zone($70,$7F,$80)
 RTS
 
 ..SP1234WithPlayerAndDSX
-    %zone($00,$04,$80)
-    %zone($05,$14,$00)
-    %zone($15,$17,$80)
-    %zone($18,$1E,$00)
+    %zone($00,$06,$80)
+    %zone($07,$08,$00)
+    %zone($09,$09,$80)
+    %zone($0A,$14,$80)
+    %zone($15,$15,$80)
+    %zone($16,$1E,$00)
     %zone($1F,$1F,$80)
     %zone($20,$6F,$00)
     %zone($70,$7F,$80)
