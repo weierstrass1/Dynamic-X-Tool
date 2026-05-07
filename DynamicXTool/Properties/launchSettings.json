@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "DynamicXTool": {
-      "commandName": "Project",
-      "commandLineArgs": "-use-settings"
-    }
-  }
-}

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>x86</Platforms>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\Dynamic X Patch\DynamicXtremePatch.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Dynamic X SNES\SNESLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DrawInfo\" />
+    <Folder Include="DynamicInfo\" />
+    <Folder Include="DynamicResources\" />
+    <Folder Include="PaletteEffects\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

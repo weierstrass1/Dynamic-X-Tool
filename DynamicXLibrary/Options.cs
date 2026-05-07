@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json;
 
 namespace DynamicXLibrary
 {
@@ -21,7 +21,8 @@ namespace DynamicXLibrary
             FixedColorOptimization = false,
             StatusBarOptimization = false,
             ScrollingOptimization = false,
-            PlayerFeatures = false
+            PlayerFeatures = false,
+            YoshiFeatures = false
         };
         public static Options Instance { get; private set; } = getFromFile();
         public string? InputROMPath { get; set; }
@@ -39,6 +40,7 @@ namespace DynamicXLibrary
         public bool StatusBarOptimization { get; set; }
         public bool ScrollingOptimization { get; set; }
         public bool PlayerFeatures { get; set; }
+        public bool YoshiFeatures { get; set; }
         public Options()
         {
 
@@ -50,20 +52,19 @@ namespace DynamicXLibrary
             if(!PaletteChange) 
                 PaletteEffects = false;
 
-            string jsonString = JsonSerializer.Serialize(this, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-            
-            if (File.Exists("Json/Settings.json"))
-                File.Delete("Json/Settings.json");
-            File.WriteAllText("Json/Settings.json", jsonString);
+            string jsonString = JsonConvert.SerializeObject(this, Formatting.Indented);
+
+            string path = Path.Combine("Json", "Settings.json");
+
+            if (File.Exists(path))
+                File.Delete(path);
+            File.WriteAllText(path, jsonString);
             Instance = this;
         }
         private static Options getFromFile()
         {
-            string jsonString = File.ReadAllText("Json/Settings.json");
-            return JsonSerializer.Deserialize<Options>(jsonString)!;
+            string jsonString = File.ReadAllText(Path.Combine("Json", "Settings.json"));
+            return JsonConvert.DeserializeObject<Options>(jsonString)!;
         }
         public static void SaveOptions()
             => Instance.Save();
@@ -82,6 +83,7 @@ namespace DynamicXLibrary
                 !ScrollingOptimization = !{ScrollingOptimization}
                 !StatusBarOptimization = !{StatusBarOptimization}
                 !PlayerFeatures = !{PlayerFeatures}
+                !YoshiFeatures = !{YoshiFeatures}
                 """;
             return content + File.ReadAllText(Path.Combine("ASM", "Options.asm"));
         }

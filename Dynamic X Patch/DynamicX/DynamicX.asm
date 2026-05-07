@@ -165,6 +165,7 @@ RTS
 
     LDA $9D
     ORA $13D4|!addr
+    AND #$00FF
     BNE +
     LDA DX_SyncTimer
     INC A
@@ -370,6 +371,16 @@ if !PlayerFeatures
     LDA #$FF
     STA.w DX_Dynamic_Player_LastCustomPlayer
 endif
+if !YoshiFeatures
+    LDA #$01
+    STA.w DX_Dynamic_Yoshi_VRAMEnable
+    LDA #$00
+    STA.w DX_Dynamic_Yoshi_Addr
+    LDA #$85
+    STA.w DX_Dynamic_Yoshi_Addr+1
+    LDA #$7E
+    STA.w DX_Dynamic_Yoshi_BNK
+endif
     PLB
     RTS
 
@@ -461,6 +472,9 @@ incsrc "Management/Palette.asm"
 endif
 if !PlayerFeatures
 incsrc "Management/Player.asm"
+endif
+if !YoshiFeatures
+incsrc "Management/Yoshi.asm"
 endif
 if !GraphicChange
 incsrc "NMI/VRAMDMA.asm"

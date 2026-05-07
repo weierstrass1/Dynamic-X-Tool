@@ -81,6 +81,8 @@ namespace DynamicXLibrary
             Dictionary<string, byte[]> result = new();
             foreach (var path in Palettes)
             {
+                if (result.ContainsKey(path))
+                    continue;
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
                 result.Add(path, b);
             }
@@ -94,6 +96,8 @@ namespace DynamicXLibrary
             Dictionary<string, byte[]> result = new();
             foreach (var path in Resources)
             {
+                if (result.ContainsKey(path))
+                    continue;
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
                 result.Add(path, b);
             }
@@ -184,7 +188,7 @@ namespace DynamicXLibrary
             int baseBlocks = ResourceSizes[id2] / 32;
             baseBlocks *= 8;
             int lastRowBlock = Math.Max(ResourceSizes[id2] % 32, ResourceSizes[id2 + 1]);
-            if(lastRowBlock < 16)
+            if(lastRowBlock <= 16)
             {
                 lastRowBlock += lastRowBlock % 2;
                 lastRowBlock /= 2;

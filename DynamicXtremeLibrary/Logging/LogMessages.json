@@ -1,0 +1,14 @@
+{
+  "TITLE": "\n============ {title} ============\n",
+  "RESOURCE INSERTED AT": "Inserted {type} {id} {name} at {address} ({size}){buffer}.",
+  "SUCCESSFULLY PROCESSED FILE": "\tSuccessfully processed file {file}.",
+  "RESOURCE NOT FOUND": "\tResource {file} was not found.",
+  "PROCESSING FILE": "Processing file {file}.",
+  "DYNAMIC INFO WITHOUT CHUNKS": "\tIn {context}: 'PosesGraphics' exists but 'PosesChunksSizes' is missing.",
+  "FAILED TO PROCESS FILE": "\tFailed to process file {file}.",
+  "DYNAMIC INFO SIZE MISMATCH": "\tSize mismatch in {context}: chunks*32={size1}, graphics={size2}.",
+  "FILE IS TOO BIG": "\tFile {file} is too large: {size} bytes (max {maxSize}).",
+  "NOT ENOUGH SPACE IN ROM": "\tNot enough free space in ROM.",
+  "VALUE EXCEEDS LIMIT": "\t{parameter} value exceeds allowed limit (value = {value}, max = {limit}) in {context}.",
+  "DRAW INFO INCONSISTENT TABLE SIZES": "\tTable size mismatch in '{context}': table sizes are inconsistent."
+}

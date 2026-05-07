@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json.Linq;
 
 namespace DynamicXLibrary.JSON
 {
@@ -9,17 +9,17 @@ namespace DynamicXLibrary.JSON
         internal GenericJSON(string path) : base()
         {
             string content = File.ReadAllText(path);
-            JsonElement je = JsonSerializer.Deserialize<JsonElement>(content);
-            initialize(je);
+            JObject node = JObject.Parse(content);
+            initialize(node);
         }
-        internal GenericJSON(JsonElement je)
+        internal GenericJSON(JToken token)
         {
-            initialize(je);
+            initialize(token);
         }
-        private void initialize(JsonElement je)
+        private void initialize(JToken token)
         {
-            Same = new(je.GetProperty(nameof(Same)));
-            Different = new(je.GetProperty(nameof(Different)));
+            Same = new(token[nameof(Same)]!);
+            Different = new(token[nameof(Different)]!);
         }
         public SimpleJSON SelectReplacement(bool AllEquals)
             => AllEquals ?

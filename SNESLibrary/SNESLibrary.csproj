@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>SNESLibrary</AssemblyName>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SNESLibrary</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x86</Platforms>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+</Project>

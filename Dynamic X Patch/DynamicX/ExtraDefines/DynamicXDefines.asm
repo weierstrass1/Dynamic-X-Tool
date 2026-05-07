@@ -92,6 +92,13 @@ org !Variables
                 namespace off
             namespace off
             endif
+            if !YoshiFeatures
+            namespace Yoshi
+                VRAMEnable: skip 1
+                Addr: skip 2
+                BNK: skip 1
+            namespace off
+            endif
         namespace off
         FreeRams:
 org !Variables2

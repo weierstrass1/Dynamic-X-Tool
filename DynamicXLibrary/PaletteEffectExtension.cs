@@ -34,16 +34,19 @@ namespace DynamicXLibrary
             List<byte> r2 = new();
             List<byte> r3 = new();
             int counter = 0;
+            IEnumerable<PaletteEffect> filtered;
             foreach (PaletteEffectCollection effect in effects)
             {
-                type.AddRange(effect.Effects.Select(x => (byte)x.Channels));
-                c1.AddRange(effect.Effects.Select(x => x.Channel1));
-                c2.AddRange(effect.Effects.Select(x => x.Channel2));
-                c3.AddRange(effect.Effects.Select(x => x.Channel3));
-                r1.AddRange(effect.Effects.Select(x => x.Ratio1));
-                r2.AddRange(effect.Effects.Select(x => x.Ratio2));
-                r3.AddRange(effect.Effects.Select(x => x.Ratio3));
-                counter += effect.Effects.Count;
+                filtered = effect.Effects.Where(x => x.EffectType != EffectType.None);
+                Log.WriteLine($"{effect.Name}: {filtered.Count()}");
+                type.AddRange(filtered.Select(x => (byte)x.EffectType));
+                c1.AddRange(filtered.Select(x => x.Channel1));
+                c2.AddRange(filtered.Select(x => x.Channel2));
+                c3.AddRange(filtered.Select(x => x.Channel3));
+                r1.AddRange(filtered.Select(x => x.Ratio1));
+                r2.AddRange(filtered.Select(x => x.Ratio2));
+                r3.AddRange(filtered.Select(x => x.Ratio3));
+                counter += filtered.Count();
             }
             List<byte> res = new()
             {

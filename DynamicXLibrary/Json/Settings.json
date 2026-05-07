@@ -13,5 +13,6 @@
   "FixedColorOptimization": true,
   "StatusBarOptimization": false,
   "ScrollingOptimization": false,
-  "PlayerFeatures": false
+  "PlayerFeatures": false,
+  "YoshiFeatures": false
 }

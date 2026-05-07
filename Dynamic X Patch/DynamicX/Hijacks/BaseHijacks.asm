@@ -5,22 +5,27 @@ org $00821D
 	dl Routines
 org $00823A
 MarioGFX:
-if !PlayerFeatures == 0  
-	JSR $A300
+if !PlayerFeatures == 0
+	if read1($00823C) == $58
+		JSR $A300
+		print "Dynamic X desinstalled player features A300"
+	endif
 else
 	BRA +
-	NOP
+	db "X"
 +
 endif
+org $00823D
 	autoclean JML DXBaseHijack1
 
 org $0082D7
 	autoclean JML DXBaseHijack2
 else
+print "Dynamic X desinstalled Graphic and Palette Change"
 org $00821D
 	db $20,$00,$A3,$80,$1B
 org $00823A
-	db $20,$00,$A3,$20,$D2,$85,$20,$49,$84
+	db $20,$00,$A3,$20,$D2,$85,$20,$49,$84,$20,$50,$86
 org $0082D7
 	db $20,$00,$A3,$2C,$9B,$0D
 endif
@@ -28,9 +33,9 @@ endif
 if !ControllerOptimization || !PaletteChange
 org $00806F
 	autoclean JML DXGameModeHijack
-	NOP
-	NOP
-else
+	db "DX"
+elseif read2($008073) == $5844
+	print "Dynamic X desinstalled Game Mode Hijack"
 	db $58,$E6,$13,$20,$22,$93
 endif
 
@@ -38,7 +43,7 @@ if !ControllerOptimization
 ;Controller Optimization
 org $0082F4
 	BRA +
-	NOP
+	db "X"
 +
 
 org $008243
@@ -48,9 +53,10 @@ org $008243
 
 org $0086C6
 RTL
-else
+elseif read1($0082F6) == $58
+	print "Dynamic X desinstalled controller optimization"
 org $0082F4
-	db $20,$50,$86
+	db $20,$50,$86,$A9,$09
 
 org $008243
 	db $20,$50,$86
@@ -65,24 +71,26 @@ org $00A4D1
 	JSR $AE41
 
 org $00AE41
-	REP #$20
-	LDA $0701|!addr
-	ASL #3
-	SEP #$21
-	ROR #3
-	XBA
-	ORA #$40
-	STA $2132
-	LDA $0702|!addr
-	LSR A
-	SEC
-	ROR
-	STA $2132
-	XBA
-	STA $2132
-RTS
-	NOP #3
-else
+	REP #$20			;2
+	LDA $0701|!addr		;5
+	ASL #3				;8
+	SEP #$21			;10
+	ROR #3				;13
+	XBA					;14
+	ORA #$40			;16
+	STA $2132			;19
+	LDA $0702|!addr		;22
+	LSR A				;23
+	SEC					;24
+	ROR					;25
+	STA $2132			;28
+	XBA					;29
+	STA $2132			;32
+RTS						;33
+	db "DX"
+	NOP
+elseif read2($00AE62) == $5844
+	print "Dynamic X desinstalled fixed color optimization"
 org $00A4D1
 	db $20,$47,$AE
 org $00AE41
@@ -141,8 +149,9 @@ org $008DB1
     STA.w $420B			;47
     SEP #$10			;49
 RTS						;50
-	db $44,$58
-elseif read1($008DB1+$32) == $44 && read1($008DB2+$32) == $58
+	db "DX"
+elseif read2($008DB1+$32) == $5844
+	print "Dynamic X desinstalled status bar optimization"
 org $008DB1
 	STA.W $2116               ;  |Set Address for VRAM Read/Write to x5042 ; Address for VRAM Read/Write (Low Byte)
 	LDA.B #$50                ;  | 
@@ -182,31 +191,40 @@ if !PlayerFeatures
 org $00F636
 	autoclean JML PlayerDynamicRoutine
 	RTS
-	NOP
-org $01E19D
-	autoclean JML PodooboDMA
-	NOP
-
-org $01EEAA
-	autoclean JML YoshiDMA
-
-org $02EA34
-	autoclean JML IDKDMA
-else
+	db "X"
+elseif read1($00F63B) == $58
+	print "Dynamic X desinstalled player features"
 org $00F636
 	REP #$20                  ; Accum (16 bit) 
 	LDX.B #$00                
 	LDA $09
+endif
+
+if !YoshiFeatures
+org $01EEAA
+	autoclean JML YoshiDMA
+	db "DX"
+
+org $02EA34
+	autoclean JML IDKDMA
 
 org $01E19D
-	REP #$20                  ; Accum (16 bit) 
-	LDA.W #$0008 
+	autoclean JML PodooboDMA
+	NOP
+
+elseif read2($01EEAA+$04) == $5844
 
 org $01EEAA
 	REP #$20                  ; Accum (16 bit) 
-	LDA $00      
+	LDA $00  
+	ASL
+	ASL    
 
 org $02EA34
 	REP #$20                  ; Accum (16 bit) 
 	LDA $00  	
+
+org $01E19D
+	REP #$20                  ; Accum (16 bit) 
+	LDA.W #$0008 
 endif

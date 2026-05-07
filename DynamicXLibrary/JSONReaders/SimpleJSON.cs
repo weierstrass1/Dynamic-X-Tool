@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json.Linq;
 
 namespace DynamicXLibrary.JSON
 {
@@ -6,10 +6,10 @@ namespace DynamicXLibrary.JSON
     {
         public ASMText PreLoop { get; set; }
         public ASMText InLoop { get; private set; }
-        public SimpleJSON(JsonElement je)
+        public SimpleJSON(JToken token)
         {
-            PreLoop = new(getContent(je, "PreLoop"), je.GetProperty("PreLoopSize").GetInt32());
-            InLoop = new(getContent(je, "InLoop"), je.GetProperty("InLoopSize").GetInt32());
+            PreLoop = new(getContent(token, "PreLoop"), int.Parse(token["PreLoopSize"]!.ToString()));
+            InLoop = new(getContent(token, "InLoop"), int.Parse(token["InLoopSize"]!.ToString()));
         }
     }
 }

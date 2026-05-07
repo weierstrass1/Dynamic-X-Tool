@@ -1,0 +1,10 @@
+{
+  "Name": "KevinLMVRAMOptimization",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Kevin's Lunar Magic VRAM Patch Optimization — Replaces and integrates Kevin’s Lunar Magic VRAM patch into the system. Optimizes stripe image handling by moving it outside of NMI, reducing NMI usage and improving stability when updating VRAM resources such as blocks, HDMA gradients, messages, and UI elements. This version should be used instead of the original SMW Central patch.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

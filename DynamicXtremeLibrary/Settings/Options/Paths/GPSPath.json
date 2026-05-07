@@ -1,0 +1,10 @@
+{
+  "Name": "GPSPath",
+  "Value": "",
+  "DefaultValue": "",
+  "Description": "Path to GPS executable (optional).",
+  "Question": "Drag and drop GPS executable or enter the path. Leave empty to use default settings (skips if not set).",
+  "Warning": "",
+  "RedoError": "The specified path does not exist or is invalid. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

@@ -1,4 +1,4 @@
-﻿using DynamicXSNES;
+﻿using SNESLibrary;
 
 namespace DynamicXLibrary
 {

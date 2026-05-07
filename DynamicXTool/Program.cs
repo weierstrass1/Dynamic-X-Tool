@@ -6,6 +6,8 @@ namespace DynamicXTool
     {
         private static void Main(string[]? args)
         {
+            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            Console.WriteLine(Environment.CurrentDirectory);
             DynamicX.Run(args);
         }
     }

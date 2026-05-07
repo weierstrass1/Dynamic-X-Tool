@@ -1,6 +1,7 @@
 ﻿using AsarCLR;
 using Dynamic_X_Patch;
-using DynamicXSNES;
+using DynamicXPaletteCreatorLibrary;
+using SNESLibrary;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -60,6 +61,10 @@ namespace DynamicXLibrary
                 return false;
             rom = File.ReadAllBytes(rompath);
             mapper = SNESROMUtils.GetMapper(rom);
+            string tmpromPath = Path.Combine("TMP", "tmp.smc");
+            if (File.Exists(tmpromPath))
+                File.Delete(tmpromPath);
+            File.Copy(rompath, tmpromPath);
             return true;
         }
         public void SaveROM(string output)
@@ -518,8 +523,7 @@ namespace DynamicXLibrary
             string patchPath = Path.Combine("TMP", "PaletteEffects.asm");
             string palDataPath = Path.Combine("TMP", "PaletteEffectsData.bin");
             var palsColls = PaletteEffectExtension.GetCollections();
-            Log.WriteLine($"{palsColls.Count}");
-            palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Count}").ToList();
+            palEffects = palsColls.Select(x => $"{x.Name!},{x.Effects.Where(e => e.EffectType != EffectType.None).Count()}").ToList();
             byte[] bin = PaletteEffectExtension.ToBin(palsColls);
             if (File.Exists(palDataPath))
                 File.Delete(palDataPath);
@@ -860,7 +864,7 @@ namespace DynamicXLibrary
                 validation = true;
                 return "";
             }
-            string[] paths = Directory.GetFiles("DynamicInfo");
+            string[] paths = Directory.GetFiles("./DynamicInfo");
             DynamicInfo di;
             validation = true;
             StringBuilder sb = new();

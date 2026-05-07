@@ -78,7 +78,6 @@ namespace DynamicXLibrary
             foreach (var fi in fis)
             {
                 fi.IsDynamic = dynFlagMatch.Success && bool.Parse(Regex.Match(dynFlagMatch.Value, "(true|false)").Value);
-                Log.WriteLine(fi.IsDynamic.ToString());
             }
 
             TextInfo info = CultureInfo.CurrentCulture.TextInfo;

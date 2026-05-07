@@ -10,6 +10,7 @@
 !ScrollingOptimization = !True
 !StatusBarOptimization = !True
 !PlayerFeatures = !True
+!YoshiFeatures = !True
 !Desinstallation = 0
 
 if !GraphicChange == 0

@@ -1,0 +1,10 @@
+{
+  "Name": "FixedColorOptimization",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Fixed Color Optimization — Optimizes background color handling to reduce NMI usage, freeing cycles for dynamic graphics and palette updates.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

@@ -20,17 +20,17 @@ namespace DynamicXLibrary
             Name = name;
         }
         public bool OneTile() => Tiles != null && Tiles.Length == 1;
-        public bool HasXDisplacement() => XDisplacements != null;
-        public bool HasYDisplacement() => YDisplacements != null;
-        public bool HasXFlip() => FlipXDisplacements != null && !AllXDisplacementsAreEquals();
-        public bool HasYFlip() => FlipYDisplacements != null && !AllYDisplacementsAreEquals();
+        public bool HasXDisplacement() => XDisplacements != null || !EqualArrays(XDisplacements, FlipXDisplacements);
+        public bool HasYDisplacement() => YDisplacements != null || !EqualArrays(YDisplacements, FlipYDisplacements);
+        public bool HasXFlip() => FlipXDisplacements != null && !EqualArrays(XDisplacements, FlipXDisplacements);
+        public bool HasYFlip() => FlipYDisplacements != null && !EqualArrays(YDisplacements, FlipYDisplacements);
         public bool HasXYFlip() => HasXFlip() && HasYFlip();
         public bool HasProperties() => Properties != null;
         public bool HasSizes() => Sizes != null;
         public bool AllTilesAreEquals() => allAreEquals(Tiles) && (Tiles == null || Tiles[0] == 0);
         public bool AllPropertiesAreEquals() => !HasProperties() && allAreEquals(Properties);
-        public bool AllXDisplacementsAreEquals() => allAreEquals(XDisplacements) && (XDisplacements == null || XDisplacements[0] == 0);
-        public bool AllYDisplacementsAreEquals() => allAreEquals(YDisplacements) && (YDisplacements == null || YDisplacements[0] == 0);
+        public bool AllXDisplacementsAreEquals() => !HasXFlip() && allAreEquals(XDisplacements) && (XDisplacements == null || XDisplacements[0] == 0);
+        public bool AllYDisplacementsAreEquals() => !HasYFlip() && allAreEquals(YDisplacements) && (YDisplacements == null || YDisplacements[0] == 0);
         public bool AllSizesAreEquals() => allAreEquals(Sizes);
         public bool AllSizesAre16() => AllSizesAreEquals() && (Sizes == null || Sizes[0] == 2);
         private static bool allAreEquals(int[]? array)
@@ -205,6 +205,19 @@ namespace DynamicXLibrary
                 groups[fi.ContextName].Add(fi);
             }
             return groups;
+        }
+        public bool EqualArrays(int[] arr1, int[] arr2)
+        {
+            if (arr1 == null && arr2 == null)
+                return true;
+            if (arr1.Length != arr2.Length)
+                return false;
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (arr1[i] != arr2[i])
+                    return false;
+            }
+            return true;
         }
     }
 }

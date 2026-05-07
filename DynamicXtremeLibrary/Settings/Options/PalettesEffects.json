@@ -1,0 +1,10 @@
+{
+  "Name": "PalettesEffects",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Palette Effects — Enables palette effects by modifying color channels (RGB/HSL), including color interpolation and palette blending. Can also affect the level background color.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

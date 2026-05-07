@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json.Linq;
 
 namespace DynamicXLibrary.JSON
 {
@@ -11,11 +11,12 @@ namespace DynamicXLibrary.JSON
         internal FlipJSON()
         {
             string content = File.ReadAllText("Json/Flip.json");
-            JsonElement je = JsonSerializer.Deserialize<JsonElement>(content);
-            NoFlip = new(je.GetProperty(nameof(NoFlip)));
-            FlipX = new(je.GetProperty(nameof(FlipX)));
-            FlipY = new(je.GetProperty(nameof(FlipY)));
-            FlipXY = new(je.GetProperty(nameof(FlipXY)));
+            JObject node = JObject.Parse(content);
+
+            NoFlip = new(node[nameof(NoFlip)]!);
+            FlipX = new(node[nameof(FlipX)]!);
+            FlipY = new(node[nameof(FlipY)]!);
+            FlipXY = new(node[nameof(FlipXY)]!);
         }
         public SimpleJSON SelectReplacement(bool flipx, bool flipy)
         {

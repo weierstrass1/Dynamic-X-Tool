@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json.Linq;
 
 namespace DynamicXLibrary.JSON
 {
@@ -10,12 +10,13 @@ namespace DynamicXLibrary.JSON
         public SimpleJSON DifferentXY { get; set; }
         internal PositionJSON() : base()
         {
-            string content = File.ReadAllText("Json/Position.json");
-            JsonElement je = JsonSerializer.Deserialize<JsonElement>(content);
-            SameXY = new(je.GetProperty(nameof(SameXY)));
-            SameX = new(je.GetProperty(nameof(SameX)));
-            SameY = new(je.GetProperty(nameof(SameY)));
-            DifferentXY = new(je.GetProperty(nameof(DifferentXY)));
+            string content = File.ReadAllText(Path.Combine("Json", "Position.json"));
+            JObject node = JObject.Parse(content);
+            
+            SameXY = new(node[nameof(SameXY)]!);
+            SameX = new(node[nameof(SameX)]!);
+            SameY = new(node[nameof(SameY)]!);
+            DifferentXY = new(node[nameof(DifferentXY)]!);
         }
         public SimpleJSON SelectReplacement(bool AllEqualsX, bool AllEqualsY)
         {

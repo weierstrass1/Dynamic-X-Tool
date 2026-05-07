@@ -1,7 +1,7 @@
 ﻿using DynamicXLibrary.JSON;
 using System.Text;
 
-namespace DynamicXLibrary
+namespace NeoDynamicXLibrary
 {
     public class GraphicRoutineVersion
     {
@@ -10,6 +10,8 @@ namespace DynamicXLibrary
         public const string GraphicRoutineFile = "GraphicRoutine.asm";
         public const string LoopSectionFile = "LoopSection.asm";
         public int ID { get; private set; }
+        public int TileSize { get; private set; }
+        public int DataSize { get; private set; }
         public bool OneTile { get; private set; }
         public bool FlipX { get; private set; }
         public bool FlipY { get; private set; }
@@ -23,13 +25,13 @@ namespace DynamicXLibrary
         private static readonly Dictionary<int, GraphicRoutineVersion> instances = new();
         public static List<GraphicRoutineVersion> GraphicRoutineVersions { get => instances.Values.ToList(); }
         public string Content { get; private set; }
-        public List<FrameInfo> FramesInfo { get; private set; }
+        public List<DrawInfo> DrawInfo { get; private set; }
         private GraphicRoutineVersion(string content)
         {
             Content = content;
             ID = currentID;
             currentID++;
-            FramesInfo = new();
+            DrawInfo = new();
         }
 
         public static GraphicRoutineVersion Create(FrameInfo fi)
@@ -82,24 +84,68 @@ namespace DynamicXLibrary
 
             int key = fi.GetKey();
 
-            if (!instances.TryGetValue(key, out GraphicRoutineVersion? grvValue))
+            if (!GetGraphicRoutineVersion(ref key, gr, out GraphicRoutineVersion? grvValue))
             {
-                grvValue = new(gr);
-                instances.Add(key, grvValue);
-            }
-            grvValue.OneTile = oneTile;
-            grvValue.FlipX = flipxdisp;
-            grvValue.FlipY = flipydisp;
-            grvValue.EqualTile = equalTile;
-            grvValue.EqualProp = equalProp;
-            grvValue.EqualXdisp = equalXdisp;
-            grvValue.EqualYdisp = equalYdisp ;
-            grvValue.EqualSize = equalSize ;
-            grvValue.Size16 = fi.AllSizesAre16();
-            grvValue.IsDynamic = fi.IsDynamic;
+                grvValue.OneTile = oneTile;
+                grvValue.FlipX = flipxdisp;
+                grvValue.FlipY = flipydisp;
+                grvValue.EqualTile = equalTile;
+                grvValue.EqualProp = equalProp;
+                grvValue.EqualXdisp = equalXdisp;
+                grvValue.EqualYdisp = equalYdisp ;
+                grvValue.EqualSize = equalSize ;
+                grvValue.Size16 = fi.AllSizesAre16();
+                grvValue.IsDynamic = fi.IsDynamic;
 
-            grvValue.FramesInfo.Add(fi);
+                grvValue.GetSize();
+            }
+
+            Log.WriteLine($"{fi.ContextName}_{fi.Name}: {key} - {grvValue.GetFlags()}");
+
+            int dataSize = fi.GetLength() * grvValue.TileSize;
+            grvValue.DrawInfo.Add(fi);
+            grvValue.DataSize += dataSize;
             return grvValue;
+        }
+        public static bool GetGraphicRoutineVersion(ref int key, string content, out GraphicRoutineVersion? grvValue)
+        {
+            if (!instances.TryGetValue(key, out grvValue))
+            {
+                grvValue = new(content);
+                instances.Add(key, grvValue);
+                return false;
+            }
+            while (grvValue.DataSize >= 30720)
+            {
+                key += 1024;
+                if (!instances.TryGetValue(key, out grvValue))
+                {
+                    grvValue = new(content);
+                    instances.Add(key, grvValue);
+                    return false;
+                }
+            }
+            return true;
+        }
+        public void GetSize()
+        {
+            TileSize = 0;
+            if (OneTile)
+                return;
+            if (!EqualTile)
+                TileSize++;
+            if (!EqualProp)
+                TileSize++;
+            if (!EqualXdisp)
+                TileSize++;
+            if (!EqualYdisp)
+                TileSize++;
+            if (!EqualSize)
+                TileSize++;
+            if (FlipX)
+                TileSize++;
+            if (FlipY)
+                TileSize++;
         }
         public void GenerateTables()
         {
@@ -107,7 +153,7 @@ namespace DynamicXLibrary
             if(!EqualTile)
             {
                 sb.AppendLine("Tiles:");
-                foreach(FrameInfo fi in FramesInfo)
+                foreach(FrameInfo fi in DrawInfo)
                 {
                     sb.Append($"{fi.ContextName}_{fi.Name}_Tiles:");
                     sb.AppendLine(fi.TilesToString());
@@ -116,7 +162,7 @@ namespace DynamicXLibrary
             if (!EqualProp)
             {
                 sb.AppendLine("Properties:");
-                foreach (FrameInfo fi in FramesInfo)
+                foreach (FrameInfo fi in DrawInfo)
                 {
                     sb.Append($"{fi.ContextName}_{fi.Name}_Properties:");
                     sb.AppendLine(fi.PropertiesToString());
@@ -125,7 +171,7 @@ namespace DynamicXLibrary
             if (!EqualXdisp)
             {
                 sb.AppendLine("XDisplacements:");
-                foreach (FrameInfo fi in FramesInfo)
+                foreach (FrameInfo fi in DrawInfo)
                 {
                     sb.Append($"{fi.ContextName}_{fi.Name}_XDisplacements:");
                     sb.AppendLine(fi.XDisplacementsToString());
@@ -133,7 +179,7 @@ namespace DynamicXLibrary
                 if (FlipX)
                 {
                     sb.AppendLine("XDisplacementsFlip:");
-                    foreach (FrameInfo fi in FramesInfo)
+                    foreach (FrameInfo fi in DrawInfo)
                     {
                         sb.Append($"{fi.ContextName}_{fi.Name}_XDisplacementsFlip:");
                         sb.AppendLine(fi.FlipXDisplacementsToString());
@@ -143,7 +189,7 @@ namespace DynamicXLibrary
             if (!EqualYdisp)
             {
                 sb.AppendLine("YDisplacements:");
-                foreach (FrameInfo fi in FramesInfo)
+                foreach (FrameInfo fi in DrawInfo)
                 {
                     sb.Append($"{fi.ContextName}_{fi.Name}_YDisplacements:");
                     sb.AppendLine(fi.YDisplacementsToString());
@@ -151,7 +197,7 @@ namespace DynamicXLibrary
                 if (FlipY)
                 {
                     sb.AppendLine("YDisplacementsFlip:");
-                    foreach (FrameInfo fi in FramesInfo)
+                    foreach (FrameInfo fi in DrawInfo)
                     {
                         sb.Append($"{fi.ContextName}_{fi.Name}_YDisplacementsFlip:");
                         sb.AppendLine(fi.FlipYDisplacementsToString());
@@ -161,7 +207,7 @@ namespace DynamicXLibrary
             if (!EqualSize)
             {
                 sb.AppendLine("Sizes:");
-                foreach (FrameInfo fi in FramesInfo)
+                foreach (FrameInfo fi in DrawInfo)
                 {
                     sb.Append($"{fi.ContextName}_{fi.Name}_Sizes:");
                     sb.AppendLine(fi.SizesToString());
