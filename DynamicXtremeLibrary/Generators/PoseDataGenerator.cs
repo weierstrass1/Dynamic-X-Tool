@@ -1,40 +1,35 @@
-﻿using DynamicXtremeLibrary.Infos;
+﻿using DynamicXtremeLibrary.GraphicRoutines;
+using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.Readers;
 
 namespace DynamicXtremeLibrary.Generators
 {
     public class PoseDataGenerator
     {
-        private static readonly string template_path = Path.Combine("ASM", "PoseDataTemplate.asm");
-        private const string offset_label = "<Offset>";
-        private const string length_label = "<Length>";
-        private const string routine_label = "<Routine>";
-        public static string GenerateEmpty()
+        public static string GenerateData(IEnumerable<GraphicRoutine> grs, string path)
         {
-            string content = File.ReadAllText(template_path);
-            content = content.Replace(offset_label, "\n\tdw $0000");
+            string content = File.ReadAllText(path);
 
-            content = content.Replace(length_label, "\n\tdw $0000");
+            var entries = GraphicRoutine.GetTableEntries(grs);
+            var grSorted = grs.OrderBy(grs => grs.ID);
 
-            content = content.Replace(routine_label, "\n\tdl $000000");
+            string routines = string.Join('\n', 
+                [.. grSorted.Select(gr => $"\tdl GraphicRoutines_{gr.Name}")]);
 
-            return content;
-        }
-        public static string GenerateData(List<int> addresses, List<DrawInfo> fis)
-        {
-            string content = File.ReadAllText(template_path);
+            content = content.Replace("<Offset>",
+                HexReader.ValuesToString(
+                            [.. entries.Select(e => e.DrawInfoOffset)], 4));
 
-            /*content = content.Replace(offset_label,
+            content = content.Replace("<Length>",
                         HexReader.ValuesToString(
-                            DrawInfo.GetOffset(fis), 4));
-            */
-            content = content.Replace(length_label,
-                        HexReader.ValuesToString(
-                            fis.Select(x => x.GetLength() - 1).ToArray(), 4));
+                            [.. entries.Select(e => e.DrawInfoLength)], 2));
 
-            /*content = content.Replace(routine_label,
+            content = content.Replace("<ID>",
                         HexReader.ValuesToString(
-                            DrawInfo.GetRoutinesAddresses(addresses, fis), 6, 8));*/
+                            [.. entries.Select(e => e.GraphicRoutineID)], 2));
+
+            content = content.Replace("<Routine>", $"\n{routines}");
+
             return content;
         }
     }

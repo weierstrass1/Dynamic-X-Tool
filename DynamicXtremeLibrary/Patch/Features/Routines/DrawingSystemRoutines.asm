@@ -172,16 +172,19 @@ Draw:
     STZ !MaxTilePriority+1
     REP #$30
     PHX
-    LDA !PoseID
+    LDX !PoseID
+    LDA.l Data_GraphicRoutineIDs,x
+    AND #$00FF
+    STA !GraphicRoutine
     ASL
     PHA
     CLC
-    ADC !PoseID
+    ADC !GraphicRoutine
     TAX
 
-    LDA.l GraphicRoutine,x
+    LDA.l Data_GraphicRoutine,x
     STA !GraphicRoutine
-    LDA.l GraphicRoutine+1,x
+    LDA.l Data_GraphicRoutine+1,x
     STA !GraphicRoutine+1
 
 if !sa1
@@ -196,11 +199,13 @@ if !sa1
     LDA !maxtile_pointer_max+8,x
     STA !maxtile_pointer+4
 
-    PLX
-    LDA.l NumberOfTilesMinus1,x
+    LDX !PoseID
+    LDA.l Data_NumberOfTilesMinus1,x
+    AND #$00FF
     STA !Iterator
     CLC
-    ADC.l TableOffset,x
+    PLX
+    ADC.l Data_TableOffset,x
     TAY
     SEP #$20
     
@@ -214,13 +219,18 @@ else
     AND #$00FF
     STA !maxtile_pointer
 
-    LDA $01,s
     PHX
-    TAX
-    LDA.l NumberOfTilesMinus1,x
+    LDX !PoseID
+    LDA.l Data_NumberOfTilesMinus1,x
+    AND #$00FF
     STA !Iterator
+
+    LDA $03,s
+    TAX
+    
+    LDA !Iterator
     CLC
-    ADC.l TableOffset,x
+    ADC.l Data_TableOffset,x
     TAY
     SEP #$20
 
@@ -260,7 +270,6 @@ else
 
     PLX
     STA.l DX_Drawing_InitialIndexLowPriority,x
-    PLX
 
     LDA.l DX_Drawing_InitialIndexLowPriority
     CMP.l DX_Drawing_InitialIndexHighPriority

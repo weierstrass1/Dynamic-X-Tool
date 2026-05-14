@@ -1,9 +1,6 @@
 ﻿using DynamicXtremeLibrary.Infos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DynamicXtremeLibrary.GraphicRoutines
 {
@@ -25,7 +22,7 @@ namespace DynamicXtremeLibrary.GraphicRoutines
         public bool Size16 { get; private set; }
         public bool IsDynamic { get; private set; }
         public IReadOnlyList<DrawInfo> DrawInfos { get => _drawInfos.AsReadOnly(); }
-        private List<DrawInfo> _drawInfos { get; set; }
+        private readonly List<DrawInfo> _drawInfos;
         private GraphicRoutine(int id, DrawInfo drawInfo)
         {
             _drawInfos = [];
@@ -89,7 +86,7 @@ namespace DynamicXtremeLibrary.GraphicRoutines
         }
         public bool TryAddDrawInfo(DrawInfo drawInfo)
         {
-            if(DataSize + drawInfo.GetLength() > 20000)
+            if(DataSize + drawInfo.GetLength() > 30000)
                 return false;
             _drawInfos.Add(drawInfo);
             DataSize += drawInfo.GetLength() * TileSize;
@@ -133,6 +130,29 @@ namespace DynamicXtremeLibrary.GraphicRoutines
                 (di.AllSizesAreEqual() ? 128 : 0) |
                 (di.AllSizesAre16() ? 256 : 0) |
                 (di.IsDynamic ? 512 : 0);
+        }
+        public static IReadOnlyList<DrawInfoTableEntry> GetTableEntries(IEnumerable<GraphicRoutine> routines)
+        {
+            List<DrawInfoTableEntry> entries = [];
+
+            int offset;
+            foreach (GraphicRoutine rout in routines)
+            {
+                offset = 0;
+                foreach (DrawInfo di in rout.DrawInfos)
+                {
+                    entries.Add(new()
+                    {
+                        GraphicRoutineID = rout.ID,
+                        DrawInfoID = di.ID,
+                        DrawInfoLength = di.GetLength(),
+                        DrawInfoOffset = offset
+                    });
+                    offset += di.GetLength();
+                }
+            }
+
+            return [.. entries.OrderBy(e => e.DrawInfoID)];
         }
         public override string ToString()
         {

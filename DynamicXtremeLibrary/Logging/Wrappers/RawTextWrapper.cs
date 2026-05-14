@@ -1,15 +1,11 @@
 ﻿using LogRegister;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DynamicXtremeLibrary.Logging.Wrappers
 {
     public class RawTextWrapper
     {
-        private StringBuilder builder;
+        private readonly StringBuilder builder;
         public RawTextWrapper() 
         {
             builder = new();
@@ -19,6 +15,10 @@ namespace DynamicXtremeLibrary.Logging.Wrappers
             if (type == SpanType.Prefix)
                 return;
             builder.Append(text);
+        }
+        public override string ToString()
+        {
+            return builder.ToString();
         }
     }
 }

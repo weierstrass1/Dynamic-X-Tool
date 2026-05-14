@@ -28,7 +28,7 @@ RTS
 ?.continue
     TAX
     JSL !SetPropertyAndOffset
-if <sprite> == 1
+if <sprite>
     LDX !SpriteIndex
 endif
 
@@ -42,7 +42,7 @@ endif
     ORA <palette>
     STA !Property
 
-if <offset> == 1
+if <offset>
     STZ !YOffsetParam+1
     LDA !YOffsetParam
     BPL ?.skipYNeg
@@ -54,7 +54,7 @@ endif
     XBA
     LDA <yl>
     REP #$20
-if <offset> == 1
+if <offset>
     CLC
     ADC !YOffsetParam
 endif
@@ -63,7 +63,7 @@ endif
     STA !YOffSet
     SEP #$20
 
-if <offset> == 1
+if <offset>
     STZ !XOffsetParam+1
     LDA !XOffsetParam
     BPL ?.skipXNeg
@@ -75,7 +75,7 @@ endif
     XBA
     LDA <xl>
     REP #$20
-if <offset> == 1
+if <offset>
     CLC
     ADC !XOffsetParam
 endif
@@ -106,7 +106,7 @@ macro DrawStatic(offset, sprite, lastFlip, palette, xl, xh, yl, yh)
     ORA <palette>
     STA !Property
 
-if <offset> == 1
+if <offset>
     STZ !YOffsetParam+1
     LDA !YOffsetParam
     BPL ?.skipYNeg
@@ -118,7 +118,7 @@ endif
     XBA
     LDA <yl>
     REP #$21
-if <offset> == 1
+if <offset>
     ADC !YOffsetParam
 endif
     SEC
@@ -126,7 +126,7 @@ endif
     STA !YOffSet
     SEP #$20
 
-if <offset> == 1
+if <offset>
     STZ !XOffsetParam+1
     LDA !XOffsetParam
     BPL ?.skipXNeg
@@ -138,7 +138,7 @@ endif
     XBA
     LDA <xl>
     REP #$21
-if <offset> == 1
+if <offset>
     ADC !XOffsetParam
 endif
     SEC

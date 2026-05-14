@@ -9,8 +9,11 @@ namespace DynamicXtremeTool
     {
         private static void Main(string[]? args)
         {
+            AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             Console.WriteLine(Environment.CurrentDirectory);
+
+            args = ["-use-settings"];
 
             var opt = Options.Instance;
             string optDef = opt.GetOptionsDefines();
@@ -30,6 +33,7 @@ namespace DynamicXtremeTool
                 PatchDirectory = "Patch",
                 DataDirectory = "Data",
                 ExtraDefinesDirectory = "ExtraDefines",
+                PoseDataTemplateFilename = "PoseDataTemplate.asm",
                 GraphicRoutinesDirectory = "GraphicRoutines",
                 GraphicRoutineTemplateFilename = "GraphicRoutineTemplate",
                 GraphicRoutineIncludeTemplateFilename = "GraphicRoutineIncludeTemplate",
@@ -41,7 +45,9 @@ namespace DynamicXtremeTool
                 GraphicRoutineIncludeFilename = "GraphicRoutineIncludes",
                 GraphicRoutineProtsFilename = "GraphicRoutineProts",
                 PaletteEffectsDataFilename = "PaletteEffectsData",
-                OutputDefinesFilename = "DXDefines"
+                OutputDefinesFilename = "DXDefines",
+                OptionsDefinesFilename = "Options",
+                RoutinesDirectory = "Routines"
             };
             dx.Run(File.ReadAllBytes(opt.InputRomPath.Value));
 
@@ -51,6 +57,8 @@ namespace DynamicXtremeTool
             mw.Actions += ConsoleWrapper.RenderAction;
             mw.Actions += rawText.RenderAction;
             renderer.RenderAll(logRegisterSystem.GetRegisters(), mw.RenderAction);
+            File.WriteAllText("log.txt", rawText.ToString());
+            Console.ResetColor();
             Console.Read();
         }
     }

@@ -80,7 +80,7 @@ if !DrawingSystem && !sa1 == 0
 while !i < $7F
     STA.w DX_Drawing_OAMMap+!i
     !i #= !i+2
-endif
+endwhile
     STA.w DX_Drawing_OAMMap+$7E
 endif
 if !PalettesChange
@@ -101,7 +101,7 @@ if !PalettesChange
     STA.w DX_Dynamic_Palettes_DisableTimer+$0C
     STA.w DX_Dynamic_Palettes_DisableTimer+$0E
 endif
-if !PaletteEffects
+if !PalettesEffects
     STA.w DX_Dynamic_Palettes_GlobalEffectID
     STA.w DX_Dynamic_Palettes_GlobalBGEnable
 	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
@@ -119,7 +119,7 @@ if !DynamicPoses
     while !i < 128
     STA.w DX_Dynamic_Pose_HashSize+!i
     !i #= !i+2
-    endif
+    endwhile
 endif
     LDA #$0800
     STA.w DX_Dynamic_MaxDataPerFrame 
@@ -147,7 +147,7 @@ endif
     STA.w DX_Dynamic_Palettes_ID+$10
     LDA #$FFFF
 endif
-if !PaletteEffects
+if !PalettesEffects
     STA.w DX_Dynamic_Palettes_LastGlobalEffectID
     STA.w DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$00
 	STA.w DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$02
@@ -185,7 +185,7 @@ if !DynamicPoses
     while !i < 256
     STA.w DX_Dynamic_Pose_ID+!i
     !i #= !i+2
-    endif
+    endwhile
 endif
 if !PlayerFeatures
     LDA $0D82|!normalBnk

@@ -1,5 +1,7 @@
 {
   "TITLE": "\n============ {title} ============\n",
+  "NUMBER OF": "Number of {name} inserted: {quantity}{size}.",
+  "DATA USAGE": "Total data used in {name}: {size} MB ({banks} banks).",
   "RESOURCE INSERTED AT": "Inserted {type} {id} {name} at {address} ({size}){buffer}.",
   "SUCCESSFULLY PROCESSED FILE": "\tSuccessfully processed file {file}.",
   "RESOURCE NOT FOUND": "\tResource {file} was not found.",

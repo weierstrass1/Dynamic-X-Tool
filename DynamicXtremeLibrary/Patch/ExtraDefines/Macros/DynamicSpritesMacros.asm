@@ -66,7 +66,7 @@ else
     SEP #$20
 endif
     BNE ?.Request
-if <flip> == 1
+if <flip>
     LDA <globalFlip>
     EOR <localFlip>
     STA <lastFlip>
@@ -165,7 +165,7 @@ if <sprite> != 2
         SEP #$20
     endif
 endif
-if <flip> == 1
+if <flip>
     LDA <globalFlip>
     EOR <localFlip>
     STA <lastFlip>

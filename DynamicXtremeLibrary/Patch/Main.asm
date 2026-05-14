@@ -1,5 +1,5 @@
 DXBaseHijack1:
-    JSR DynamicX
+    JSR DynamicXtreme
 
 	PHK
 	PEA.w .jslrtsreturn-1
@@ -15,7 +15,7 @@ DXBaseHijack1:
 	JML $008243|!rom
 
 DXBaseHijack2:
-	JSR DynamicX
+	JSR DynamicXtreme
 if !PlayerFeatures == 0    
 	PHK
 	PEA.w .jslrtsreturn2-1
@@ -25,4 +25,3 @@ if !PlayerFeatures == 0
 endif
     BIT.W $0D9B|!addr
     JML $0082DD|!rom
-endif

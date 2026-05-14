@@ -67,9 +67,24 @@ namespace DynamicXtremeLibrary.Config
                 i++;
             }
             Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SETTINGS_FILE))!;
+            settingsToOptions();
+        }
+        private void settingsToOptions()
+        {
+            InputRomPath.Value = Settings.InputROMPath;
+            OutputRomPath.Value = Settings.OutputROMPath;
+            PixiPath.Value = Settings.PixiPath;
+            UberasmPath.Value = Settings.UberasmToolPath;
+            GPSPath.Value = Settings.GPSPath;
+            foreach(var feat in Settings.Features)
+            {
+                BoolOptions.First(bo => bo.Name == feat.Name).Value = feat.Enable;
+            }
         }
         public void SettingsForm(bool useSettings)
         {
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             if (useSettings)
             {
                 useSettings = InputRomPath.Validate(InputRomPath.Value) &&
@@ -118,6 +133,7 @@ namespace DynamicXtremeLibrary.Config
         }
         public void Save()
         {
+            
             string jsonString = JsonConvert.SerializeObject(InputRomPath, Formatting.Indented);
             File.WriteAllText(INPUT_ROM_PATH_FILE, jsonString);
             jsonString = JsonConvert.SerializeObject(OutputRomPath, Formatting.Indented);

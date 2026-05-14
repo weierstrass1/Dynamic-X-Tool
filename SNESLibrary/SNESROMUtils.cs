@@ -120,7 +120,11 @@
 			return SNEStoPC(snes, m);
 		}
 		public static int JoinAddress(byte[] rom, int address)
-			=> JoinAddress(rom[address + 2], rom[address + 1], rom[address]);
+		{
+			if (rom == null || address < 0 || address + 2 >= rom.Length)
+				return -1;
+			return JoinAddress(rom[address + 2], rom[address + 1], rom[address]);
+		}
 
         public static int JoinAddress(byte bnk, byte hb, byte lb)
         {
@@ -128,7 +132,9 @@
         }
 		public static int RemoveAt(byte[] rom, int address)
 		{
-			if (address + 8 >= rom.Length)
+            if (rom == null || address < 0 || address + 2 >= rom.Length)
+                return -1;
+            if (address + 8 >= rom.Length)
 				return 0;
 			if (rom[address] != 0x53 || rom[address + 1] != 0x54 ||
 				rom[address + 2] != 0x41 || rom[address + 3] != 0x52)
@@ -367,7 +373,9 @@
             int size;
             while (pointer != 0xFFFFFFFF + offset)
             {
-                pointer = JoinAddress(rom[addr + 2], rom[addr + 1], rom[addr]) + offset;
+                pointer = JoinAddress(rom, addr) + offset;
+				if (pointer < 0)
+					break;
                 size = RemoveAt(rom, pointer);
                 if (size > 0)
                     l.Add((PCtoSNES(pointer + 8, mapper), size));

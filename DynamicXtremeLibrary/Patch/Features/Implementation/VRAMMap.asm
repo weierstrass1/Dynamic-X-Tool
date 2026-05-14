@@ -21,12 +21,12 @@ namespace VRAMMap
 GetBestSlot:
     LDX.b #!VRAMMAP_SIZE-1 ;byte i = VRAMMAP_SIZE - 1;
     LDY.b #$00
-    STZ.b VRAMMap_Adjacent
+    STZ.b Routines_VRAMMap_Adjacent
     LDA #$FF
-    STA.b VRAMMapBestSpace_Size
-    STA.b VRAMMapBestSpace_Offset
+    STA.b Routines_VRAMMapBestSpace_Size
+    STA.b Routines_VRAMMapBestSpace_Offset
     LDA #$00
-    STA.b VRAMMapBestSpace_Score    ;Best starts with size, Offset #$FF and Score #$00
+    STA.b Routines_VRAMMapBestSpace_Score    ;Best starts with size, Offset #$FF and Score #$00
 
 .loop
     %CallFunctionLongShortDBG(checkSpace)                   ;if (checkSpace(i, size, ref adjacent, current, TimeSpan))
@@ -71,37 +71,37 @@ GetBestSlot:
 ;VRAMMapTMP_Size = Required Size
 ;VRAMMap_Adjacent
 checkSpace:
-    LDA.l DX_Dynamic_Tile_Offset,X : AND.b #$7F : STA.b VRAMMapCurrentSpace_Offset ;current.offset = slot.offset & 0x7F
+    LDA.l DX_Dynamic_Tile_Offset,X : AND.b #$7F : STA.b Routines_VRAMMapCurrentSpace_Offset ;current.offset = slot.offset & 0x7F
     %VRAMMapSlot_IsRestricted()
     BEQ +                           ;if (slot.IsRestricted)
-        STZ.b VRAMMap_Adjacent      ;   adjacent = false
+        STZ.b Routines_VRAMMap_Adjacent      ;   adjacent = false
         CLC
         %ReturnLongShortDBG()       ;   return false
     +
 
-    %CallFunctionLongShortDBG(VRAMMapSlot_GetSizeAndScore)  ;byte slotSize = slot.GetSize(PoseDataBase, Hashmap);
-    STA.b VRAMMapSlot_Score                                 ;score = slot.GetSize(PoseDataBase, Hashmap);
+    %CallFunctionLongShortDBG(Routines_VRAMMapSlot_GetSizeAndScore)  ;byte slotSize = slot.GetSize(PoseDataBase, Hashmap);
+    STA.b Routines_VRAMMapSlot_Score                                 ;score = slot.GetSize(PoseDataBase, Hashmap);
 
     ;if(adjacent)
-    LDA.b VRAMMap_Adjacent : BEQ +
+    LDA.b Routines_VRAMMap_Adjacent : BEQ +
         ;slotSize += current.Size;
-        LDA.b VRAMMapCurrentSpace_Size : CLC : ADC.b VRAMMapSlot_Size : STA.b VRAMMapSlot_Size
+        LDA.b Routines_VRAMMapCurrentSpace_Size : CLC : ADC.b Routines_VRAMMapSlot_Size : STA.b Routines_VRAMMapSlot_Size
         ;Math.Min(score, current.Score);
-        LDA.b VRAMMapSlot_Score : CMP.b VRAMMapCurrentSpace_Score : BCC + 
-            LDA.b VRAMMapCurrentSpace_Score
-            STA.b VRAMMapSlot_Score
+        LDA.b Routines_VRAMMapSlot_Score : CMP.b Routines_VRAMMapCurrentSpace_Score : BCC + 
+            LDA.b Routines_VRAMMapCurrentSpace_Score
+            STA.b Routines_VRAMMapSlot_Score
     +
 
-    LDA.b VRAMMapSlot_Size : STA.b VRAMMapCurrentSpace_Size     ;current.Size = slotSize
-    LDA.b VRAMMapSlot_Score : STA.b VRAMMapCurrentSpace_Score   ;current.Score = score;
+    LDA.b Routines_VRAMMapSlot_Size : STA.b Routines_VRAMMapCurrentSpace_Size     ;current.Size = slotSize
+    LDA.b Routines_VRAMMapSlot_Score : STA.b Routines_VRAMMapCurrentSpace_Score   ;current.Score = score;
     
     CMP #$02 : BCS +                                    ; if(score < 2)
-        STZ.b VRAMMap_Adjacent                          ;   adjacent = false
+        STZ.b Routines_VRAMMap_Adjacent                          ;   adjacent = false
         CLC
         %ReturnLongShortDBG()                           ;   return false
     +
-    LDA.b VRAMMapSlot_Size : CMP.b VRAMMapTMP_Size : BCS +    ;if (slotSize < size)
-        INC.b VRAMMap_Adjacent              ;   adjacent = true;
+    LDA.b Routines_VRAMMapSlot_Size : CMP.b Routines_VRAMMapTMP_Size : BCS +    ;if (slotSize < size)
+        INC.b Routines_VRAMMap_Adjacent              ;   adjacent = true;
     +
     SEC                                     ;return true
 %ReturnLongShortDBG() ;return true
@@ -121,33 +121,33 @@ checkSpace:
 ;}
 checkIfCurrentIsBest:
 
-    LDA.b VRAMMapCurrentSpace_Size
-    CMP.b VRAMMapTMP_Size
+    LDA.b Routines_VRAMMapCurrentSpace_Size
+    CMP.b Routines_VRAMMapTMP_Size
     BCS +                           ;if (current.Size < size)
     CLC
 %ReturnLongShortDBG()               ;return false;
 +
-    STZ.b VRAMMap_Adjacent          ;adjacent = false;
-    LDA.b VRAMMapCurrentSpace_Score
-    CMP.b VRAMMapBestSpace_Score
+    STZ.b Routines_VRAMMap_Adjacent          ;adjacent = false;
+    LDA.b Routines_VRAMMapCurrentSpace_Score
+    CMP.b Routines_VRAMMapBestSpace_Score
     BCS +                           ;if (current.Score < best.Score)
     CLC
 %ReturnLongShortDBG()               ;return false;
 +
     BNE ++                          ;if (current.Score == best.Score && current.Size >= best.Size)
-    LDA.b VRAMMapCurrentSpace_Size
-    CMP.b VRAMMapBestSpace_Size
+    LDA.b Routines_VRAMMapCurrentSpace_Size
+    CMP.b Routines_VRAMMapBestSpace_Size
     BCC +
     CLC
 %ReturnLongShortDBG()               ;return false;
 ++
-    LDA.b VRAMMapCurrentSpace_Size
+    LDA.b Routines_VRAMMapCurrentSpace_Size
 +
-    STA.b VRAMMapBestSpace_Size         ;best.Size = current.Size;
-    LDA.b VRAMMapCurrentSpace_Score
-    STA.b VRAMMapBestSpace_Score    
-    LDA.b VRAMMapCurrentSpace_Offset    ;best.Score = current.Score;
-    STA.b VRAMMapBestSpace_Offset       ;best.Offset = current.Offset;
+    STA.b Routines_VRAMMapBestSpace_Size         ;best.Size = current.Size;
+    LDA.b Routines_VRAMMapCurrentSpace_Score
+    STA.b Routines_VRAMMapBestSpace_Score    
+    LDA.b Routines_VRAMMapCurrentSpace_Offset    ;best.Score = current.Score;
+    STA.b Routines_VRAMMapBestSpace_Offset       ;best.Offset = current.Offset;
     SEC
 %ReturnLongShortDBG()
 ;public void RemovePosesInSpace(Space space)
@@ -166,22 +166,22 @@ checkIfCurrentIsBest:
 ;Input:
 ;   VRAMMapBestSpace
 RemovePosesInSpace:
-    LDA.b VRAMMapBestSpace_Offset : TAX ;i = space.Offset
-    CLC : ADC.b VRAMMapBestSpace_Size : STA.b VRAMMapLoop ;limit = space.Offset + space.Size
+    LDA.b Routines_VRAMMapBestSpace_Offset : TAX ;i = space.Offset
+    CLC : ADC.b Routines_VRAMMapBestSpace_Size : STA.b Routines_VRAMMapLoop ;limit = space.Offset + space.Size
 .loop
     %VRAMMapSlot_GetSize()
-    STA.b VRAMMapSlot_Size ;size = slot.GetSize(PoseDataBase, Hashmap);
+    STA.b Routines_VRAMMapSlot_Size ;size = slot.GetSize(PoseDataBase, Hashmap);
 
     %VRAMMapSlot_IsFree() ;if (!slot.IsFree)
     BNE +
         PHX
         LDA.l DX_Dynamic_Tile_Pose,x : ASL : TAX
-        %CallFunctionLongShortDBG(DynamicPoseHashmap_Remove) ;Hashmap.Remove(slot.SizeOrPose);
+        %CallFunctionLongShortDBG(Routines_DynamicPoseHashmap_Remove) ;Hashmap.Remove(slot.SizeOrPose);
         PLX
     +
 
-    TXA : CLC : ADC.b VRAMMapSlot_Size : TAX ;i += size
-    CMP.b VRAMMapLoop : BCC .loop ;i < limit
+    TXA : CLC : ADC.b Routines_VRAMMapSlot_Size : TAX ;i += size
+    CMP.b Routines_VRAMMapLoop : BCC .loop ;i < limit
 %ReturnLongShortDBG()
 
 ;public void RemoveSpace(Space space)
@@ -200,13 +200,13 @@ RemovePosesInSpace:
 RemoveSpace:
     %CallFunctionLongShortDBG(RemovePosesInSpace) ;RemovePosesInSpace(space);
 
-    LDA.b VRAMMapBestSpace_Offset : TAX ;var slot = slots[space.Offset];
+    LDA.b Routines_VRAMMapBestSpace_Offset : TAX ;var slot = slots[space.Offset];
     STA.l DX_Dynamic_Tile_Offset,x ;slot.Offset = space.Offset;
-    LDA.b VRAMMapBestSpace_Size : DEC A : ORA.b #$80 : STA.l DX_Dynamic_Tile_Pose,x ;slot.SizeOrPose = (byte)((space.Size - 1) | 0x80);
+    LDA.b Routines_VRAMMapBestSpace_Size : DEC A : ORA.b #$80 : STA.l DX_Dynamic_Tile_Pose,x ;slot.SizeOrPose = (byte)((space.Size - 1) | 0x80);
 
-    LDA.b VRAMMapBestSpace_Offset : CLC : ADC.b VRAMMapBestSpace_Size : DEC A : TAX ;var slot = slots[space.Offset + space.Size - 1];
-    LDA.b VRAMMapBestSpace_Offset : STA.l DX_Dynamic_Tile_Offset,x ;slot.Offset = space.Offset;
-    LDA.b VRAMMapBestSpace_Size : DEC A : ORA.b #$80 : STA.l DX_Dynamic_Tile_Pose,x ;slot.SizeOrPose = (byte)((space.Size - 1) | 0x80);
+    LDA.b Routines_VRAMMapBestSpace_Offset : CLC : ADC.b Routines_VRAMMapBestSpace_Size : DEC A : TAX ;var slot = slots[space.Offset + space.Size - 1];
+    LDA.b Routines_VRAMMapBestSpace_Offset : STA.l DX_Dynamic_Tile_Offset,x ;slot.Offset = space.Offset;
+    LDA.b Routines_VRAMMapBestSpace_Size : DEC A : ORA.b #$80 : STA.l DX_Dynamic_Tile_Pose,x ;slot.SizeOrPose = (byte)((space.Size - 1) | 0x80);
 %ReturnLongShortDBG()
 ;public void AddPoseInSpace(byte hashmapIndex, Space space)
 ;{
@@ -237,30 +237,30 @@ RemoveSpace:
 ;   VRAMMapTMP_Size
 AddPoseInSpace:
 
-    LDA.b VRAMMapBestSpace_Offset
+    LDA.b Routines_VRAMMapBestSpace_Offset
     TAX                             ;var slot = slots[space.Offset];
     STA.l DX_Dynamic_Tile_Offset,x  ;slot.Offset = space.Offset;
-    LDA.b HashIndexBackup
+    LDA.b Routines_HashIndexBackup
     STA.l DX_Dynamic_Tile_Pose,x    ;slot.SizeOrPose = hashmapIndex;
 
-    LDA.b VRAMMapTMP_Size
+    LDA.b Routines_VRAMMapTMP_Size
     CLC
-    ADC.b VRAMMapBestSpace_Offset   ;byte nextSlotIndex = (byte)(space.Offset + slot.GetSize(PoseDataBase, Hashmap));
+    ADC.b Routines_VRAMMapBestSpace_Offset   ;byte nextSlotIndex = (byte)(space.Offset + slot.GetSize(PoseDataBase, Hashmap));
     DEC A
     TAX                             ;slot = slots[nextSlotIndex - 1];
-    LDA.b VRAMMapBestSpace_Offset
+    LDA.b Routines_VRAMMapBestSpace_Offset
     STA.l DX_Dynamic_Tile_Offset,x  ;slot.Offset = space.Offset; 
-    LDA.b HashIndexBackup
+    LDA.b Routines_HashIndexBackup
     STA.l DX_Dynamic_Tile_Pose,x    ;slot.SizeOrPose = hashmapIndex;
 
-    LDA.b VRAMMapBestSpace_Size
+    LDA.b Routines_VRAMMapBestSpace_Size
     SEC
-    SBC.b VRAMMapTMP_Size
+    SBC.b Routines_VRAMMapTMP_Size
     BNE +                           ;if (size == space.Size)
 %ReturnLongShortDBG()               ;   return;
 +
     DEC A
-    STA.b VRAMMapSlot_Size          ;size = (byte)((space.Size - size - 1) | 0x80);
+    STA.b Routines_VRAMMapSlot_Size          ;size = (byte)((space.Size - size - 1) | 0x80);
     INX                             ;slot = slots[nextSlotIndex];
     ORA #$80
     STA.l DX_Dynamic_Tile_Size,x    ;slot.SizeOrPose = size;
@@ -268,11 +268,11 @@ AddPoseInSpace:
     STA.l DX_Dynamic_Tile_Offset,x  ;slot.Offset = nextSlotIndex;
 
     CLC
-    ADC.b VRAMMapSlot_Size
+    ADC.b Routines_VRAMMapSlot_Size
     PHX
     TAX                             ;slot = slots[nextSlotIndex + (size & 0x7F)];
 
-    LDA.b VRAMMapSlot_Size
+    LDA.b Routines_VRAMMapSlot_Size
     ORA #$80
     STA.l DX_Dynamic_Tile_Size,x    ;slot.SizeOrPose = size;
     PLA

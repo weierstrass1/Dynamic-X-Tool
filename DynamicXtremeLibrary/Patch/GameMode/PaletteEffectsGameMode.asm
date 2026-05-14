@@ -45,7 +45,7 @@ while !i < 8
 	LDA.b #!i
 	JSL LoadBGPaletteGlobalEffect
 !i #= !i+1
-endif
+endwhile
 +
 	LDA DX_Dynamic_Palettes_GlobalSPEnable
 	BEQ +
@@ -54,7 +54,7 @@ while !i < 8
 	LDA.b #!i
 	JSL LoadSPPaletteGlobalEffect
 !i #= !i+1
-endif
+endwhile
 +
 	PLB
 if !sa1
@@ -241,7 +241,7 @@ RTL
 	STA !Source
 
 	LDA $98
-	JSL DoEffectAndMerge
+	JSL Routines_DoEffectAndMerge
 	PLX
 .UploadToCGRAM
 	SEP #$20

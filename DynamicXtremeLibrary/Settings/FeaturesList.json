@@ -5,9 +5,9 @@
   "DrawingSystem",
   "PalettesEffects",
   "Free7E2000",
-  "KevinLMVRAMOptimization",
   "ControllerOptimization",
   "FixedColorOptimization",
+  "KevinLMVRAMOptimization",
   "StatusBarOptimization",
   "PlayerFeatures",
   "YoshiFeatures"

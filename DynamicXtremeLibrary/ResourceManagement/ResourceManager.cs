@@ -18,9 +18,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 addresses.AppendLine($"\tdl !Palette{reference.Resource.Name}");
             }
             string result = $"""
-                dl PaletteData
-                dl $FFFFFF
-                PaletteData:
+                PaletteTable:
                 .IDs
                 {ids}
                 .Addresses
@@ -32,6 +30,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
         {
             var res = buffers.OrderBy(r => r.Resource.ID);
             StringBuilder sb = new();
+            sb.AppendLine("BufferTable:");
             foreach (var reference in res)
             {
                 sb.AppendLine($"\tdl !Buffer{reference.Resource.Name}");

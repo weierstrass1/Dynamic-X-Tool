@@ -12,17 +12,17 @@ org $01E19D
 
 elseif read2($01EEAA+$04) == $5844
 
-org $01EEAA
+%CleanOrg($01EEAA)
 	REP #$20                  ; Accum (16 bit) 
 	LDA $00  
 	ASL
 	ASL    
 
-org $02EA34
+%CleanOrg($02EA34)
 	REP #$20                  ; Accum (16 bit) 
 	LDA $00  	
 
-org $01E19D
+%CleanOrg($01E19D)
 	REP #$20                  ; Accum (16 bit) 
 	LDA.W #$0008 
 endif

@@ -25,10 +25,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Asar\asar">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Asar\asar.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\DXDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ASM\DynamicPoseDataTemplate.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\Data\DynamicPoseData.asm">
+    <None Update="ASM\PoseDataTemplate.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\Data\GFX32.bin">
@@ -37,16 +46,16 @@
     <None Update="Patch\Data\GFX33.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\Data\PoseData.asm">
+    <None Update="Patch\DefinesFix.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\DynamicX.asm">
+    <None Update="Patch\DynamicXtreme.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\DynamicXVector.asm">
+    <None Update="Patch\DynamicXtremeVector.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\DynamicXVectorMacros.asm">
+    <None Update="Patch\DynamicXtremeVectorMacros.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\ExtraDefines\DyzenDefines.asm">
@@ -116,6 +125,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\Features\Hijacks\YoshiFeaturesHijack.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Patch\Features\Implementation\DrawingSystem.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Patch\Features\Implementation\DynamicSpriteSystem.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\Features\Implementation\DynamicXSystem.asm">
@@ -245,7 +260,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Settings\Settings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

@@ -22,7 +22,7 @@ if !KevinLMVRAMOptimization
     JSR VRAMOptimizer
 endif
 
-if !PaletteEffects
+if !PalettesEffects
     incsrc "PalettesChangeGameMode.asm"
     incsrc "PaletteEffectsGameMode.asm"
 elseif !PalettesChange

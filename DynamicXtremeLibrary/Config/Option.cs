@@ -33,10 +33,13 @@ namespace DynamicXtremeLibrary.Config
                 Console.ResetColor();
             }
             Console.WriteLine(Question);
+            T def = Value != null && string.IsNullOrWhiteSpace(Value.ToString()) ?
+                    Value :
+                    DefaultValue;
             string value = Console.ReadLine()!;
-            T tValue = string.IsNullOrWhiteSpace(value) ?
-                DefaultValue :
-                ParseFromString(value);
+            T tValue = !string.IsNullOrWhiteSpace(value) ?
+                ParseFromString(value) :
+                def;
 
             while (!Validate(value))
             {
@@ -44,8 +47,8 @@ namespace DynamicXtremeLibrary.Config
                 Console.WriteLine(Question);
                 value = Console.ReadLine()!;
                 tValue = string.IsNullOrWhiteSpace(value) ?
-                    DefaultValue :
-                    ParseFromString(value);
+                    ParseFromString(value) :
+                    def;
             }
             Value = tValue;
         }

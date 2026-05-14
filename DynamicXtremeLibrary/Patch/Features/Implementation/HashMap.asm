@@ -15,29 +15,29 @@ namespace DynamicPoseHashmap
 ;HashIndexBackup es el slot devuelto.
 FindPose:
 		;getHashCode
-		STY.w PoseIDBackup : TYA : AND.b #!HASHMAP_SIZE-1
+		STY.w Routines_PoseIDBackup : TYA : AND.b #!HASHMAP_SIZE-1
 	SEP #$10 ;XY -> 8
-	STA.b HashCodeBackup : STA.b HashIndexBackup
+	STA.b Routines_HashCodeBackup : STA.b Routines_HashIndexBackup
 	TAX
 
 	LDA.l DX_Dynamic_Pose_Length : BEQ .ReturnFalseCarryClear ;if (Length == 0) return false
 	LDA.l DX_Dynamic_Pose_HashSize,X : BEQ .ReturnFalseCarryClear ;if (hashSize[hashCode]) return false
-	STA.b HashSizeBackup
+	STA.b Routines_HashSizeBackup
 
 	;X = hashCode * 2
-	LDA.b HashCodeBackup : ASL : TAX
+	LDA.b Routines_HashCodeBackup : ASL : TAX
 .hashLoop
 	REP #$20 ;A->16
 		LDA.l DX_Dynamic_Pose_ID,X : CMP.w #$FFFF : BEQ .incrementHashLoopAndContinue ;if (slot is null)
-		CMP.b PoseIDBackup ;z = (A == PoseIDBackup)
+		CMP.b Routines_PoseIDBackup ;z = (A == PoseIDBackup)
 	SEP #$20 ;A->8
 	BEQ ReturnHashIndexAndTrue ;slot.ID == id
 
-	AND.b #!HASHMAP_SIZE-1 : CMP.b HashCodeBackup : BNE .incrementHashLoopAndContinue_8bit ;DynamicPoseHashMapSlot.GetHashCode(slot.ID) != hashCode
-	DEC.b HashSizeBackup : BNE .incrementHashLoopAndContinue_8bit ;i--, i > 0 -> incrementHashLoopAndContinue_8bit
+	AND.b #!HASHMAP_SIZE-1 : CMP.b Routines_HashCodeBackup : BNE .incrementHashLoopAndContinue_8bit ;DynamicPoseHashMapSlot.GetHashCode(slot.ID) != hashCode
+	DEC.b Routines_HashSizeBackup : BNE .incrementHashLoopAndContinue_8bit ;i--, i > 0 -> incrementHashLoopAndContinue_8bit
 ;no se encontro, devolver X / 2 y Carry Clear
 .couldNotBeFound
-	TXA : LSR : STA.b HashIndexBackup
+	TXA : LSR : STA.b Routines_HashIndexBackup
 .ReturnFalseCarryClear
 	CLC
 RTL
@@ -53,7 +53,7 @@ BRA .hashLoop
 ;se encontro, devolver X / 2 y Carry Set
 ;este label es tambien utilizado en FindFreeSpace para devolver el slot que se encontro.
 ReturnHashIndexAndTrue:
-	TXA : LSR : STA.b HashIndexBackup : SEC
+	TXA : LSR : STA.b Routines_HashIndexBackup : SEC
 RTL
 
 ;---------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ FindFreeSpace:
 	LDA.l DX_Dynamic_Pose_Length : CMP.b #!HASHMAP_SIZE : BCS FindPose_ReturnFalseCarryClear ;Length >= HASHMAP_SIZE
 
 	;X = hashmapIndex * 2
-	LDA.b HashIndexBackup : ASL : TAX
+	LDA.b Routines_HashIndexBackup : ASL : TAX
 .hashLoop
 	REP #$20 ;A->16
 		LDA.l DX_Dynamic_Pose_ID,X : CMP.w #$FFFF ;z = if (slot is null)
@@ -109,7 +109,7 @@ Add:
 	;slots[hashmapIndex] = slot;
 	LDA.l DX_Timer
 	STA.l DX_Dynamic_Pose_TimeLastUse,x
-	LDA.b PoseIDBackup
+	LDA.b Routines_PoseIDBackup
 	STA.l DX_Dynamic_Pose_ID,x
 	SEP #$20
 	AND.b #!HASHMAP_SIZE-1 : TAX ;DynamicPoseHashMapSlot.GetHashCode()

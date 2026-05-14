@@ -1,5 +1,5 @@
 .PaletteSetup
-if !sa1 == 1
+if !sa1
 	LDA.b #..Start
 	STA $3180
 	LDA.b #..Start>>8
@@ -12,10 +12,10 @@ JML $008075|!rom
 ..Start
 endif
 
-	JSL AllowedGameMode
+	JSL Routines_AllowedGameMode
 	ORA $13D4|!addr
     BEQ +
-if !sa1 == 1
+if !sa1
 RTL
 else
 JML $008075|!rom

@@ -1,5 +1,4 @@
-﻿using DynamicXtremeLibrary;
-using DynamicXtremeLibrary.GraphicRoutines;
+﻿using DynamicXtremeLibrary.GraphicRoutines;
 using DynamicXtremeLibrary.Infos;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -45,6 +44,9 @@ namespace DynamicXtremeLibrary.Generators
                 {
                     sb.AppendLine("freecode");
                     sb.AppendLine($"incsrc \"{gr.Name}.asm\"");
+                    sb.AppendLine($".End");
+                    sb.AppendLine($"print dec(GraphicRoutines_{gr.Name})");
+                    sb.AppendLine($"print dec(GraphicRoutines_{gr.Name}_End-GraphicRoutines_{gr.Name})");
                     if (!first)
                         prots.Append(',');
                     prots.Append($"GraphicRoutines_{gr.Name}");
@@ -85,7 +87,6 @@ namespace DynamicXtremeLibrary.Generators
                 $"\n.Sizes\n{GetTable(drawinfos, di => di.SizesToString())}";
             string content = File.ReadAllText(TemplatePath)
                 .Replace("<IsDynamic>", gr.IsDynamic ? "1" : "0")
-                .Replace("<OneTile>", gr.OneTile ? "1" : "0")
                 .Replace("<DefaultXdisp>", gr.DefaultXdisp ? "1" : "0")
                 .Replace("<DefaultYdisp>", gr.DefaultYdisp ? "1" : "0")
                 .Replace("<FlipX>", gr.FlipX ? "1" : "0")
@@ -108,7 +109,6 @@ namespace DynamicXtremeLibrary.Generators
         private string GetTable(IReadOnlyList<DrawInfo> list, Func<DrawInfo, string> stringValue)
         {
             StringBuilder sb = new();
-            int[] values;
             foreach (DrawInfo di in list)
             {
                 sb.Append($"..{di.ContextName}_{di.Name}");

@@ -97,7 +97,7 @@ RTL
     if <sprite> != 0
     LDX !SpriteIndex
     endif
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?+
@@ -163,7 +163,7 @@ RTL
     if <sprite> != 0
     LDX !SpriteIndex
     endif
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?+
@@ -250,7 +250,7 @@ RTL
     LSR
     TAX
 
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA DX_Dynamic_Palettes_GlobalSPEnable
 	AND.l ?.BitClearer,x
 	STA DX_Dynamic_Palettes_GlobalSPEnable
@@ -285,7 +285,7 @@ endif
     LDX !SpriteIndex
     endif
 
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?.NoPalEffect
@@ -402,7 +402,7 @@ RTL
     SEC
 RTL
 
-if !PaletteEffects == 1
+if !PaletteEffects
 ?.BitSetter
     db $01,$02,$04,$08,$10,$20,$40,$80
 ?.BitClearer
@@ -1149,7 +1149,7 @@ RTL
     if <sprite> != 0
     LDX !SpriteIndex
     endif
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?+
@@ -1217,7 +1217,7 @@ RTL
     if <sprite> != 0
     LDX !SpriteIndex
     endif
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?+
@@ -1310,7 +1310,7 @@ RTL
     LSR
     TAX
 
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA DX_Dynamic_Palettes_GlobalSPEnable
 	AND.l ?.BitClearer,x
 	STA DX_Dynamic_Palettes_GlobalSPEnable
@@ -1349,7 +1349,7 @@ endif
     LDY #$01
     SEC
 RTL
-if !PaletteEffects == 1
+if !PaletteEffects
 ?.BitSetter
     db $01,$02,$04,$08,$10,$20,$40,$80
 ?.BitClearer
@@ -1606,7 +1606,7 @@ macro ReplacePalette(sprite, paletteOption, palette)
     LDX !SpriteIndex
     endif
 
-if !PaletteEffects == 1
+if !PaletteEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?.NoPalEffect
@@ -1715,7 +1715,7 @@ RTL
     SEC
 RTL
 
-if !PaletteEffects == 1
+if !PaletteEffects
 ?.BitSetter
     db $01,$02,$04,$08,$10,$20,$40,$80
 ?.BitClearer

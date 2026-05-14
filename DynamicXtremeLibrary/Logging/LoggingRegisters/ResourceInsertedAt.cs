@@ -1,7 +1,6 @@
 ﻿using LogRegister;
 using DynamicXtremeLibrary.Logging.Categories;
 using DynamicXtremeLibrary.ResourceManagement;
-using SNESLibrary;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {

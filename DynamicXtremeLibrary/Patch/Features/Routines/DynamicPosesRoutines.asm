@@ -280,7 +280,7 @@ VRAMDisp:
 	db $C0,$C2,$C4,$C6,$C8,$CA,$CC,$CE
 	db $E0,$E2,$E4,$E6,$E8,$EA,$EC,$EE
 
-incsrc "../Implementation/DynamicXSystem.asm"
+incsrc "../Implementation/DynamicSpriteSystem.asm"
 
 !baseSourseOffset = $47
 !baseSourceOffsetBNK = $49
@@ -323,26 +323,26 @@ DynamicRoutine:
         LDA.B PoseIDBackup : ASL : STA !doubledID : CLC : ADC.B PoseIDBackup
         TAY
 
-        LDA PoseResource,y : STA !baseSourseOffset
-        LDA PoseResource+1,y : STA !baseSourseOffset+1
+        LDA.w Data_PoseResource,y : STA !baseSourseOffset
+        LDA.w Data_PoseResource+1,y : STA !baseSourseOffset+1
 
         LDA !doubledID : ASL
         STA !doubledID : TAY
 
         LDA #$0000 : STA !SourceOffset
-        LDA PoseResourceSizePerLine,y : STA !SourceSize
+        LDA.w Data_PoseResourceSizePerLine,y : STA !SourceSize
     SEP #$20 ;A->8 bit
     JSR DynamicRoutineLine
 
-    LDY !doubledID|!dp
-    LDA PoseResourceSizePerLine+2,y : BNE +
+    LDY !doubledID
+    LDA.w Data_PoseResourceSizePerLine+2,y : BNE +
         SEP #$30 : RTS
     +
     STA !SourceSize
 
-    LDA PoseResourceSizePerLine,y : STA !SourceOffset
+    LDA.w Data_PoseResourceSizePerLine,y : STA !SourceOffset
     LDA !doubledID : LSR : TAY
-    LDA !VRAMOffset : CLC : ADC PoseSecondLineOffset,y : STA !VRAMOffset
+    LDA !VRAMOffset : CLC : ADC.w Data_PoseSecondLineOffset,y : STA !VRAMOffset
 
     JSR DynamicRoutineLine
     SEP #$30
@@ -364,10 +364,12 @@ DynamicRoutineLine:
 		LDA !SourceOffset : CLC : ADC !baseSourseOffset : STA !CurrentSourceOffset
 
 		LDA !CurrentVRAMOffset : AND #$00FF : BNE .Loop
-			LDA !SourceSize : CMP #$0200 : BCS .EndLine
+			LDA !SourceSize : CMP #$0200 : BCS .EndLineReDir
 .Loop
-		LDA !SourceSize : SEC : SBC !SentData : CMP !CurrentLine1Size : BCC .EndLine : BEQ .EndLine
-		CMP #$0200 : BCC .TwoLinesWithEndLineReDir : BEQ .TwoLinesWithEndLineReDir
+		LDA !SourceSize : SEC : SBC !SentData : CMP !CurrentLine1Size : BCC .EndLineReDir : BEQ .EndLineReDir
+		CMP #$0200 : BCC .TwoLinesWithEndLine : BEQ .TwoLinesWithEndLine
+.EndLineReDir
+    JMP .EndLine
 .TwoLines
 	SEP #$20 ;A->8 bit
 	LDA #$00 : XBA
@@ -396,25 +398,6 @@ DynamicRoutineLine:
 
 		LDA !SentData : CLC : ADC #$0200 : STA !SentData
 		BRA .Loop
-.TwoLinesWithEndLineReDir
-		BRA .TwoLinesWithEndLine
-.EndLine
-		STA !CurrentLine1Size
-	SEP #$20 ;A->8 bit
-	LDA #$00 : XBA
-	LDA DX_PPU_VRAM_Transfer_Length : ASL : TAX ;X = number of transfer*2
-	LSR : INC A : STA DX_PPU_VRAM_Transfer_Length ;Number of transfer ++
-
-	LDA !baseSourceOffsetBNK                        ;\
-	STA DX_PPU_VRAM_Transfer_SourceBNK,x            ;|BNK (low byte) = source bnk
-	LDA #$00                                        ;|BNK (high byte) = 0
-	STA DX_PPU_VRAM_Transfer_SourceBNK+$01,x        ;/
-
-	REP #$20 ;A->16 bit
-		LDA !CurrentVRAMOffset : STA DX_PPU_VRAM_Transfer_Offset,x
-		LDA !CurrentLine1Size : STA DX_PPU_VRAM_Transfer_SourceLength,x ;MapLength = Size
-		LDA !CurrentSourceOffset : STA DX_PPU_VRAM_Transfer_Source,x ;MapAddr = Addr
-		RTS
 .TwoLinesWithEndLine
 		SEC  : SBC !CurrentLine1Size : STA !CurrentLine2Size
 	SEP #$20 ;A->8 bit
@@ -438,4 +421,22 @@ DynamicRoutineLine:
 		
 		LDA !CurrentSourceOffset : STA DX_PPU_VRAM_Transfer_Source,x ;MapAddr = Addr
 		ADC !CurrentLine1Size : STA DX_PPU_VRAM_Transfer_Source+2,x ;MapAddr = Addr
+RTS
+
+.EndLine
+		STA !CurrentLine1Size
+	SEP #$20 ;A->8 bit
+	LDA #$00 : XBA
+	LDA DX_PPU_VRAM_Transfer_Length : ASL : TAX ;X = number of transfer*2
+	LSR : INC A : STA DX_PPU_VRAM_Transfer_Length ;Number of transfer ++
+
+	LDA !baseSourceOffsetBNK                        ;\
+	STA DX_PPU_VRAM_Transfer_SourceBNK,x            ;|BNK (low byte) = source bnk
+	LDA #$00                                        ;|BNK (high byte) = 0
+	STA DX_PPU_VRAM_Transfer_SourceBNK+$01,x        ;/
+
+	REP #$20 ;A->16 bit
+		LDA !CurrentVRAMOffset : STA DX_PPU_VRAM_Transfer_Offset,x
+		LDA !CurrentLine1Size : STA DX_PPU_VRAM_Transfer_SourceLength,x ;MapLength = Size
+		LDA !CurrentSourceOffset : STA DX_PPU_VRAM_Transfer_Source,x ;MapAddr = Addr
 RTS

@@ -1,7 +1,6 @@
 ﻿using LogRegister;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using DynamicXtremeLibrary.Infos;
 
@@ -109,7 +108,7 @@ namespace DynamicXtremeLibrary.Readers
             string SpriteName = Path.GetFileNameWithoutExtension(path);
             DynamicInfo DynamicInfo = TablesReader.ReadDynamicInfoTables(SpriteName, dynamicInfo);
             DynamicInfo.Palettes = palettesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
-            DynamicInfo.Poses = posesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
+            DynamicInfo.PoseGraphics = posesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
             DynamicInfo.Resources = resourcesPaths?.Select(x => x.Replace("\t", "").Replace(" ", "")).ToArray();
             DynamicInfo.GenerateLastRow();
             return DynamicInfo;

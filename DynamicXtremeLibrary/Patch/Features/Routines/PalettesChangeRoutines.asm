@@ -24,7 +24,7 @@ RTS
 +
 !i #= !i+1
 !j #= !j*2
-endif
+endwhile
 
 !i = <imin>
 while !i < <imax>
@@ -50,7 +50,7 @@ while !i < <imax>
 RTS
 +
 !i #= !i+1
-endif
+endwhile
     SEP #$20
     CLC
 RTS

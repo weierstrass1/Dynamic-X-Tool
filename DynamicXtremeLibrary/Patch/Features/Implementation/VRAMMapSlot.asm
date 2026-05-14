@@ -60,7 +60,7 @@ VRAMMapSlot_GetSizeAndScore:
     TAY
 
     SEP #$20
-    LDA.w Pose16x16Blocks,y
+    LDA.w Data_Pose16x16Blocks,y
     STA.b VRAMMapSlot_Size      ;return poseDataBase.Get(poseslot.ID).blocks16x16;
 
     REP #$20
@@ -108,7 +108,7 @@ macro VRAMMapSlot_GetSize()
     TAY
     SEP #$20
 
-    LDA.w Pose16x16Blocks,y     ;return poseDataBase.Get(poseslot.ID).blocks16x16;
+    LDA.w Data_Pose16x16Blocks,y     ;return poseDataBase.Get(poseslot.ID).blocks16x16;
     SEP #$10
     PLX
 ?.finish

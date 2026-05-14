@@ -21,14 +21,14 @@ namespace DynamicXtremeLibrary.Readers
                 posesChunksSizes = [];
             DynamicInfo di = new(contextName)
             {
-                ResourceSizes = new int[posesChunksSizes.Length * 2]
+                PosesChunksSizes = new int[posesChunksSizes.Length * 2]
             };
             int[] values;
             for (int i = 0; i < posesChunksSizes.Length; i++)
             {
                 values = getValues(i, posesChunksSizes)!;
-                di.ResourceSizes[i * 2] = values[0];
-                di.ResourceSizes[(i * 2) + 1] = values[1];
+                di.PosesChunksSizes[i * 2] = values[0];
+                di.PosesChunksSizes[(i * 2) + 1] = values[1];
             }
             return di;
         }

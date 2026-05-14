@@ -1,4 +1,4 @@
-DynamicX:
+DynamicXtreme:
 
     LDX $0100|!addr
 
@@ -37,10 +37,10 @@ RTS
 
     SEP #$30
 
-if !GraphicChange
+if !GraphicsChange
     JSR VRAMDMA
 endif
-if !PaletteChange
+if !PalettesChange
     JSR CGRAMDMA
 endif
 
@@ -50,9 +50,9 @@ endif
     STA $4200
 RTS
 
-if !GraphicChange
+if !GraphicsChange
 incsrc "VRAMDMA.asm"
 endif
-if !PaletteChange
+if !PalettesChange
 incsrc "ColorPaletteChange.asm"
 endif

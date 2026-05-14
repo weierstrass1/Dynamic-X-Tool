@@ -26,7 +26,7 @@ namespace DynamicXtremeLibrary.PaletteEffec
         {
             if (effects == null || effects.Count() == 0)
             {
-                File.WriteAllText(file, "Length:\n\tdw $0000\n");
+                File.WriteAllText(file, "PaletteEffectsTable:\n.Length\n\tdw $0000\n");
                 return;
             }
             List<int> type = [];
@@ -51,26 +51,26 @@ namespace DynamicXtremeLibrary.PaletteEffec
                 counter += filtered.Count();
             }
             StringBuilder sb = new();
-            sb.AppendLine($"Length:\n\tdw ${counter:X4}\n");
-            sb.Append("Types:");
+            sb.AppendLine($"PaletteEffectsTable:\n.Length\n\tdw ${counter:X4}\n");
+            sb.Append(".Types:");
             sb.AppendLine(HexReader.ValuesToString(type.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Value1:");
+            sb.Append(".Value1");
             sb.AppendLine(HexReader.ValuesToString(c1.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Value2:");
+            sb.Append(".Value2");
             sb.AppendLine(HexReader.ValuesToString(c2.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Value3:");
+            sb.Append(".Value3");
             sb.AppendLine(HexReader.ValuesToString(c3.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Ratio1:");
+            sb.Append(".Ratio1");
             sb.AppendLine(HexReader.ValuesToString(r1.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Ratio2:");
+            sb.Append(".Ratio2");
             sb.AppendLine(HexReader.ValuesToString(r2.ToArray(), 2));
             sb.AppendLine();
-            sb.Append("Ratio3:");
+            sb.Append(".Ratio3");
             sb.AppendLine(HexReader.ValuesToString(r3.ToArray(), 2));
             File.WriteAllText(file, sb.ToString());
         }

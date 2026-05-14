@@ -1,5 +1,4 @@
-﻿using DynamicXtremeLibrary;
-using LogRegister;
+﻿using LogRegister;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.ResourceManagement;
 using DynamicXtremeLibrary.Config;
@@ -9,11 +8,14 @@ namespace DynamicXtremeLibrary.Infos
     public class DynamicInfo
     {
         public string ContextName { get; set; }
-        public int[]? ResourceSizes { get; set; }
-        public int[]? ResourceLastRow { get; set; }
-        public string[]? Poses { get; set; }
+        public int[]? PosesChunksSizes { get; set; }
+        public int[]? PosesLastRow { get; set; }
+        public string[]? PoseGraphics { get; set; }
         public string[]? Palettes { get; set; }
         public string[]? Resources { get; set; }
+        public int PoseLength => PosesChunksSizes == null ? 0 : PosesChunksSizes.Length / 2;
+        public int PaletteLength => Palettes == null ? 0 : Palettes.Length;
+        public int ResourcesLength => Resources == null ? 0 : Resources.Length;
         public DynamicInfo(string contextName) 
         {
             ContextName = contextName;
@@ -57,29 +59,29 @@ namespace DynamicXtremeLibrary.Infos
                     }
                 }
             }
-            if (Poses == null || Poses.Length == 0)
+            if (PoseGraphics == null || PoseGraphics.Length == 0)
                 return result;
             long totalSize = 0;
            
-            for (int i = 0; i < Poses.Length; i++)
+            for (int i = 0; i < PoseGraphics.Length; i++)
             {
-                path = Path.Combine(resourceDirectory, Poses[i]);
+                path = Path.Combine(resourceDirectory, PoseGraphics[i]);
                 if (!File.Exists(path))
                 {
-                    logging.Add(new ResourceNotFound(Poses[i]));
+                    logging.Add(new ResourceNotFound(PoseGraphics[i]));
                     result = false;
                     continue;
                 }
                 totalSize += new FileInfo(path).Length;
             }
-            if (ResourceSizes == null || ResourceSizes.Length == 0)
+            if (PosesChunksSizes == null || PosesChunksSizes.Length == 0)
             {
                 logging.Add(new DynamicInfoWithoutChunks(ContextName));
                 result = false;
                 return result;
             }
             long totalSizeFromResSizes = 0;
-            foreach (var size in ResourceSizes)
+            foreach (var size in PosesChunksSizes)
                 totalSizeFromResSizes += size;
             totalSizeFromResSizes *= 32;
             if (totalSize != totalSizeFromResSizes )
@@ -180,25 +182,25 @@ namespace DynamicXtremeLibrary.Infos
         }
         public IReadOnlyList<Resource> GetPosesData(int idOffset)
         {
-            if (Poses == null || Poses.Length == 0)
+            if (PoseGraphics == null || PoseGraphics.Length == 0)
                 return [];
-            if (ResourceSizes == null)
+            if (PosesChunksSizes == null)
                 return [];
 
             List<Resource> poses = [];
 
             int totalLength = 0;
-            foreach (var value in ResourceSizes)
+            foreach (var value in PosesChunksSizes)
             {
                 totalLength += value;
             }
             totalLength *= 32;
             byte[] wholeGFX = new byte[totalLength];
-            int[] lens = new int[Poses.Length];
+            int[] lens = new int[PoseGraphics.Length];
             byte[] b;
             int index = 0;
             int i = 0;
-            foreach (var path in Poses)
+            foreach (var path in PoseGraphics)
             {
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
                 b.CopyTo(wholeGFX, index);
@@ -211,9 +213,9 @@ namespace DynamicXtremeLibrary.Infos
             int gfxInd = 0;
             int fInd = 0;
             int size = 0;
-            for (i = 0; i < ResourceSizes.Length; i += 2)
+            for (i = 0; i < PosesChunksSizes.Length; i += 2)
             {
-                newVal += (ResourceSizes[i] + ResourceSizes[i + 1]) * 32;
+                newVal += (PosesChunksSizes[i] + PosesChunksSizes[i + 1]) * 32;
                 b = wholeGFX[index..newVal];
                 size += b.Length;
                 if(size > lens[gfxInd])
@@ -223,7 +225,7 @@ namespace DynamicXtremeLibrary.Infos
                     size = b.Length;
                 }
                 poses.Add(new(idOffset + fInd, 
-                    $"{Path.GetFileNameWithoutExtension(Poses[gfxInd])}{fInd:D3}",
+                    $"{Path.GetFileNameWithoutExtension(PoseGraphics[gfxInd])}{fInd:D3}",
                     ResourceType.DynamicPose, b));
                 fInd++;
                 index = newVal;
@@ -232,9 +234,9 @@ namespace DynamicXtremeLibrary.Infos
         }
         public int[] GetPosesSizes()
         {
-            if (ResourceSizes == null)
+            if (PosesChunksSizes == null)
                 return Array.Empty<int>();
-            int[] res = new int[ResourceSizes.Length / 2];
+            int[] res = new int[PosesChunksSizes.Length / 2];
             for (int i = 0; i < res.Length; i++)
                 res[i] = GetPoseSize(i);
             return res;
@@ -242,17 +244,17 @@ namespace DynamicXtremeLibrary.Infos
         public int GetPoseSize(int id)
         {
             int id2 = id * 2;
-            return ResourceSizes == null ? 
+            return PosesChunksSizes == null ? 
                         -1 :
-                        id2 >= ResourceSizes.Length ? 
+                        id2 >= PosesChunksSizes.Length ? 
                             -1 : 
-                            32 * (ResourceSizes[id2] + ResourceSizes[id2 + 1]);
+                            32 * (PosesChunksSizes[id2] + PosesChunksSizes[id2 + 1]);
         }
         public int[] GetPosesBlocks()
         {
-            if( ResourceSizes == null )
+            if( PosesChunksSizes == null )
                 return Array.Empty<int>();
-            int[] res = new int[ResourceSizes.Length / 2];
+            int[] res = new int[PosesChunksSizes.Length / 2];
             for (int i = 0; i < res.Length; i++)
                 res[i] = GetPoseBlocks(i);
             return res;
@@ -260,11 +262,11 @@ namespace DynamicXtremeLibrary.Infos
         public int GetPoseBlocks(int id)
         {
             int id2 = id * 2;
-            if (ResourceSizes == null || id2 >= ResourceSizes.Length)
+            if (PosesChunksSizes == null || id2 >= PosesChunksSizes.Length)
                 return -1;
-            int baseBlocks = ResourceSizes[id2] / 32;
+            int baseBlocks = PosesChunksSizes[id2] / 32;
             baseBlocks *= 8;
-            int lastRowBlock = Math.Max(ResourceSizes[id2] % 32, ResourceSizes[id2 + 1]);
+            int lastRowBlock = Math.Max(PosesChunksSizes[id2] % 32, PosesChunksSizes[id2 + 1]);
             if(lastRowBlock <= 16)
             {
                 lastRowBlock += lastRowBlock % 2;
@@ -279,19 +281,19 @@ namespace DynamicXtremeLibrary.Infos
         {
             List<int> res = new();
             foreach (var di in dis)
-                if (di.ResourceSizes != null)
-                    res.AddRange(di.ResourceSizes!.Select(x => x * 32).ToList());
+                if (di.PosesChunksSizes != null)
+                    res.AddRange(di.PosesChunksSizes!.Select(x => x * 32).ToList());
             return res.ToArray();
         }
         public int[] GetLastRow()
         {
-            if(ResourceLastRow == null || ResourceSizes == null)
+            if(PosesLastRow == null || PosesChunksSizes == null)
                 return Array.Empty<int>();
-            if (ResourceLastRow.Length == ResourceSizes.Length / 2)
-                return ResourceLastRow.Select(x => x*16).ToArray();
-            int[] lr = new int[ResourceSizes.Length / 2];
+            if (PosesLastRow.Length == PosesChunksSizes.Length / 2)
+                return PosesLastRow.Select(x => x*16).ToArray();
+            int[] lr = new int[PosesChunksSizes.Length / 2];
             for (int i = 0; i < lr.Length; i++)
-                lr[i] = ResourceLastRow[0] * 16;
+                lr[i] = PosesLastRow[0] * 16;
             return lr;
         }
         public static int[] GetLastRow(IEnumerable<DynamicInfo> dis)
@@ -303,17 +305,17 @@ namespace DynamicXtremeLibrary.Infos
         }
         public void GenerateLastRow()
         {
-            if (ResourceSizes == null || ResourceSizes.Length <= 0)
+            if (PosesChunksSizes == null || PosesChunksSizes.Length <= 0)
                 return;
-            ResourceLastRow = new int[ResourceSizes.Length / 2];
+            PosesLastRow = new int[PosesChunksSizes.Length / 2];
             int val;
-            for (int i = 0; i < ResourceSizes.Length; i += 2) 
+            for (int i = 0; i < PosesChunksSizes.Length; i += 2) 
             {
-                val = ResourceSizes[i] / 32;
+                val = PosesChunksSizes[i] / 32;
                 val *= 2;
                 val++;
                 val *= 16;
-                ResourceLastRow[i / 2] = val;
+                PosesLastRow[i / 2] = val;
             }
         }
     }

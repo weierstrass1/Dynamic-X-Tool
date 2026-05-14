@@ -9,20 +9,27 @@ namespace DynamicXtremeLibrary.Defines
     {
         public string BaseDefineFile { get; private set; }
         public string OutputFile { get; private set; }
-        public DefineGenerator(string baseDefineFile, string outputFile) 
+        public string OutputFileExternal { get; private set; }
+        public DefineGenerator(string baseDefineFile, string outputFile, string outputFileExternal) 
         { 
             BaseDefineFile = baseDefineFile;
             if(!File.Exists(BaseDefineFile))
                 throw new FileNotFoundException(nameof(BaseDefineFile));
             OutputFile = outputFile;
+            OutputFileExternal = outputFileExternal;
         }
-        public void GenerateDefinesFile(ResourceAllReferences refs, IEnumerable<DrawInfo> drawInfos, IEnumerable<PaletteEffectCollection> paletteEffects)
+        public void GenerateDefinesFile(ResourceAllReferences? refs, IEnumerable<DrawInfo>? drawInfos, IEnumerable<PaletteEffectCollection>? paletteEffects)
         {
             string content = File.ReadAllText(BaseDefineFile);
-            File.WriteAllText(OutputFile, $"{content}\n{GenerateReferenceDefines(refs)}\n{GeneratePoseDefines(drawInfos)}\n{GeneratePaletteEffectDefines(paletteEffects)}");
+            content = $"{content}\n{GenerateReferenceDefines(refs)}\n{GeneratePoseDefines(drawInfos)}\n{GeneratePaletteEffectDefines(paletteEffects)}";
+            File.WriteAllText(OutputFile, content);
+            File.WriteAllText(OutputFileExternal, content);
         }
-        public static string GenerateReferenceDefines(ResourceAllReferences refs)
+        public static string GenerateReferenceDefines(ResourceAllReferences? refs)
         {
+            if (refs == null)
+                return "";
+            var buffs = refs.Buffers.OrderBy(r => r.Resource.ID);
             var dynP = refs.DynamicPoses.OrderBy(r => r.Resource.ID);
             var pals = refs.Palettes.OrderBy(r => r.Resource.ID);
             var res = refs.GeneralResources.OrderBy(r => r.Resource.ID);
@@ -30,14 +37,25 @@ namespace DynamicXtremeLibrary.Defines
             StringBuilder addrs = new();
             StringBuilder sizes = new();
             StringBuilder result = new();
-            foreach(var dp in dynP)
+            foreach (var b in buffs)
+            {
+                ids.AppendLine($"!Buffer{b.Resource.Name} = ${b.Resource.ID:X4}");
+                addrs.AppendLine($"!BufferID{b.Resource.Name} = ${b.Position:X6}");
+                sizes.AppendLine($"!Buffer{b.Resource.Name}Size = ${b.Resource.Length:X4}");
+            }
+            result.AppendLine($"!NumberOfBuffers = ${buffs.Count():X4}\n");
+            result.Append($"{ids}\n{addrs}\n{sizes}\n");
+            ids.Clear();
+            addrs.Clear();
+            sizes.Clear();
+            foreach (var dp in dynP)
             {
                 ids.AppendLine($"!DynamicPoseID{dp.Resource.Name} = ${dp.Resource.ID:X4}");
                 addrs.AppendLine($"!DynamicPose{dp.Resource.Name} = ${dp.Position:X6}");
                 sizes.AppendLine($"!DynamicPose{dp.Resource.Name}Size = ${dp.Resource.Length:X4}");
             }
             result.AppendLine($"!NumberOfDynamicPoses = ${dynP.Count():X4}\n");
-            result.Append($"{ids}\n\n{addrs}\n{sizes}\n");
+            result.Append($"{ids}\n{addrs}\n{sizes}\n");
             ids.Clear();
             addrs.Clear();
             sizes.Clear();
@@ -62,8 +80,10 @@ namespace DynamicXtremeLibrary.Defines
             result.Append($"{ids}\n{addrs}\n{sizes}");
             return result.ToString();
         }
-        public static string GeneratePoseDefines(IEnumerable<DrawInfo> drawInfos)
+        public static string GeneratePoseDefines(IEnumerable<DrawInfo>? drawInfos)
         {
+            if (drawInfos == null)
+                return "";
             Dictionary<string, List<DrawInfo>> contextdic = [];
             StringBuilder renderx = new();
             StringBuilder rendery = new();
@@ -88,8 +108,10 @@ namespace DynamicXtremeLibrary.Defines
             result.Append($"\n{renderx}\n{rendery}");
             return result.ToString();
         }
-        public static string GeneratePaletteEffectDefines(IEnumerable<PaletteEffectCollection> paletteEffects)
+        public static string GeneratePaletteEffectDefines(IEnumerable<PaletteEffectCollection>? paletteEffects)
         {
+            if (paletteEffects == null)
+                return "";
             StringBuilder sb = new();
             int i = 1;
             int j;
