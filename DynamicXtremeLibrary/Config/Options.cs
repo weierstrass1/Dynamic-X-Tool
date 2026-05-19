@@ -53,6 +53,10 @@ namespace DynamicXtremeLibrary.Config
             UberasmPath = Option.FromFile<DirectoryOption>(UBERASMTOOL_PATH_FILE)!;
             GPSPath = Option.FromFile<DirectoryOption>(GPS_PATH_FILE)!;
 
+            PixiPath.GetFromSettings = true;
+            UberasmPath.GetFromSettings = true;
+            GPSPath.GetFromSettings = true;
+
             Dependencies = JsonConvert.DeserializeObject<FeatureDependency[]>(File.ReadAllText(DEPENDENCIES_FILE))!;
             FeaturesList = JsonConvert.DeserializeObject<string[]>(File.ReadAllText(FEATURES_LIST_FILE))!;
 

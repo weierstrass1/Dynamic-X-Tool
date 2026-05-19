@@ -100,18 +100,19 @@ namespace DynamicXtremeLibrary.GraphicRoutines
             foreach (DrawInfo drawInfo in drawInfos)
             {
                 gr = new(id, drawInfo);
-                if (!res.ContainsKey(gr.Key))
+                if (!res.TryGetValue(gr.Key, out List<GraphicRoutine>? value))
                 {
-                    res[gr.Key] = [];
-                    res[gr.Key].Add(gr);
+                    value = [];
+                    res[gr.Key] = value;
+                    value.Add(gr);
                     id++;
                     continue;
                 }
-                gr = res[gr.Key].Last();
+                gr = value.Last();
                 if (gr.TryAddDrawInfo(drawInfo))
                     continue;
                 gr = new(id, drawInfo);
-                res[gr.Key].Add(gr);
+                value.Add(gr);
                 id++;
             }
             return res

@@ -5,7 +5,7 @@ namespace DynamicXtremeLibrary.Asar
 {
     public class AsarPatch
     {
-        public static string Run()
+        public async static Task<(bool, string)> Run()
         {
             string asarPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Path.Combine(AppContext.BaseDirectory, "Asar", "asar.exe")
@@ -29,12 +29,17 @@ namespace DynamicXtremeLibrary.Asar
 
             process.Start();
 
-            string stdout = process.StandardOutput.ReadToEnd();
-            string stderr = process.StandardError.ReadToEnd();
+            Task<string> readOut = process.StandardOutput.ReadToEndAsync();
+            Task<string> readErr = process.StandardError.ReadToEndAsync();
 
             process.WaitForExit();
 
-            return stdout + stderr;
+            string stdout = await readOut;
+            string stderr = await readErr;
+
+            bool success = string.IsNullOrWhiteSpace(stderr);
+
+            return (success, stdout + stderr);
         }
     }
 }

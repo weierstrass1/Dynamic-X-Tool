@@ -8,23 +8,18 @@ using System.Threading.Tasks;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
-    public class NumberOf : ILoggingRegister
+    internal class RemovedBufferAt : ILoggingRegister
     {
         public ILogCategory Category => new Info();
-
-        public string MessageType => "NUMBER OF";
-
+        public string MessageType => "REMOVED BUFFER AT";
         public IReadOnlyDictionary<string, string> Parameters { get; }
-        public NumberOf(string name, long quantity, long? size = null)
+        public RemovedBufferAt(long address, long size)
         {
-            var pars = new Dictionary<string, string>
+            Parameters = new Dictionary<string, string>
             {
-                { "name", $"'{name}'" },
-                { "quantity", $"{quantity}" },
-                { "size", size != null ? $" ({size} bytes)" : "" }
+                { "address", $"'0x{address:X6}'" },
+                { "size", $"{size} bytes" }
             };
-
-            Parameters = pars;
         }
     }
 }

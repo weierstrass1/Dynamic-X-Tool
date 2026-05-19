@@ -150,7 +150,7 @@
             {
 				rom[i] = 0;
 			}
-			return l - address;
+			return l - address - 8;
 		}
 		public static int SNEStoPC(int addr, Mapper mapper)
 		{
@@ -364,24 +364,22 @@
 		}
         public static List<(int, int)> Remove(byte[] rom, int address, Mapper mapper, int offset = 0)
         {
-            int pointer = JoinAddress(rom[address + 2], rom[address + 1], rom[address]);
-            int snesp = SNEStoPC(pointer, mapper);
-            pointer = snesp < 0 ? pointer : snesp;
-            int addr = pointer;
-            address = pointer;
+			int addr = address;
+            int pointer = JoinAddress(rom, address);
             List<(int, int)> l = [];
             int size;
-            while (pointer != 0xFFFFFFFF + offset)
+			int pcAddr;
+            while (pointer != 0xFFFFFF)
             {
                 pointer = JoinAddress(rom, addr) + offset;
 				if (pointer < 0)
 					break;
-                size = RemoveAt(rom, pointer);
-                if (size > 0)
-                    l.Add((PCtoSNES(pointer + 8, mapper), size));
+				pcAddr = SNEStoPC(pointer, mapper);
+				size = RemoveAt(rom, pcAddr - 8);
+				if (size > 0)
+					l.Add((pointer - 8, size + 8));
                 addr += 3;
             }
-            l.Add((PCtoSNES(address, mapper), RemoveAt(rom, address - 8)));
             return l;
         }
     }

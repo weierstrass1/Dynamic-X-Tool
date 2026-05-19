@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <AssemblyVersion>1.0.0.78</AssemblyVersion>
+    <FileVersion>1.0.0.78</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +22,7 @@
 
   <ItemGroup>
     <Compile Update="Generators\DynamicPoseDataGenerator.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
 
@@ -31,10 +33,19 @@
     <None Update="Asar\asar.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ASM\ClusterSpriteDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ASM\DXDefines.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ASM\DynamicPoseDataTemplate.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\ExtendedSpriteDefines.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ASM\NormalSpriteDefines.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ASM\PoseDataTemplate.asm">
@@ -58,9 +69,6 @@
     <None Update="Patch\DynamicXtremeVectorMacros.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Patch\ExtraDefines\DyzenDefines.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="ASM\GraphicRoutineIncludeTemplate.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -71,12 +79,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ASM\DynamicXDefines.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Patch\ExtraDefines\DynamicXSpritesTables.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Patch\ExtraDefines\GlobalCustomVars.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\ExtraDefines\Macros\DynamicSpritesMacros.asm">
@@ -95,12 +97,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\ExtraDefines\Macros\PPU.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Patch\ExtraDefines\Macros\STDCall.asm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Patch\ExtraDefines\MoreSpriteMiscs.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\Features\Hijacks\ControllerOptimizationHijack.asm">

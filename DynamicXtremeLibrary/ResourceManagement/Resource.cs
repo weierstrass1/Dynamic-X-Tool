@@ -5,7 +5,8 @@
         GeneralResource,
         Palette,
         DynamicPose,
-        Buffer
+        Buffer,
+        GraphicRoutine
     }
     public class Resource
     {

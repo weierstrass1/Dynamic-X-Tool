@@ -16,7 +16,7 @@ namespace DynamicXtremeTool
             args = ["-use-settings"];
 
             var opt = Options.Instance;
-            string optDef = opt.GetOptionsDefines();
+
             opt.SettingsForm(args != null && args.Length > 0 && 
                 args[0].ToLower().Trim() == "-use-settings");
             opt.Save();
@@ -26,9 +26,9 @@ namespace DynamicXtremeTool
             {
                 TemplateASMDirectory = "ASM",
                 TMPDirectory = "TMP",
-                DynamicInfoDirectory = "DynamicInfo",
+                DynamicInfoDirectory = "DynamicInfos",
                 DynamicResourcesDirectory = "DynamicResources",
-                DrawInfoDirectory = "DrawInfo",
+                DrawInfoDirectory = "DrawInfos",
                 PaletteEffectsDirectory = "PaletteEffects",
                 PatchDirectory = "Patch",
                 DataDirectory = "Data",

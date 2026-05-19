@@ -24,7 +24,7 @@ namespace DynamicXtremeLibrary.PaletteEffec
         }
         public static void ToFile(IEnumerable<PaletteEffectCollection> effects, string file)
         {
-            if (effects == null || effects.Count() == 0)
+            if (effects == null || !effects.Any())
             {
                 File.WriteAllText(file, "PaletteEffectsTable:\n.Length\n\tdw $0000\n");
                 return;

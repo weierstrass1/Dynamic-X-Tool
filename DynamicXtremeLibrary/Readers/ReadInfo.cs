@@ -23,8 +23,13 @@ namespace DynamicXtremeLibrary.Readers
         }
         public IReadOnlyList<DrawInfo> GetAllDrawInfos(string drawInfoDirectory, out bool validation)
         {
+            string[] paths = Directory.GetFiles(drawInfoDirectory, "*.drawinfo");
+            if(paths == null || paths.Length == 0)
+            {
+                validation = true;
+                return new List<DrawInfo>().AsReadOnly();
+            }
             _logRegisterSystem.Add(new Title("Reading DrawInfo files"));
-            string[] paths = Directory.GetFiles("DrawInfo", "*.drawinfo");
             List<DrawInfo> drawInfos = [];
             DrawInfo[] dis;
             validation = true;
@@ -51,8 +56,13 @@ namespace DynamicXtremeLibrary.Readers
         }
         public IReadOnlyList<DynamicInfo> GetAllDynamicInfos(string dynamicInfoDirectory, string resourceDirectory, out bool validation)
         {
-            _logRegisterSystem.Add(new Title("Reading DynamicInfo files"));
             string[] paths = Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo");
+            if(paths == null || paths.Length == 0)
+            {
+                validation = true;
+                return new List<DynamicInfo>().AsReadOnly();
+            }
+            _logRegisterSystem.Add(new Title("Reading DynamicInfo files"));
             List<DynamicInfo> dynamicInfos = [];
             validation = true;
             DynamicInfo di;

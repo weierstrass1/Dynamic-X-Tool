@@ -29,7 +29,8 @@ namespace DynamicXtremeLibrary.ExternalTools
         }
         public void PixiLinker()
         {
-            if (string.IsNullOrWhiteSpace(Options.Instance.PixiPath.Value))
+            if (string.IsNullOrWhiteSpace(Options.Instance.PixiPath.Value) || 
+                !Directory.Exists(Options.Instance.PixiPath.Value))
                 return;
             Link(Path.Combine(Options.Instance.PixiPath.Value, PIXI_ASM_DIR));
             copyDirectory(RoutinesDirectory, 
@@ -38,11 +39,11 @@ namespace DynamicXtremeLibrary.ExternalTools
             string pixiClusters = Path.Combine(Options.Instance.PixiPath.Value, PIXI_CLUSTER_DIR);
             string pixiExtended = Path.Combine(Options.Instance.PixiPath.Value, PIXI_EXTENDED_DIR);
             File.Copy(Path.Combine(ASMDirectory, SPRITE_DEFINES),
-                Path.Combine(pixiSprites, SPRITE_DEFINES));
+                Path.Combine(pixiSprites, SPRITE_DEFINES), true);
             File.Copy(Path.Combine(ASMDirectory, CLUSTER_DEFINES),
-                Path.Combine(pixiClusters, CLUSTER_DEFINES));
+                Path.Combine(pixiClusters, CLUSTER_DEFINES), true);
             File.Copy(Path.Combine(ASMDirectory, EXTENDED_DEFINES),
-                Path.Combine(pixiExtended, EXTENDED_DEFINES));
+                Path.Combine(pixiExtended, EXTENDED_DEFINES), true);
         }
         public void UberASMToolLinker()
         {
@@ -55,23 +56,41 @@ namespace DynamicXtremeLibrary.ExternalTools
         }
         public void Link(string mainDirectory, string definesFile = "")
         {
-            if (string.IsNullOrWhiteSpace(mainDirectory))
+            if (string.IsNullOrWhiteSpace(mainDirectory) || !Directory.Exists(mainDirectory))
                 return;
             copyExtraDefines(mainDirectory);
             editDefineFiles(Path.Combine(mainDirectory, definesFile));
         }
+        private static string[] _dontInclude = [
+            "DXDefines",
+            "Options",
+            "DynamicSpritesMacros",
+            "GraphicRoutinesMacros",
+            "MultAndDiv",
+            "PalettesMacros",
+            "PaletteEffectsMacros",
+            "PPU"
+            ];
         private void editDefineFiles(string definePath)
         {
-            if (string.IsNullOrWhiteSpace(definePath))
+            if (string.IsNullOrWhiteSpace(definePath) || !File.Exists(definePath))
                 return;
-            string[] files = Directory.GetFiles(ExtraDefinesDirectory, ".*", SearchOption.AllDirectories);
-            string[] lines = File.ReadAllLines(definePath);
+            var fs = Directory
+                .GetFiles(ExtraDefinesDirectory, "*", SearchOption.AllDirectories)
+                .Where(l => !_dontInclude.Any(s => s == Path.GetFileNameWithoutExtension(l)))
+                .ToList();
+            var files = fs.Prepend(Path.Combine(ExtraDefinesDirectory, "DXDefines.asm"));
+
+            var lines = File.ReadAllLines(definePath);
+
             StringBuilder content = new(File.ReadAllText(definePath));
+            content.AppendLine();
             Regex r;
             bool alreadyAdded;
+            string f;
             foreach (var file in files)
             {
-                r = new($"incsrc\\s*\"{file}\"");
+                r = new($"incsrc\\s*\"{file.Replace("\\", "\\/")}\"");
                 alreadyAdded = false;
                 foreach (var line in lines)
                 {
@@ -81,14 +100,21 @@ namespace DynamicXtremeLibrary.ExternalTools
                         break;
                     }
                 }
-                if (!alreadyAdded)
-                    content.AppendLine($"incsrc \"{file}\"");
+                if (alreadyAdded)
+                    break;
+                f = file.Replace("\\", "/");
+                content.AppendLine($"incsrc \"{f}\"");
             }
-            File.ReadAllText(definePath);
+            string cont = content.ToString();
+            cont = Regex.Replace(cont, @"(\s*\n)(\s*\n)+", "\n\n");
+            File.WriteAllText(definePath, cont);
         }
         private void copyExtraDefines(string destination)
         {
-            copyDirectory(ExtraDefinesDirectory, destination, true);
+            string destExtDefs = Path.Combine(destination, ExtraDefinesDirectory);
+            if(!Directory.Exists(destExtDefs))
+                Directory.CreateDirectory(destExtDefs);
+            copyDirectory(ExtraDefinesDirectory, destExtDefs, true);
         }
         private static void copyDirectory(string sourceDir, string destinationDir, bool recursive)
         {
@@ -109,7 +135,7 @@ namespace DynamicXtremeLibrary.ExternalTools
             foreach (FileInfo file in dir.GetFiles())
             {
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
-                file.CopyTo(targetFilePath);
+                file.CopyTo(targetFilePath, true);
             }
 
             // If recursive and copying subdirectories, recursively call this method

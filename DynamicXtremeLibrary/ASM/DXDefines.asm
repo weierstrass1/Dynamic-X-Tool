@@ -398,7 +398,6 @@ if !PalettesEffects
 !PaletteEffectsRatios3 = !PaletteEffectsRatios2+!NumberOfPaletteEffects
 endif
 
-incsrc "./Macros/STDCall.asm"
 incsrc "./Macros/MultAndDiv.asm"
 
 if !DynamicPoses

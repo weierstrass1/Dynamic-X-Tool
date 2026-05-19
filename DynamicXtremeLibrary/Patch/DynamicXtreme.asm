@@ -17,8 +17,9 @@ incsrc "DefinesFix.asm"
 
 macro CleanOrg(address)
 org <address>
-    autoclean JML $000000
-org <address>
+    if read1(<address>) == $5c
+        autoclean read3(<address>+1)
+    endif
 endmacro
 
 incsrc "Features/Hijacks/ControllerOptimizationHijack.asm"
@@ -45,7 +46,7 @@ if !DrawingSystem
 prot Data_TableOffset
 incsrc "GraphicRoutines/GraphicRoutineProts.asm"
 endif
-if !PalettesChange && !DynamicPoses
+if !PalettesChange
 prot Data_PaletteTable
 endif
 if !PalettesEffects
@@ -81,10 +82,18 @@ endif
 namespace nested on
 namespace Routines
     incsrc "Features/Routines/AllowedGameMode.asm"
+if !DrawingSystem
     incsrc "Features/Routines/DrawingSystemRoutines.asm"
+endif
+if !DynamicPoses
     incsrc "Features/Routines/DynamicPosesRoutines.asm"
+endif
+if !PalettesChange
     incsrc "Features/Routines/PalettesChangeRoutines.asm"
+endif
+if !PalettesEffects
     incsrc "Features/Routines/PaletteEffectsRoutines.asm"
+endif
 namespace off
 namespace nested off
 
@@ -125,7 +134,7 @@ if !DrawingSystem
 freedata
     incsrc "Data/PoseData.asm"
 endif
-if !PalettesChange && !DynamicPoses
+if !PalettesChange
     incsrc "Data/PaletteData.asm"
 endif
 if !PalettesEffects

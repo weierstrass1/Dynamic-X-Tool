@@ -106,7 +106,7 @@ JML $00F69E|!rom
 +
     STA.l DX_PPU_CGRAM_LastPlayerPal
 
-    if !PaletteEffects
+if !PalettesEffects
     
     SEP #$20
     LDA DX_Dynamic_Palettes_GlobalSPEnable
@@ -130,43 +130,43 @@ JML $00F69E|!rom
 
     LDY #$00
     LDA [$8A]
-    STA DX_PPU_CGRAM_PaletteCopy+($010C+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$010C
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($010E+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$010E
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($0110+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$0110
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($0112+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$0112
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($0114+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$0114
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($0116+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$0116
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($0118+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$0118
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($011A+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$011A
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($011C+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$011C
     INY
     INY
     LDA [$8A],y
-    STA DX_PPU_CGRAM_PaletteCopy+($011E+$00)
+    STA.w DX_PPU_CGRAM_PaletteCopy+$011E
 
     LDA #$FFFF
     STA DX_Dynamic_Palettes_LastGlobalEffectID+$10

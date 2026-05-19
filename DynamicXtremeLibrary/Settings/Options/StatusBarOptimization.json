@@ -3,7 +3,7 @@
   "Value": "False",
   "DefaultValue": "False",
   "Description": "Feature: Status Bar Optimization — Optimizes the original status bar to reduce NMI usage, freeing cycles for dynamic graphics and palette updates.",
-  "Warning": "WARNING: Incompatible with status bar modifications (e.g., LX5's DKC Style Status Bar, Minimalistic Status Bar, Nuke Status Bar).",
+  "Warning": "WARNING: Incompatible with status bar modifications (e.g., LX5's DKC Style Status Bar,\nMinimalistic Status Bar, Nuke Status Bar).",
   "Question": "Enable this feature? (Y/N, leave empty for default):",
   "RedoError": "Invalid option. Enter \"Y\" to try again.",
   "Error": "Installation aborted."

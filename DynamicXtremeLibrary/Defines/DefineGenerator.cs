@@ -39,8 +39,8 @@ namespace DynamicXtremeLibrary.Defines
             StringBuilder result = new();
             foreach (var b in buffs)
             {
-                ids.AppendLine($"!Buffer{b.Resource.Name} = ${b.Resource.ID:X4}");
-                addrs.AppendLine($"!BufferID{b.Resource.Name} = ${b.Position:X6}");
+                ids.AppendLine($"!BufferID{b.Resource.Name} = ${b.Resource.ID:X4}");
+                addrs.AppendLine($"!Buffer{b.Resource.Name} = ${b.Position:X6}");
                 sizes.AppendLine($"!Buffer{b.Resource.Name}Size = ${b.Resource.Length:X4}");
             }
             result.AppendLine($"!NumberOfBuffers = ${buffs.Count():X4}\n");

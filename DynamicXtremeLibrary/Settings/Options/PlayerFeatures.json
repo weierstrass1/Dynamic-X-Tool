@@ -3,7 +3,7 @@
   "Value": "False",
   "DefaultValue": "False",
   "Description": "Feature: Player Features — Enhances and extends the vanilla player system.\n\n• Optimizes dynamic graphics and palette routines, reducing NMI usage by using Dynamic X systems.\n• Supports player graphics using the vanilla layout.\n• Supports fully customizable dynamic graphics (arbitrary poses within hardware limits).\n• Supports palette changes and palette effects for player.\n• Allows hiding the player and disabling its dynamic routines.\n• Required for Yoshi Features and Player Revolution.",
-  "Warning": "WARNING: This feature has compatibility issues with patches like LX5's powerups, Player 8x8 tiles DMAer, Player 32x32, or any system that modifies player graphics or palettes, except for Player Revolution which is compatible.",
+  "Warning": "WARNING: This feature has compatibility issues with patches like LX5's powerups, Player 8x8 tiles DMAer,\nPlayer 32x32, or any system that modifies player graphics or palettes, except for Player Revolution which is compatible.",
   "Question": "Enable this feature? (Y/N, leave empty for default):",
   "RedoError": "Invalid option. Enter \"Y\" to try again.",
   "Error": "Installation aborted."

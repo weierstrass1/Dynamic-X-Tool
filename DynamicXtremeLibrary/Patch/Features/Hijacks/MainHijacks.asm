@@ -18,10 +18,11 @@ endif
 
 org $00823D
 	autoclean JML DXBaseHijack1
+	db "DX"
 
 org $0082D7
 	autoclean JML DXBaseHijack2
-else
+elseif read2($008241) == $5844
 org $00821D
 	db $20,$00,$A3,$80,$1B
 org $00823A

@@ -19,20 +19,28 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
                 ResourceType.Palette => "Palette",
                 ResourceType.DynamicPose => "Dynamic Pose",
                 ResourceType.Buffer => "Buffer",
+                ResourceType.GraphicRoutine => "Graphic Routine",
                 _ => "Unknown"
             };
-            var pars = new Dictionary<string, string>()
+            var pars = new Dictionary<string, string>
             {
                 { "type", type },
                 { "id", $"'{reference.Resource.ID}'" },
-                { "name", $"'{reference.Resource.Name}'" },
+                { "name",
+                     reference.Resource.Type != ResourceType.Buffer?
+                        $" {type}":
+                        ""},
                 { "address", $"${reference.Position:X6}" },
-                { "size", $"{reference.Resource.Length} bytes" }
+                { "size", $"{reference.Resource.Length} bytes" },
+                {
+                    "buffer",
+                    reference.Resource.Type != ResourceType.Buffer &&
+                    reference.Resource.Type != ResourceType.GraphicRoutine ?
+                        $" at buffer {reference.BufferID}" :
+                        ""
+                }
             };
-            if(reference.Resource.Type != ResourceType.Buffer)
-            {
-                pars.Add("buffer", $"at buffer {reference.BufferID}");
-            }
+
             Parameters = pars;
         }
     }

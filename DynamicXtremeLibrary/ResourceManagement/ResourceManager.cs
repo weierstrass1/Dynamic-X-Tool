@@ -51,7 +51,6 @@ namespace DynamicXtremeLibrary.ResourceManagement
         public static ResourceAllReferences InsertBuffers(LogRegisterSystem logging, byte[] rom, IReadOnlyList<ResourceBuffer> buffers)
         {
             Mapper mapper = SNESROMUtils.GetMapper(rom);
-            logging.Add(new Title("Resource Buffers"));
             List<(int, int)> spaces = SNESROMUtils.FindFreeSpace(rom);
             spaces.Sort(comp);
             (int, int) space;
@@ -60,6 +59,18 @@ namespace DynamicXtremeLibrary.ResourceManagement
             List<ResourceReference> palRefs = [];
             List<ResourceReference> resRefs = [];
             ResourceReference bufRef;
+
+            if(buffers.Count == 0)
+            {
+                return new()
+                {
+                    Buffers = references.AsReadOnly(),
+                    DynamicPoses = posesRefs.AsReadOnly(),
+                    Palettes = palRefs.AsReadOnly(),
+                    GeneralResources = resRefs.AsReadOnly()
+                };
+            }
+            logging.Add(new Title("Resource Buffers"));
             foreach (var buffer in buffers)
             {
                 space = spaces.FirstOrDefault(x => x.Item2 >= 8 + buffer.Length);
@@ -87,21 +98,30 @@ namespace DynamicXtremeLibrary.ResourceManagement
             posesRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
             palRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
             resRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
-            logging.Add(new Title("Dynamic Poses"));
-            foreach(var reference in posesRefs)
-                logging.Add(new ResourceInsertedAt(reference));
-            logging.Add(new Title("Palettes"));
-            foreach (var reference in palRefs)
-                logging.Add(new ResourceInsertedAt(reference));
-            logging.Add(new Title("Resources"));
-            foreach (var reference in resRefs)
-                logging.Add(new ResourceInsertedAt(reference));
+            if (posesRefs.Count != 0)
+            {
+                logging.Add(new Title("Dynamic Poses"));
+                foreach (var reference in posesRefs)
+                    logging.Add(new ResourceInsertedAt(reference));
+            }
+            if (palRefs.Count != 0)
+            {
+                logging.Add(new Title("Palettes"));
+                foreach (var reference in palRefs)
+                    logging.Add(new ResourceInsertedAt(reference));
+            }
+            if (resRefs.Count != 0)
+            {
+                logging.Add(new Title("Resources"));
+                foreach (var reference in resRefs)
+                    logging.Add(new ResourceInsertedAt(reference));
+            }
             return new()
             {
                 Buffers = references.AsReadOnly(),
-                DynamicPoses = posesRefs.AsReadOnly(),
-                Palettes = palRefs.AsReadOnly(),
-                GeneralResources = resRefs.AsReadOnly()
+                DynamicPoses = posesRefs!.AsReadOnly(),
+                Palettes = palRefs!.AsReadOnly(),
+                GeneralResources = resRefs!.AsReadOnly()
             };
         }
         private static int comp((int, int) x1, (int, int) x2)
