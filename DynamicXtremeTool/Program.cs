@@ -10,8 +10,6 @@ namespace DynamicXtremeTool
         private static void Main(string[]? args)
         {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
-            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            Console.WriteLine(Environment.CurrentDirectory);
 
             var opt = Options.Instance;
 
