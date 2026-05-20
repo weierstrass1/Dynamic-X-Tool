@@ -42,7 +42,7 @@ namespace DynamicXtremeLibrary.Generators
 
             content = content.Replace(resource_label,
                         HexReader.ValuesToString(
-                            [.. refs.Select(r => SNESROMUtils.PCtoSNES(r.Position + 8, mapper))], 6, 8));
+                            [.. refs.Select(r => SNESROMUtils.PCtoSNES(r.Position, mapper))], 6, 8));
 
             content = content.Replace(sizes_label,
                         HexReader.ValuesToString(DynamicInfo.GetSizes(dis), 4, 2));

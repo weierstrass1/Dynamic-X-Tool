@@ -1,0 +1,10 @@
+{
+  "Name": "DynamicPoses",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Dynamic Poses — Core system for dynamically loading and reusing pose graphics in VRAM. Essential for dynamic sprites.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

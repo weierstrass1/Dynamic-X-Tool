@@ -13,8 +13,6 @@ namespace DynamicXtremeTool
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             Console.WriteLine(Environment.CurrentDirectory);
 
-            args = ["-use-settings"];
-
             var opt = Options.Instance;
 
             opt.SettingsForm(args != null && args.Length > 0 && 

@@ -1,0 +1,57 @@
+{
+  "InputROMPath": "..test.smc",
+  "OutputROMPath": "..test.smc",
+  "PixiPath": "",
+  "UberasmToolPath": "",
+  "GPSPath": "",
+  "Features": [
+    {
+      "Name": "GraphicsChange",
+      "Enable": true
+    },
+    {
+      "Name": "PalettesChange",
+      "Enable": true
+    },
+    {
+      "Name": "DynamicPoses",
+      "Enable": true
+    },
+    {
+      "Name": "DrawingSystem",
+      "Enable": true
+    },
+    {
+      "Name": "PalettesEffects",
+      "Enable": true
+    },
+    {
+      "Name": "Free7E2000",
+      "Enable": true
+    },
+    {
+      "Name": "KevinLMVRAMOptimization",
+      "Enable": false
+    },
+    {
+      "Name": "ControllerOptimization",
+      "Enable": true
+    },
+    {
+      "Name": "FixedColorOptimization",
+      "Enable": true
+    },
+    {
+      "Name": "StatusBarOptimization",
+      "Enable": false
+    },
+    {
+      "Name": "PlayerFeatures",
+      "Enable": false
+    },
+    {
+      "Name": "YoshiFeatures",
+      "Enable": false
+    }
+  ]
+}

@@ -1,5 +1,7 @@
-﻿using DynamicXtremeLibrary.Readers;
+﻿using DynamicXtremeLibrary.Logging.LoggingRegisters;
+using DynamicXtremeLibrary.Readers;
 using DynamicXtremePaletteCreatorLibrary;
+using LogRegister;
 using System.Text;
 
 namespace DynamicXtremeLibrary.PaletteEffec
@@ -22,7 +24,7 @@ namespace DynamicXtremeLibrary.PaletteEffec
             }
             return res.AsReadOnly();
         }
-        public static void ToFile(IEnumerable<PaletteEffectCollection> effects, string file)
+        public static void ToFile(LogRegisterSystem log, IEnumerable<PaletteEffectCollection> effects, string file)
         {
             if (effects == null || !effects.Any())
             {
@@ -38,9 +40,11 @@ namespace DynamicXtremeLibrary.PaletteEffec
             List<int> r3 = [];
             int counter = 0;
             IEnumerable<PaletteEffect> filtered;
+            log.Add(new Title("Palette Effects"));
             foreach (PaletteEffectCollection effect in effects)
             {
                 filtered = effect.Effects.Where(x => x.EffectType != EffectType.None);
+                log.Add(new InsertedPaletteEffect(effect.Name, filtered.Count()));
                 type.AddRange(filtered.Select(x => (int)x.EffectType));
                 c1.AddRange(filtered.Select(x => (int)x.Channel1));
                 c2.AddRange(filtered.Select(x => (int)x.Channel2));

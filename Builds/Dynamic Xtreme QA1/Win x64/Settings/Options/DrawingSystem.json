@@ -1,0 +1,10 @@
+{
+  "Name": "DrawingSystem",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Drawing System — Core system for rendering registered poses (static or dynamic) using OAM. Essential for dynamic sprites.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

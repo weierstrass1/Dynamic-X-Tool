@@ -1,0 +1,10 @@
+{
+  "Name": "InputROMPath",
+  "Value": "../test.smc",
+  "DefaultValue": "../test.smc",
+  "Description": "Enter source ROM path:",
+  "Question": "Drag and drop your source ROM or enter the path. Leave empty to use the default settings.",
+  "Warning": "",
+  "RedoError": "The specified path does not exist or is invalid. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

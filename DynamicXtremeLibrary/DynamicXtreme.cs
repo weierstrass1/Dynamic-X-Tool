@@ -107,7 +107,7 @@ namespace DynamicXtremeLibrary
                 Path.Combine(TemplateASMDirectory, $"{InputDefinesFilename}.asm"),
                 Path.Combine(extDefinesDir, $"{OutputDefinesFilename}.asm"),
                 Path.Combine(ExtraDefinesDirectory, $"{OutputDefinesFilename}.asm"));
-            dg.GenerateDefinesFile(allRefs, drawInfos, palEffects);
+            dg.GenerateDefinesFile(allRefs, SNESROMUtils.GetMapper(rom), drawInfos, dynamicInfos, palEffects);
 
             Task<(bool, string)> asarTask = AsarPatch.Run();
             asarTask.Wait();
@@ -138,7 +138,7 @@ namespace DynamicXtremeLibrary
         private IReadOnlyList<PaletteEffectCollection> processPaletteEffects()
         {
             IReadOnlyList<PaletteEffectCollection>? palEffects = PaletteEffectExtension.GetCollections(PaletteEffectsDirectory);
-            PaletteEffectExtension.ToFile(palEffects,
+            PaletteEffectExtension.ToFile(_log, palEffects,
                                 Path.Combine(PatchDirectory, DataDirectory, $"{PaletteEffectsDataFilename}.asm"));
             return palEffects;
         }
@@ -163,7 +163,7 @@ namespace DynamicXtremeLibrary
             string bufferTable = ResourceManager.BuildBufferTable(allRefs.Buffers);
             string dynamicPoseData = DynamicPoseDataGenerator.GenerateData(
                 SNESROMUtils.GetMapper(rom), allRefs.DynamicPoses, dynamicInfos);
-            string paletteTable = ResourceManager.BuildPalettesTable(allRefs.Palettes);
+            string paletteTable = ResourceManager.BuildPalettesTable(dynamicInfos);
 
             File.WriteAllText(Path.Combine(dataDir, $"{BufferDataFilename}.asm"),
                 bufferTable);

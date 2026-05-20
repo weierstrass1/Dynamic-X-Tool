@@ -1,0 +1,10 @@
+{
+  "Name": "GraphicsChange",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Graphic Change — Required for dynamic graphics changes (ExAnimation, tileset updates, dynamic sprites).",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

@@ -2,20 +2,26 @@
 using LogRegister;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using System.Text;
+using DynamicXtremeLibrary.Infos;
 
 namespace DynamicXtremeLibrary.ResourceManagement
 {
     public class ResourceManager
     {
-        public static string BuildPalettesTable(IEnumerable<ResourceReference> palettes)
+        public static string BuildPalettesTable(IEnumerable<DynamicInfo> dynamicInfos)
         {
-            var res = palettes.OrderBy(r => r.Resource.ID);
             StringBuilder ids = new();
             StringBuilder addresses = new();
-            foreach (var reference in res)
+
+            string filename;
+            foreach (var dyn in dynamicInfos)
             {
-                ids.AppendLine($"\tdw !PaletteID{reference.Resource.Name}");
-                addresses.AppendLine($"\tdl !Palette{reference.Resource.Name}");
+                foreach (var pal in dyn.Palettes ?? [])
+                {
+                    filename = Path.GetFileNameWithoutExtension(pal);
+                    ids.AppendLine($"\tdw !PaletteID{filename}");
+                    addresses.AppendLine($"\tdl !Palette{filename}");
+                }
             }
             string result = $"""
                 PaletteTable:
@@ -87,9 +93,9 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 }
                 spaces.Remove(space);
                 SNESROMUtils.InsertDataWithRats(rom, space.Item1, buffer.Data);
-                bufRef = new(buffer.ID, SNESROMUtils.PCtoSNES(space.Item1, mapper)+8, buffer);
+                bufRef = new(buffer.ID, SNESROMUtils.PCtoSNES(space.Item1, mapper) + 8, buffer);
                 references.Add(bufRef);
-                buffer.AddOffsetPosition(space.Item1);
+                buffer.AddOffsetPosition(space.Item1 + 8);
                 logging.Add(new ResourceInsertedAt(bufRef));
                 posesRefs.AddRange(buffer.GetReferences().Where(r => r.Resource.Type == ResourceType.DynamicPose));
                 palRefs.AddRange(buffer.GetReferences().Where(r => r.Resource.Type == ResourceType.Palette));

@@ -30,16 +30,16 @@
       "Enable": true
     },
     {
-      "Name": "KevinLMVRAMOptimization",
-      "Enable": true
-    },
-    {
       "Name": "ControllerOptimization",
       "Enable": true
     },
     {
       "Name": "FixedColorOptimization",
       "Enable": true
+    },
+    {
+      "Name": "KevinLMVRAMOptimization",
+      "Enable": false
     },
     {
       "Name": "StatusBarOptimization",

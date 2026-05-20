@@ -1,0 +1,22 @@
+[
+  {
+    "Parent": "GraphicsChange",
+    "Children": [
+      "DynamicPoses",
+      "PlayerFeatures"
+    ]
+  },
+  {
+    "Parent": "PalettesChange",
+    "Children": [
+      "PalettesEffects",
+      "PlayerFeatures"
+    ]
+  },
+  {
+    "Parent": "PlayerFeatures",
+    "Children": [
+      "YoshiFeatures"
+    ]
+  }
+]

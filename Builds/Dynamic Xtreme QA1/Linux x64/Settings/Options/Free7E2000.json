@@ -1,0 +1,10 @@
+{
+  "Name": "Free7E2000",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Free up RAM $7E2000 — Frees a large vanilla RAM buffer used for graphics in LoROM mode by relocating player, Yoshi, and vanilla ExAnimation graphics storage to ROM instead of RAM. This extra RAM is used by the system for internal variables. If not enabled, the system will use RAM that may already be required by other common resources. Not relevant in SA-1 rom.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

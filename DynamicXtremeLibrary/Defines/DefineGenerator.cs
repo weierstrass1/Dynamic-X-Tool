@@ -1,7 +1,9 @@
-﻿using DynamicXtremePaletteCreatorLibrary;
-using DynamicXtremeLibrary.Infos;
+﻿using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.ResourceManagement;
+using DynamicXtremePaletteCreatorLibrary;
+using SNESLibrary;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Defines
 {
@@ -10,22 +12,45 @@ namespace DynamicXtremeLibrary.Defines
         public string BaseDefineFile { get; private set; }
         public string OutputFile { get; private set; }
         public string OutputFileExternal { get; private set; }
-        public DefineGenerator(string baseDefineFile, string outputFile, string outputFileExternal) 
-        { 
+        public DefineGenerator(string baseDefineFile, string outputFile, string outputFileExternal)
+        {
             BaseDefineFile = baseDefineFile;
-            if(!File.Exists(BaseDefineFile))
+            if (!File.Exists(BaseDefineFile))
                 throw new FileNotFoundException(nameof(BaseDefineFile));
             OutputFile = outputFile;
             OutputFileExternal = outputFileExternal;
         }
-        public void GenerateDefinesFile(ResourceAllReferences? refs, IEnumerable<DrawInfo>? drawInfos, IEnumerable<PaletteEffectCollection>? paletteEffects)
+        public void GenerateDefinesFile(ResourceAllReferences? refs, Mapper mapper, IEnumerable<DrawInfo>? drawInfos, IEnumerable<DynamicInfo>? dynamicInfos, IEnumerable<PaletteEffectCollection>? paletteEffects)
         {
             string content = File.ReadAllText(BaseDefineFile);
-            content = $"{content}\n{GenerateReferenceDefines(refs)}\n{GeneratePoseDefines(drawInfos)}\n{GeneratePaletteEffectDefines(paletteEffects)}";
+            content = $"{content}\n{GenerateReferenceDefines(refs, mapper)}\n{GeneratePoseDefines(drawInfos)}\n{GeneratePaletteEffectDefines(paletteEffects)}\n{GeneratePaletteOffsets(dynamicInfos)}";
+            content = content.Replace("\r\n", "\n");
+            content = Regex.Replace(content, @"(\s*\n)(\s*\n)+", "\n\n");
             File.WriteAllText(OutputFile, content);
             File.WriteAllText(OutputFileExternal, content);
         }
-        public static string GenerateReferenceDefines(ResourceAllReferences? refs)
+        public static string GeneratePaletteOffsets(IEnumerable<DynamicInfo>? dynamicInfos)
+        {
+            if (dynamicInfos == null || dynamicInfos.Count() == 0)
+                return "";
+            StringBuilder sb = new();
+            int palCounter = 0;
+            foreach (var dynInfo in dynamicInfos)
+            {
+                if (dynInfo.Palettes == null)
+                    continue;
+                sb.AppendLine($"!{dynInfo.ContextName}PaletteTableOffset = ${palCounter:X4}");
+                palCounter += dynInfo.Palettes.Length;
+            }
+            string start = $"""
+            !PaletteTableSize = ${palCounter:X4}
+            !PaletteIDTables = !PaletteTables
+            !PaletteAddrTables = !PaletteIDTables+(!PaletteTableSize*2)
+
+            """;
+            return $"{start}\n{sb}";
+        }
+        public static string GenerateReferenceDefines(ResourceAllReferences? refs, Mapper mapper)
         {
             if (refs == null)
                 return "";
@@ -51,7 +76,7 @@ namespace DynamicXtremeLibrary.Defines
             foreach (var dp in dynP)
             {
                 ids.AppendLine($"!DynamicPoseID{dp.Resource.Name} = ${dp.Resource.ID:X4}");
-                addrs.AppendLine($"!DynamicPose{dp.Resource.Name} = ${dp.Position:X6}");
+                addrs.AppendLine($"!DynamicPose{dp.Resource.Name} = ${SNESROMUtils.PCtoSNES(dp.Position, mapper):X6}");
                 sizes.AppendLine($"!DynamicPose{dp.Resource.Name}Size = ${dp.Resource.Length:X4}");
             }
             result.AppendLine($"!NumberOfDynamicPoses = ${dynP.Count():X4}\n");
@@ -62,7 +87,7 @@ namespace DynamicXtremeLibrary.Defines
             foreach (var p in pals)
             {
                 ids.AppendLine($"!PaletteID{p.Resource.Name} = ${p.Resource.ID:X4}");
-                addrs.AppendLine($"!Palette{p.Resource.Name} = ${p.Position:X6}");
+                addrs.AppendLine($"!Palette{p.Resource.Name} = ${SNESROMUtils.PCtoSNES(p.Position, mapper):X6}");
                 sizes.AppendLine($"!Palette{p.Resource.Name}Size = ${p.Resource.Length:X4}");
             }
             result.AppendLine($"!NumberOfPalettes = ${pals.Count():X4}\n");
@@ -73,7 +98,7 @@ namespace DynamicXtremeLibrary.Defines
             foreach (var r in res)
             {
                 ids.AppendLine($"!ResourceID{r.Resource.Name} = ${r.Resource.ID:X4}");
-                addrs.AppendLine($"!Resource{r.Resource.Name} = ${r.Position:X6}");
+                addrs.AppendLine($"!Resource{r.Resource.Name} = ${SNESROMUtils.PCtoSNES(r.Position, mapper):X6}");
                 sizes.AppendLine($"!Resource{r.Resource.Name}Size = ${r.Resource.Length:X4}");
             }
             result.AppendLine($"!NumberOfResources = ${res.Count():X4}\n");

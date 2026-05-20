@@ -1,5 +1,4 @@
 ﻿using DynamicXtremeLibrary.GraphicRoutines;
-using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.Readers;
 
 namespace DynamicXtremeLibrary.Generators
