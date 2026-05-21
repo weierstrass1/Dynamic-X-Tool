@@ -14,6 +14,8 @@
         }
         public override bool Validate(string value)
         {
+            if (Path.GetExtension(value) != ".smc")
+                return false;
             string directory = Path.GetDirectoryName(value)!;
             if(string.IsNullOrWhiteSpace(directory))
                 directory = ".\\";

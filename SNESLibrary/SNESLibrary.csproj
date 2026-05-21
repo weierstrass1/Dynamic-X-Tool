@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x86</Platforms>
     <LangVersion>latest</LangVersion>
-    <AssemblyVersion>1.0.0.29</AssemblyVersion>
-    <FileVersion>1.0.0.29</FileVersion>
+    <AssemblyVersion>1.0.0.30</AssemblyVersion>
+    <FileVersion>1.0.0.30</FileVersion>
   </PropertyGroup>
 
 </Project>
