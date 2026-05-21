@@ -37,6 +37,7 @@ namespace DynamicXtremeLibrary.Config
                     Value :
                     DefaultValue;
             string value = Console.ReadLine()!;
+            value = value.Replace("\'", "").Replace("\"", "");
             T tValue = !string.IsNullOrWhiteSpace(value) ?
                 ParseFromString(value) :
                 def;
@@ -46,6 +47,7 @@ namespace DynamicXtremeLibrary.Config
                 Console.WriteLine(RedoError);
                 Console.WriteLine(Question);
                 value = Console.ReadLine()!;
+                value = value.Replace("\'", "").Replace("\"", "");
                 tValue = string.IsNullOrWhiteSpace(value) ?
                     ParseFromString(value) :
                     def;
