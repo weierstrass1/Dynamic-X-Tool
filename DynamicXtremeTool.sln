@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SNESLibrary", "SNESLibrary\SNESLibrary.csproj", "{0A71E1DA-532A-4EEE-8493-AC40466FBE90}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicXtremePaletteCreatorLibrary", "..\DynamicXtremePaletteEffectCreator\DynamicXtremePaletteCreatorLibrary\DynamicXtremePaletteCreatorLibrary.csproj", "{B606B149-3088-4BAB-A599-9AE2BBECFAF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicXtremePaletteCreatorLibrary", "DynamicXtremePaletteCreatorLibrary\DynamicXtremePaletteCreatorLibrary.csproj", "{B606B149-3088-4BAB-A599-9AE2BBECFAF7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicXtremeTool", "DynamicXtremeTool\DynamicXtremeTool.csproj", "{B1D83B49-78AA-49AF-8400-F7B57694E41E}"
 EndProject
