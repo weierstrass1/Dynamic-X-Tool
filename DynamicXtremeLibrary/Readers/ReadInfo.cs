@@ -194,7 +194,7 @@ namespace DynamicXtremeLibrary.Readers
             {
                 List<int> pcs = [];
                 foreach (var tuple in legacyPoseChunkSizes)
-                    pcs.Concat([tuple.Item1, tuple.Item2]);
+                    pcs.AddRange([tuple.Item1, tuple.Item2]);
                 di.PosesChunksSizes = [.. pcs];
                 di.GenerateLastRow();
             }
