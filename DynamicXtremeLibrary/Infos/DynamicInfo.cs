@@ -1,11 +1,13 @@
-﻿using LogRegister;
+﻿using DynamicXtremeLibrary.Config;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.ResourceManagement;
-using DynamicXtremeLibrary.Config;
+using LogRegister;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Infos
 {
-    public class DynamicInfo
+    public partial class DynamicInfo
     {
         public string ContextName { get; set; }
         public int[]? PosesChunksSizes { get; set; }
@@ -224,8 +226,8 @@ namespace DynamicXtremeLibrary.Infos
                     fInd = 0;
                     size = b.Length;
                 }
-                poses.Add(new(idOffset + fInd, 
-                    $"{Path.GetFileNameWithoutExtension(PoseGraphics[gfxInd])}{fInd:D3}",
+                poses.Add(new(idOffset + fInd,
+                    $"{Path.GetFileNameWithoutExtension(PoseGraphics[gfxInd]).Split('.')[0]}{fInd:D3}",
                     ResourceType.DynamicPose, b));
                 fInd++;
                 index = newVal;
@@ -318,5 +320,181 @@ namespace DynamicXtremeLibrary.Infos
                 PosesLastRow[i / 2] = val;
             }
         }
+        public void FromNumberOf16x16Tiles(IDictionary<int, string> numberOf16x16TilesPerPose)
+        {
+            if(PoseGraphics == null || PoseGraphics.Length == 0)
+            {
+                return;
+            }
+
+            List<(long, byte[])> bs = [];
+
+            long count = 0;
+            long tiles = 0;
+            long gtiles;
+            string file;
+            byte[] bytes;
+            foreach(var pg in  PoseGraphics) 
+            {
+                file = Path.Combine("DynamicResources", pg);
+                if (!File.Exists(file))
+                {
+                    return;
+                }
+                bytes = File.ReadAllBytes(file);
+                if (bytes.Length % 1024 != 0)
+                {
+                    return;
+                }
+                count += bytes.Length;
+                gtiles = getNumberOfTilesPerGraphic(file);
+                tiles += gtiles;
+                bs.Add((gtiles, bytes));
+            }
+
+            List<byte[]> poses = [];
+            List<int> posechunks = [];
+
+            Regex modifier = tilesRegex();
+            Match m;
+            int totalTiles = 0;
+            int posetiles;
+            int v1, v2;
+            int remainder;
+            string mod;
+
+            IEnumerator<(long, byte[])> en = bs.GetEnumerator();
+            en.Reset();
+            en.MoveNext();
+            long bufTiles;
+            byte[] buffBytes;
+            long bytePointer;
+            long grPointer = 0;
+            int rows;
+            long grPointerBytes = 0;
+            long endV1;
+            long endV2;
+            long lastRowAdder = 0;
+            long endTiles;
+            List<byte> result = [];
+
+            var tilesValues = numberOf16x16TilesPerPose
+                .OrderBy(kvp => kvp.Key)
+                .Select(kvp => kvp.Value).ToList();
+
+            foreach (var numOfTiles in tilesValues)
+            {
+                m = modifier.Match(numOfTiles);
+                posetiles = int.Parse(m.Groups["tiles"].Value);
+                v1 = posetiles / 8;
+                v1 *= 32;
+                remainder = posetiles % 8;
+                v2 = remainder * 2;
+                v1 += v2;
+                if (m.Groups["modifier"].Success)
+                {
+                    mod = m.Groups["modifier"].Value;
+                    posetiles++;
+                    v1 += mod switch
+                    {
+                        "q3" => 2,
+                        "h" => 2,
+                        "q" => 1,
+                        _ => 0
+                    };
+                    v2 += mod switch
+                    {
+                        "q3" => 1,
+                        _ => 0
+                    };
+                }
+                totalTiles += posetiles;
+                if (totalTiles > tiles)
+                {
+                    return;
+                }
+                posechunks.Add(v1);
+                posechunks.Add(v2);
+
+                bytes = new byte[(v1 + v2) * 32];
+                bytePointer = 0;
+
+                rows = posetiles / 8;
+                rows *= 8;
+                endV1 = v1 * 32;
+                endV2 = (v1 + v2) * 32;
+                lastRowAdder = endV1;
+
+                for (int i = 0; i < posetiles; i++)
+                {
+                    (bufTiles, buffBytes) = en.Current;
+                    if (grPointer >= bufTiles)
+                    {
+                        en.MoveNext();
+                        grPointer = 0;
+                        grPointerBytes = 0;
+                    }
+
+                    if (i < rows)
+                    {
+                        Array.Copy(buffBytes, grPointerBytes, bytes, bytePointer, 64);
+                        Array.Copy(buffBytes, grPointerBytes + 512, bytes, bytePointer + 512, 64);
+                    }
+                    else
+                    {
+                        Array.Copy(buffBytes, grPointerBytes, bytes, bytePointer, endV1 - bytePointer);
+                        Array.Copy(buffBytes, grPointerBytes + 512, bytes, lastRowAdder, endV2 - lastRowAdder);
+                        endTiles = (63 + endV1 - bytePointer) / 64;
+                        grPointer += endTiles;
+                        for (int j = 0; j < endTiles; j++)
+                        {
+                            grPointerBytes += 64;
+                            if (grPointerBytes % 512 == 0)
+                                grPointerBytes += 512;
+                        }
+                        break;
+                    }
+                    bytePointer += 64;
+                    if (bytePointer % 512 == 0)
+                        bytePointer += 512;
+                    grPointerBytes += 64;
+                    if (grPointerBytes % 512 == 0)
+                        grPointerBytes += 512;
+                    grPointer++;
+                }
+                result.AddRange(bytes);
+            }
+
+            PoseGraphics = [$"{ContextName}.bin.tmp"];
+            PosesChunksSizes = [.. posechunks];
+            File.WriteAllBytes(Path.Combine("DynamicResources", $"{ContextName}.bin.tmp"), [.. result]);
+            
+            GenerateLastRow();
+        }
+        private long getNumberOfTilesPerGraphic(string path)
+        {
+            using var fs = new FileStream(path, FileMode.Open);
+
+            long end = fs.Length - 512;
+
+            while (end > 0)
+            {
+                fs.Position = end - 1;
+
+                if (fs.ReadByte() != 0)
+                    break;
+
+                end--;
+            }
+            long tiles = end / 1024;
+            tiles *= 8;
+            long remainder = end % 512;
+            remainder += 63;
+            remainder /= 64;
+            return tiles + remainder;
+        }
+
+        [GeneratedRegex("(?<tiles>\\d+)(?<modifier>(q3|h|q))?")]
+        private static partial Regex tilesRegex();
     }
 }

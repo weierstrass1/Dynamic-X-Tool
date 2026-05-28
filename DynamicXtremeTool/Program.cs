@@ -11,6 +11,8 @@ namespace DynamicXtremeTool
         {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
 
+            args = ["-use-settings"];
+
             var opt = Options.Instance;
 
             opt.SettingsForm(args != null && args.Length > 0 && 
