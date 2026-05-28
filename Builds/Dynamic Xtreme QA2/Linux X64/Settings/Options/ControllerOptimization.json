@@ -1,0 +1,10 @@
+{
+  "Name": "ControllerOptimization",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Controller Optimization — Moves controller handling out of the NMI handler to free up cycles for dynamic graphics and palette updates.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

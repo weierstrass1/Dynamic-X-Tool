@@ -1,0 +1,10 @@
+{
+  "Name": "UberasmToolPath",
+  "Value": "",
+  "DefaultValue": "",
+  "Description": "Path to UberasmTool executable (optional).",
+  "Warning": "",
+  "Question": "Drag and drop UberasmTool executable or enter the path. Leave empty to use default settings (skips if not set).",
+  "RedoError": "The specified path does not exist or is invalid. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

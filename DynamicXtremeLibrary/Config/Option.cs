@@ -22,7 +22,7 @@ namespace DynamicXtremeLibrary.Config
         public string Question;
         public string RedoError;
         public string Error;
-        public void ObtainValue()
+        public bool ObtainValue()
         {
             Console.WriteLine();
             Console.WriteLine(Description);
@@ -45,6 +45,9 @@ namespace DynamicXtremeLibrary.Config
             while (!Validate(value))
             {
                 Console.WriteLine(RedoError);
+                value = Console.ReadLine()!;
+                if (value.ToLower().Trim() != "y")
+                    return false;
                 Console.WriteLine(Question);
                 value = Console.ReadLine()!;
                 value = value.Replace("\'", "").Replace("\"", "").Trim();
@@ -53,6 +56,7 @@ namespace DynamicXtremeLibrary.Config
                     def;
             }
             Value = tValue;
+            return true;
         }
         public abstract T ParseFromString(string value);
         public abstract bool Validate(string value);

@@ -85,7 +85,7 @@ namespace DynamicXtremeLibrary.Config
                 BoolOptions.First(bo => bo.Name == feat.Name).Value = feat.Enable;
             }
         }
-        public void SettingsForm(bool useSettings)
+        public bool SettingsForm(bool useSettings)
         {
             Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -104,11 +104,11 @@ namespace DynamicXtremeLibrary.Config
             }
             if (!useSettings)
             {
-                InputRomPath.ObtainValue();
-                OutputRomPath.ObtainValue();
-                PixiPath.ObtainValue();
-                UberasmPath.ObtainValue();
-                GPSPath.ObtainValue();
+                if (!InputRomPath.ObtainValue()) return false;
+                if (!OutputRomPath.ObtainValue()) return false;
+                if (!PixiPath.ObtainValue()) return false;
+                if (!UberasmPath.ObtainValue()) return false;
+                if (!GPSPath.ObtainValue()) return false;
                 bool dependencyFulfilled;
                 foreach (var option in BoolOptions)
                 {
@@ -119,7 +119,7 @@ namespace DynamicXtremeLibrary.Config
                             dependencyFulfilled = false;
                     }
                     if (dependencyFulfilled)
-                        option.ObtainValue();
+                        if (!option.ObtainValue()) return false;
                 }
             }
             Settings.InputROMPath = InputRomPath.Value;
@@ -134,6 +134,7 @@ namespace DynamicXtremeLibrary.Config
                 if (features.TryGetValue(feature.Name, out bool value))
                     feature.Enable = value;
             }
+            return true;
         }
         public void Save()
         {

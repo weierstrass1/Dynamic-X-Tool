@@ -1,0 +1,10 @@
+{
+  "Name": "OutputROMPath",
+  "Value": "",
+  "DefaultValue": "",
+  "Description": "Enter destination ROM path:",
+  "Question": "Drag and drop your destination ROM or enter the path. Leave empty to use default settings (falls back to source ROM if not set).",
+  "Warning": "",
+  "RedoError": "The specified path does not exist or is invalid. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

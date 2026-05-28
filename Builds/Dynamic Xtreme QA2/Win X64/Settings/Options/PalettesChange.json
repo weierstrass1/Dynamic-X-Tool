@@ -1,0 +1,10 @@
+{
+  "Name": "PalettesChange",
+  "Value": "True",
+  "DefaultValue": "True",
+  "Description": "Feature: Palette Change — Required for dynamic palette updates (dynamic sprite palettes, palette effects, palette ExAnimation).",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

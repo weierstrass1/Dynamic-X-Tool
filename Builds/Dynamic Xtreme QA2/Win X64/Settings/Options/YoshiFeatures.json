@@ -1,0 +1,10 @@
+{
+  "Name": "YoshiFeatures",
+  "Value": "False",
+  "DefaultValue": "False",
+  "Description": "Feature: Yoshi Features — Allows modifying Yoshi’s graphics using the game’s vanilla layout.",
+  "Warning": "",
+  "Question": "Enable this feature? (Y/N, leave empty for default):",
+  "RedoError": "Invalid option. Enter \"Y\" to try again.",
+  "Error": "Installation aborted."
+}

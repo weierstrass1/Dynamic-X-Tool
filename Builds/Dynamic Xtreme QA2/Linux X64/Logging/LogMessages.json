@@ -1,0 +1,19 @@
+{
+  "TITLE": "\n============ {title} ============\n",
+  "NUMBER OF": "Number of {name} inserted: {quantity}{size}.",
+  "DATA USAGE": "Total data used in {name}: {size} MB ({banks} banks).",
+  "REMOVED BUFFER AT": "Removed Resource at {address} ({size}).",
+  "RESOURCE INSERTED AT": "Inserted {type} {id}{name} at {address} ({size}){buffer}.",
+  "PALETTE EFFECT COLLECTION INSERTED": "Inserted Palette Effect Collection {name} ({length} effects added).",
+  "SUCCESSFULLY PROCESSED FILE": "\tSuccessfully processed file {file}.",
+  "RESOURCE NOT FOUND": "\tResource {file} was not found.",
+  "PROCESSING FILE": "Processing file {file}.",
+  "DYNAMIC INFO WITHOUT CHUNKS": "\tIn {context}: 'PosesGraphics' exists but 'PosesChunksSizes' is missing.",
+  "FAILED TO PROCESS FILE": "\tFailed to process file {file}.",
+  "DYNAMIC INFO SIZE MISMATCH": "\tSize mismatch in {context}: chunks*32={size1}, graphics={size2}.",
+  "FILE IS TOO BIG": "\tFile {file} is too large: {size} bytes (max {maxSize}).",
+  "NOT ENOUGH SPACE IN ROM": "\tNot enough free space in ROM.",
+  "VALUE EXCEEDS LIMIT": "\t{parameter} value exceeds allowed limit (value = {value}, max = {limit}) in {context}.",
+  "DRAW INFO INCONSISTENT TABLE SIZES": "\tTable size mismatch in '{context}': table sizes are inconsistent.",
+  "SYNTAX ERROR": "\tSyntax Error in file {file}, line {line}{message}.\n\t\tLine Content: {lineContent}."
+}

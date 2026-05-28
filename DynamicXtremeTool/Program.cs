@@ -11,12 +11,16 @@ namespace DynamicXtremeTool
         {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
 
-            args = ["-use-settings"];
-
             var opt = Options.Instance;
 
-            opt.SettingsForm(args != null && args.Length > 0 && 
-                args[0].ToLower().Trim() == "-use-settings");
+            if(!opt.SettingsForm(args != null && args.Length > 0 && 
+                args[0].ToLower().Trim() == "-use-settings"))
+            {
+                Console.WriteLine("The process was interrupted.");
+                Console.ResetColor();
+                Console.Read();
+                return;
+            }
             opt.Save();
             LogRegisterSystem logRegisterSystem = new();
 
