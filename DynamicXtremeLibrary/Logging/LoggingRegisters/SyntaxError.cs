@@ -5,6 +5,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class SyntaxError : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => true;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Error();
 
         public string MessageType => "SYNTAX ERROR";

@@ -172,12 +172,15 @@ Draw:
     STZ !MaxTilePriority+1
     REP #$30
     PHX
-    LDX !PoseID
+    LDA !PoseID
+    TAX
+    ASL
+    PHA
+
     LDA.l Data_GraphicRoutineIDs,x
     AND #$00FF
     STA !GraphicRoutine
     ASL
-    PHA
     CLC
     ADC !GraphicRoutine
     TAX
@@ -270,13 +273,13 @@ else
 
     PLX
     STA.l DX_Drawing_InitialIndexLowPriority,x
+    PLX
 
     LDA.l DX_Drawing_InitialIndexLowPriority
     CMP.l DX_Drawing_InitialIndexHighPriority
     BCS +
     STA.l DX_Drawing_InitialIndexHighPriority
 +
-    PLB
 
     JML [!GraphicRoutine|!dp]
 endif

@@ -5,6 +5,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     internal class RemovedBufferAt : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => false;
+        public bool AppearInErrors => false;
         public ILogCategory Category => new Info();
         public string MessageType => "REMOVED BUFFER AT";
         public IReadOnlyDictionary<string, string> Parameters { get; }

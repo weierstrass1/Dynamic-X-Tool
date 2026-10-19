@@ -5,6 +5,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class DynamicInfoSizeMismatch : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => true;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Error();
         public string MessageType => "DYNAMIC INFO SIZE MISMATCH";
         public IReadOnlyDictionary<string, string> Parameters { get; }

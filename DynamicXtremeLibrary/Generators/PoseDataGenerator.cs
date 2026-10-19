@@ -21,7 +21,7 @@ namespace DynamicXtremeLibrary.Generators
 
             content = content.Replace("<Length>",
                         HexReader.ValuesToString(
-                            [.. entries.Select(e => e.DrawInfoLength)], 2));
+                            [.. entries.Select(e => e.DrawInfoLength-1)], 2));
 
             content = content.Replace("<ID>",
                         HexReader.ValuesToString(

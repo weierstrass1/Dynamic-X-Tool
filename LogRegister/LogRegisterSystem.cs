@@ -15,5 +15,10 @@
         {
             return _events.AsReadOnly();
         }
+        public bool HasLogsOfType<T>() where T : ILogCategory
+        {
+            Type type = typeof(T);
+            return _events.Any(e => e.Category.GetType() == type);
+        }
     }
 }

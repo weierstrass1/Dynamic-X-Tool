@@ -3,7 +3,7 @@
 
 !BufferTable = Data_BufferTable
 !PaletteTables = Data_PaletteTable
-!PaletteEffectsTable = Data_PaletteTable
+!PaletteEffectsTable = Data_PaletteEffectsTable
 
 !AllowedGameMode = Routines_AllowedGameMode
 

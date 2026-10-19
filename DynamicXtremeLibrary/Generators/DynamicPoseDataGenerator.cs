@@ -33,12 +33,14 @@ namespace DynamicXtremeLibrary.Generators
             List<int> PoseSizes = [];
             foreach (var di in dis)
                 PoseSizes.AddRange(di.GetPosesSizes());
-            content = content.Replace(size_label,HexReader.ValuesToString([.. PoseSizes], 4));
+            content = content.Replace(size_label,
+                HexReader.ValuesToString([.. PoseSizes], 4));
 
             List<int> PoseBlocks = [];
             foreach (var di in dis)
                 PoseBlocks.AddRange(di.GetPosesBlocks());
-            content = content.Replace(blocks_label, HexReader.ValuesToString([.. PoseBlocks], 2));
+            content = content.Replace(blocks_label, 
+                HexReader.ValuesToString([.. PoseBlocks], 2));
 
             content = content.Replace(resource_label,
                         HexReader.ValuesToString(

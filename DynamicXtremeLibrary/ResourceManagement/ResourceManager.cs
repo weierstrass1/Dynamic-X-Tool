@@ -1,4 +1,5 @@
 ﻿using SNESLibrary;
+using DynamicXtremeLibrary.Defines;
 using LogRegister;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using System.Text;
@@ -18,7 +19,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
             {
                 foreach (var pal in dyn.Palettes ?? [])
                 {
-                    filename = Path.GetFileNameWithoutExtension(pal);
+                    filename = AsarSymbolName.FromPath(pal);
                     ids.AppendLine($"\tdw !PaletteID{filename}");
                     addresses.AppendLine($"\tdl !Palette{filename}");
                 }
@@ -54,12 +55,13 @@ namespace DynamicXtremeLibrary.ResourceManagement
             }
             return sb.ToString();
         }
-        public static ResourceAllReferences InsertBuffers(LogRegisterSystem logging, byte[] rom, IReadOnlyList<ResourceBuffer> buffers)
+        public static ResourceAllReferences? InsertBuffers(LogRegisterSystem logging, byte[] rom, IReadOnlyList<ResourceBuffer> buffers)
         {
             Mapper mapper = SNESROMUtils.GetMapper(rom);
             List<(int, int)> spaces = SNESROMUtils.FindFreeSpace(rom);
             spaces.Sort(comp);
             (int, int) space;
+            List<(ResourceBuffer Buffer, (int, int) Space)> allocations = [];
             List<ResourceReference> references = [];
             List<ResourceReference> posesRefs = [];
             List<ResourceReference> palRefs = [];
@@ -83,15 +85,15 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 if (space == default)
                 {
                     logging.Add(new NotEnoughSpaceInROM());
-                    return new()
-                    {
-                        Buffers = references.AsReadOnly(),
-                        DynamicPoses = posesRefs.AsReadOnly(),
-                        Palettes = palRefs.AsReadOnly(),
-                        GeneralResources = resRefs.AsReadOnly()
-                    };
+                    return null;
                 }
                 spaces.Remove(space);
+                allocations.Add((buffer, space));
+            }
+            foreach (var allocation in allocations)
+            {
+                ResourceBuffer buffer = allocation.Buffer;
+                space = allocation.Space;
                 SNESROMUtils.InsertDataWithRats(rom, space.Item1, buffer.Data);
                 bufRef = new(buffer.ID, SNESROMUtils.PCtoSNES(space.Item1, mapper) + 8, buffer);
                 references.Add(bufRef);

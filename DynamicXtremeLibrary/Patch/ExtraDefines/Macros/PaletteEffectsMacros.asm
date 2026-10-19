@@ -167,7 +167,7 @@ macro MixAndMergeRBDefault(r1,r3,v1,v3,offset,length)
     %MixAndMergeRB("<r1>","<r3>","<v1>","<v3>","#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16","#DX_PPU_CGRAM_PaletteWriteMirror","#DX_PPU_CGRAM_PaletteWriteMirror>>16","<offset>","<length>")
 endmacro
 
-macro MixAndMergeGB(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
+macro MixAndMergeGB(r2,r3,v2,v3,src,srcbnk,dst,dstbnk,offset,length)
     %SetMixAndMerge3Params(!ratio1,"<r2>","<r3>",!V1,"<v2>","<v3>","<src>","<srcbnk>","<dst>","<dstbnk>","<offset>","<length>")
 
     JSL !MixAndMergeGB
@@ -237,7 +237,7 @@ macro MixAndMergeHLDefault(r1,r3,v1,v3,offset,length)
     %MixAndMergeHL("<r1>","<r3>","<v1>","<v3>","#DX_PPU_CGRAM_BaseHSLPalette","#DX_PPU_CGRAM_BaseHSLPalette>>16","#DX_PPU_CGRAM_PaletteWriteMirror","#DX_PPU_CGRAM_PaletteWriteMirror>>16","<offset>","<length>")
 endmacro
 
-macro MixAndMergeSL(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
+macro MixAndMergeSL(r2,r3,v2,v3,src,srcbnk,dst,dstbnk,offset,length)
     %SetMixAndMerge3Params(!ratio1,"<r2>","<r3>",!V1,"<v2>","<v3>","<src>","<srcbnk>","<dst>","<dstbnk>","<offset>","<length>")
 
     JSL !MixAndMergeSL
@@ -359,7 +359,7 @@ macro MixRB(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
     JSL !MixRB
 endmacro
 
-macro MixGB(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
+macro MixGB(r2,r3,v2,v3,src,srcbnk,dst,dstbnk,offset,length)
     %SetMix3Params(!ratio1,"<r2>","<r3>",!V1,"<v2>","<v3>","<src>","<srcbnk>","<dst>","<dstbnk>","<offset>","<length>")
 
     JSL !MixGB
@@ -401,7 +401,7 @@ macro MixHL(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
     JSL !MixHL
 endmacro
 
-macro MixSL(r1,r3,v1,v3,src,srcbnk,dst,dstbnk,offset,length)
+macro MixSL(r2,r3,v2,v3,src,srcbnk,dst,dstbnk,offset,length)
     %SetMix3Params(!ratio1,"<r2>","<r3>",!V1,"<v2>","<v3>","<src>","<srcbnk>","<dst>","<dstbnk>","<offset>","<length>")
 
     JSL !MixSL

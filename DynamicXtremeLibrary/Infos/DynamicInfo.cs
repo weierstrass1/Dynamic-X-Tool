@@ -1,4 +1,5 @@
 ﻿using DynamicXtremeLibrary.Config;
+using DynamicXtremeLibrary.Defines;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.ResourceManagement;
 using LogRegister;
@@ -53,6 +54,7 @@ namespace DynamicXtremeLibrary.Infos
                     {
                         logging.Add(new ResourceNotFound(Resources[i]));
                         result = false;
+                        continue;
                     }
                     if (new FileInfo(path).Length > 32760)
                     {
@@ -158,7 +160,7 @@ namespace DynamicXtremeLibrary.Infos
                 if(result.ContainsKey(path) || currentPalettes.ContainsKey(path))
                     continue;
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
-                result.Add(path, new(i, Path.GetFileNameWithoutExtension(path),
+                result.Add(path, new(i, AsarSymbolName.FromPath(path),
                     ResourceType.Palette, b));
                 i++;
             }
@@ -176,7 +178,7 @@ namespace DynamicXtremeLibrary.Infos
                 if(currentResources.ContainsKey(path) || result.ContainsKey(path))
                     continue;
                 b = File.ReadAllBytes(Path.Combine("DynamicResources", path));
-                result.Add(path, new(i, Path.GetFileNameWithoutExtension(path),
+                result.Add(path, new(i, AsarSymbolName.FromPath(path),
                     ResourceType.GeneralResource, b));
                 i++;
             }
@@ -227,7 +229,7 @@ namespace DynamicXtremeLibrary.Infos
                     size = b.Length;
                 }
                 poses.Add(new(idOffset + fInd,
-                    $"{Path.GetFileNameWithoutExtension(PoseGraphics[gfxInd]).Split('.')[0]}{fInd:D3}",
+                    $"{AsarSymbolName.FromPath(PoseGraphics[gfxInd])}{fInd:D3}",
                     ResourceType.DynamicPose, b));
                 fInd++;
                 index = newVal;

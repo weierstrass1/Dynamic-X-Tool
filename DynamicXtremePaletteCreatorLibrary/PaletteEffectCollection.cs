@@ -20,7 +20,7 @@ namespace DynamicXtremePaletteCreatorLibrary
             try
             {
                 var pec = JsonSerializer.Deserialize<PaletteEffectCollection>(jsonContent.Trim());
-                if (pec == null)
+                if (pec == null || pec.Effects == null || pec.Effects.Any(effect => effect == null))
                     return false;
                 Effects = pec.Effects;
                 return true;

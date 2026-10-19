@@ -1,4 +1,5 @@
 ﻿using DynamicXtremeLibrary.Infos;
+using DynamicXtremeLibrary.Defines;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using LogRegister;
 using System.Collections.Generic;
@@ -18,13 +19,23 @@ namespace DynamicXtremeLibrary.Readers
         }
         public IReadOnlyList<DrawInfo> GetAllDrawInfos(string drawInfoDirectory, out bool validation)
         {
-            string[] paths = Directory.GetFiles(drawInfoDirectory, "*.drawinfo");
-            if(paths == null || paths.Length == 0)
+            string[] paths = [.. Directory.GetFiles(drawInfoDirectory, "*.drawinfo")
+                .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
+                .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
+            if (paths == null || paths.Length == 0)
             {
                 validation = true;
                 return new List<DrawInfo>().AsReadOnly();
             }
-            _logRegisterSystem.Add(new Title("Reading DrawInfo files"));
+            _logRegisterSystem.Add(new Title("Reading DrawInfo files")
+            {
+                AppearInErrors = true                
+            });
+            if (!AsarSymbolName.ValidateUnique(paths, _logRegisterSystem))
+            {
+                validation = false;
+                return Array.Empty<DrawInfo>();
+            }
             List<DrawInfo> drawInfos = [];
             DrawInfo[] dis;
             validation = true;
@@ -57,13 +68,23 @@ namespace DynamicXtremeLibrary.Readers
         }
         public IReadOnlyList<DynamicInfo> GetAllDynamicInfos(string dynamicInfoDirectory, string resourceDirectory, out bool validation)
         {
-            string[] paths = Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo");
-            if(paths == null || paths.Length == 0)
+            string[] paths = [.. Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo")
+                .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
+                .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
+            if (paths == null || paths.Length == 0)
             {
                 validation = true;
                 return new List<DynamicInfo>().AsReadOnly();
             }
-            _logRegisterSystem.Add(new Title("Reading DynamicInfo files"));
+            _logRegisterSystem.Add(new Title("Reading DynamicInfo files")
+            {
+                AppearInErrors = true
+            });
+            if (!AsarSymbolName.ValidateUnique(paths, _logRegisterSystem))
+            {
+                validation = false;
+                return Array.Empty<DynamicInfo>();
+            }
             List<DynamicInfo> dynamicInfos = [];
             validation = true;
             DynamicInfo? di;
@@ -80,6 +101,20 @@ namespace DynamicXtremeLibrary.Readers
                 _logRegisterSystem.Add(new SuccessfullyProcessedFile(path));
                 dynamicInfos.Add(di);
             }
+            bool generatedNamesAreValid =
+                AsarSymbolName.ValidateUnique(
+                    dynamicInfos.SelectMany(info => info.PoseGraphics ?? []),
+                    _logRegisterSystem) &
+                AsarSymbolName.ValidateUnique(
+                    dynamicInfos.SelectMany(info => info.Palettes ?? [])
+                        .Distinct(StringComparer.OrdinalIgnoreCase),
+                    _logRegisterSystem) &
+                AsarSymbolName.ValidateUnique(
+                    dynamicInfos.SelectMany(info => info.Resources ?? [])
+                        .Distinct(StringComparer.OrdinalIgnoreCase),
+                    _logRegisterSystem);
+            if (!generatedNamesAreValid)
+                validation = false;
             return dynamicInfos.AsReadOnly();
         }
         public DynamicInfo? ReadDynamicInfo(string path, out bool validation)
@@ -184,7 +219,7 @@ namespace DynamicXtremeLibrary.Readers
                         return null;
                 }
             }
-            DynamicInfo di = new(Path.GetFileNameWithoutExtension(path))
+            DynamicInfo di = new(AsarSymbolName.FromPath(path))
             {
                 Palettes = [.. palettes],
                 PoseGraphics = [.. posesGraphics],
@@ -370,8 +405,18 @@ namespace DynamicXtremeLibrary.Readers
                         dradd = readDrawInfoCurrent(idoff, i, lines, out i, path, out validation);
                         if (!validation)
                             return [];
-                        idoff += dradd.Count();
-                        dis.AddRange(dradd);
+                        foreach (DrawInfo drawInfo in dradd)
+                        {
+                            int existingIndex = dis.FindIndex(di => di.ContextName == drawInfo.ContextName && di.Name == drawInfo.Name);
+                            if (existingIndex >= 0)
+                            {
+                                drawInfo.ID = dis[existingIndex].ID;
+                                dis[existingIndex] = drawInfo;
+                                continue;
+                            }
+                            drawInfo.ID = idoff++;
+                            dis.Add(drawInfo);
+                        }
                         isLegacy = false;
                         break;
                 }
@@ -387,7 +432,7 @@ namespace DynamicXtremeLibrary.Readers
                     .Union(sizes.Keys)
                     .Distinct()
                     .ToList();
-            string context = Path.GetFileNameWithoutExtension(path);
+            string context = AsarSymbolName.FromPath(path);
 
             foreach (var name in names)
             {
@@ -508,7 +553,7 @@ namespace DynamicXtremeLibrary.Readers
             Regex legDI = dynInfoLegacy();
             Regex table = numberTableRegex();
             int[] vals;
-            for (outLine = line + 1; outLine + 1 < content.Length; outLine += 2) 
+            for (outLine = line + 1; outLine < content.Length; outLine++)
             {
                 if (string.IsNullOrWhiteSpace(content[outLine]))
                     continue;
@@ -529,26 +574,36 @@ namespace DynamicXtremeLibrary.Readers
                     _logRegisterSystem.Add(new SyntaxError(path, outLine, content[outLine], "Repeated Frame"));
                     return posechunkSizes.Values.ToList().AsReadOnly();
                 }
-                if (!table.IsMatch(content[outLine + 1]))
+                int valuesLine = outLine + 1;
+                while (valuesLine < content.Length && string.IsNullOrWhiteSpace(content[valuesLine]))
+                    valuesLine++;
+                if (valuesLine >= content.Length || isDynamicInfoLabel(content[valuesLine]))
                 {
                     validation = false;
-                    _logRegisterSystem.Add(new SyntaxError(path, outLine + 1, content[outLine + 1]));
+                    _logRegisterSystem.Add(new SyntaxError(path, outLine, content[outLine], "Incomplete PosesChunksSizes structure"));
                     return posechunkSizes.Values.ToList().AsReadOnly();
                 }
-                if (content[outLine + 1][0..2] != "db")
+                if (!table.IsMatch(content[valuesLine]))
                 {
                     validation = false;
-                    _logRegisterSystem.Add(new SyntaxError(path, outLine + 1, content[outLine + 1], "Should use db"));
+                    _logRegisterSystem.Add(new SyntaxError(path, valuesLine, content[valuesLine]));
                     return posechunkSizes.Values.ToList().AsReadOnly();
                 }
-                vals = HexReader.GetValues(content[outLine + 1]);
+                if (content[valuesLine][0..2] != "db")
+                {
+                    validation = false;
+                    _logRegisterSystem.Add(new SyntaxError(path, valuesLine, content[valuesLine], "Should use db"));
+                    return posechunkSizes.Values.ToList().AsReadOnly();
+                }
+                vals = HexReader.GetValues(content[valuesLine]);
                 if(vals.Length != 2)
                 {
                     validation = false;
-                    _logRegisterSystem.Add(new SyntaxError(path, outLine + 1, content[outLine + 1], "You Should use 2 values per PosesChunksSizes"));
+                    _logRegisterSystem.Add(new SyntaxError(path, valuesLine, content[valuesLine], "You Should use 2 values per PosesChunksSizes"));
                     return posechunkSizes.Values.ToList().AsReadOnly();
                 }
                 posechunkSizes.Add(content[outLine], (vals[0], vals[1]));
+                outLine = valuesLine;
             }
             return posechunkSizes.Values.ToList().AsReadOnly();
         }
@@ -569,7 +624,7 @@ namespace DynamicXtremeLibrary.Readers
                 if (isDynamicInfoLabel(content[outLine]))
                 {
                     outLine--;
-                    return numberOf16x16TilesPerPose.AsReadOnly();
+                    break;
                 }
                 m = table.Match(content[outLine]);
                 if(!m.Success)
@@ -617,6 +672,13 @@ namespace DynamicXtremeLibrary.Readers
                     numberOf16x16TilesPerPose.Add(i, $"{tiles}{modifier}");
                 }
             }
+            int[] poseIDs = [.. numberOf16x16TilesPerPose.Keys.Order()];
+            if (!poseIDs.SequenceEqual(Enumerable.Range(0, poseIDs.Length)))
+            {
+                validation = false;
+                _logRegisterSystem.Add(new SyntaxError(path, line, content[line],
+                    "Pose IDs must be consecutive and start at 0"));
+            }
             return numberOf16x16TilesPerPose;
         }
         private Dictionary<string, (List<int>, List<int>)> readDrawInfoTable(string suffix, int line, string[] content, out int outLine, string path, out bool validation, string? allowFlip = null)
@@ -646,7 +708,7 @@ namespace DynamicXtremeLibrary.Readers
                 {
                     mSuccess = m;
                     poseName = content[outLine].Split('_')[0];
-                    table.Add(poseName, ([], []));
+                    table.TryAdd(poseName, ([], []));
                     continue;
                 }
                 else if(poseName == null)
@@ -705,7 +767,7 @@ namespace DynamicXtremeLibrary.Readers
             outLine = line;
             if (m.Groups["end"].Success)
             {
-                int.Parse(m.Groups["end"].Value);
+                end = int.Parse(m.Groups["end"].Value);
                 if (start > end)
                 {
                     validation = false;
@@ -760,7 +822,7 @@ namespace DynamicXtremeLibrary.Readers
                 if (isDrawInfoLabel(content[outLine]))
                 {
                     outLine--;
-                    return [];
+                    break;
                 }
                 if (content[outLine] == ".IsStatic")
                 {
@@ -918,6 +980,7 @@ namespace DynamicXtremeLibrary.Readers
                     xdispsFlip[i] = xpivot.Value - 8 - xdisps[i];
                     if (sizes[i] == 0)
                         xdispsFlip[i] += 8;
+                    xdispsFlip[i] = (byte)xdispsFlip[i];
                 }
             }
             if (ypivot != null)
@@ -928,12 +991,13 @@ namespace DynamicXtremeLibrary.Readers
                     ydispsFlip[i] = ypivot.Value - 8 - ydisps[i];
                     if (sizes[i] == 0)
                         ydispsFlip[i] += 8;
+                    ydispsFlip[i] = (byte)ydispsFlip[i];
                 }
             }
             List<DrawInfo> dis = [];
             for (int i = start; i <= end; i++, offset++)
             {
-                dis.Add(new DrawInfo(offset, Path.GetFileNameWithoutExtension(path), $"{name}{i}")
+                dis.Add(new DrawInfo(offset, AsarSymbolName.FromPath(path), $"{name}{i}")
                 {
                     IsDynamic = isDynamic,
                     Tiles = tileCodes,
@@ -956,13 +1020,13 @@ namespace DynamicXtremeLibrary.Readers
         private static partial Regex dynInfoLegacy();
         [GeneratedRegex(@"(db (\$[a-fA-F0-9]{2}|[0-9]+)(,(\$[a-fA-F0-9]{2}|[0-9]+))*|dw (\$[a-fA-F0-9]{4}|[0-9]+)(,(\$[a-fA-F0-9]{4}|[0-9]+))*|dl (\$[a-fA-F0-9]{6}|[0-9]+)(,(\$[a-fA-F0-9]{6}|[0-9]+))*)")]
         private static partial Regex numberTableRegex();
-        [GeneratedRegex(@"\.Pose(?<start>\d+)(\.\.(?<end>\d+))? (?<tiles>\d+)(?<modifier>(q3|h|q))?")]
+        [GeneratedRegex(@"^\.Pose(?<start>\d+)(?:\.\.(?<end>\d+))? (?<tiles>\d+)(?<modifier>q3|h|q)?$")]
         private static partial Regex dynInfoCurrent();
-        [GeneratedRegex(@"(?<name>[a-zA-Z][a-zA-Z0-9]*)_Pose(?<start>\d+)(?<end>\.\.\d+)?:")]
+        [GeneratedRegex(@"^(?<name>[a-zA-Z][a-zA-Z0-9]*)_Pose(?<start>\d+)(?:\.\.(?<end>\d+))?:$")]
         private static partial Regex drawInfoCurrent();
-        [GeneratedRegex(@"\.NumberOfTiles: (?<tiles>\d+)")]
+        [GeneratedRegex(@"^\.NumberOfTiles: (?<tiles>\d+)$")]
         private static partial Regex numOfTilesRegex();
-        [GeneratedRegex(@"\.(?<directives>[a-zA-Z]+)((?<start>\d+)(\.\.(?<end>\d+))?)?:? (?<values>(\$[a-fA-F0-9]{2}|\d+)(,(\$[a-fA-F0-9]{2}|\d+))*)")]
+        [GeneratedRegex(@"^\.(?<directives>[a-zA-Z]+)((?<start>\d+)(\.\.(?<end>\d+))?)?:? (?<values>(\$[a-fA-F0-9]{2}|\d+)(,(\$[a-fA-F0-9]{2}|\d+))*)$")]
         private static partial Regex directiveRegex();
     }
 }

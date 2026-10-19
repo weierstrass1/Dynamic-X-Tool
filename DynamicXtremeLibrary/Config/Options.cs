@@ -92,10 +92,10 @@ namespace DynamicXtremeLibrary.Config
             if (useSettings)
             {
                 useSettings = InputRomPath.Validate(InputRomPath.Value) &&
-                    OutputRomPath.Validate(InputRomPath.Value) &&
-                    PixiPath.Validate(InputRomPath.Value) &&
-                    UberasmPath.Validate(InputRomPath.Value) &&
-                    GPSPath.Validate(InputRomPath.Value);
+                    OutputRomPath.Validate(OutputRomPath.Value) &&
+                    PixiPath.Validate(PixiPath.Value) &&
+                    UberasmPath.Validate(UberasmPath.Value) &&
+                    GPSPath.Validate(GPSPath.Value);
                 foreach (var option in BoolOptions)
                 {
                     if (!option.Validate($"{option.Value}"))
@@ -104,6 +104,9 @@ namespace DynamicXtremeLibrary.Config
             }
             if (!useSettings)
             {
+                PixiPath.GetFromSettings = false;
+                UberasmPath.GetFromSettings = false;
+                GPSPath.GetFromSettings = false;
                 if (!InputRomPath.ObtainValue()) return false;
                 if (!OutputRomPath.ObtainValue()) return false;
                 if (!PixiPath.ObtainValue()) return false;

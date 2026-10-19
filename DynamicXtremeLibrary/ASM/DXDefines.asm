@@ -403,12 +403,19 @@ incsrc "./Macros/MultAndDiv.asm"
 if !DynamicPoses
 incsrc "./Macros/DynamicSpritesMacros.asm"
 endif
+
 if !PalettesChange
-if !PalettesEffects
-incsrc "./Macros/Palettes.asm"
+incsrc "./Macros/PalettesMacros.asm"
 endif
+
+if !PalettesEffects
+incsrc "./Macros/PaletteEffectsMacros.asm"
+endif
+
+if !PalettesChange || !GraphicsChange
 incsrc "./Macros/PPU.asm"
 endif
+
 if !DrawingSystem
 incsrc "./Macros/GraphicRoutinesMacros.asm"
 endif

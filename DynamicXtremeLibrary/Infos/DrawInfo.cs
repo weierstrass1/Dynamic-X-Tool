@@ -6,7 +6,7 @@ namespace DynamicXtremeLibrary.Infos
 {
     public class DrawInfo
     {
-        public int ID { get; private set; }
+        public int ID { get; internal set; }
         public bool IsDynamic { get; set; } = false;
         public string ContextName { get; set; }
         public string Name { get; private set; }
@@ -23,11 +23,11 @@ namespace DynamicXtremeLibrary.Infos
             ContextName = contextName;
             Name = name;
         }
-        public bool OneTile() => Tiles != null && Tiles.Length == 1;
-        public bool HasXDisplacement() => XDisplacements != null || !EqualArrays(XDisplacements, FlipXDisplacements);
-        public bool HasYDisplacement() => YDisplacements != null || !EqualArrays(YDisplacements, FlipYDisplacements);
-        public bool HasXFlip() => FlipXDisplacements != null && !EqualArrays(XDisplacements, FlipXDisplacements);
-        public bool HasYFlip() => FlipYDisplacements != null && !EqualArrays(YDisplacements, FlipYDisplacements);
+        public bool OneTile() => GetLength() == 1;
+        public bool HasXDisplacement() => XDisplacements != null && XDisplacements.Length > 0;
+        public bool HasYDisplacement() => YDisplacements != null && YDisplacements.Length > 0;
+        public bool HasXFlip() => FlipXDisplacements != null && FlipXDisplacements.Length > 0 && !EqualArrays(XDisplacements, FlipXDisplacements);
+        public bool HasYFlip() => FlipYDisplacements != null && FlipYDisplacements.Length > 0 && !EqualArrays(YDisplacements, FlipYDisplacements);
         public bool HasXYFlip() => HasXFlip() && HasYFlip();
         public bool HasProperties() => Properties != null && Properties!.FirstOrDefault(p => p != 0) != default;
         public bool HasSizes() => Sizes != null;
@@ -76,19 +76,27 @@ namespace DynamicXtremeLibrary.Infos
                 logging.Add(new ValueExceedsLimit(ContextName, "Flip Y Displacement", value, 255));
                 validation = false;
             }
-            if (!validateValues(Sizes, 0x02, out value))
+            if (!validateAllowedValues(Sizes, [0x00, 0x02], out value))
             {
-                logging.Add(new ValueExceedsLimit(ContextName, "Size", value, 2));
+                logging.Add(new ValueNotAllowed(ContextName, "Size", value, [0x00, 0x02]));
                 validation = false;
             }
 
             int l = GetLength();
 
-            if ((Tiles != null && Tiles.Length != l) ||
-                (Properties != null && Properties.Length != l) ||
-                (XDisplacements != null && XDisplacements.Length != l) ||
-                (YDisplacements != null && YDisplacements.Length != l) ||
-                (Sizes != null && Sizes.Length != l))
+            if (l > 128)
+            {
+                logging.Add(new ValueExceedsLimit(ContextName, "Number of tiles", l, 128));
+                validation = false;
+            }
+
+            if (hasInvalidLength(Tiles, l) ||
+                hasInvalidLength(Properties, l) ||
+                hasInvalidLength(XDisplacements, l) ||
+                hasInvalidLength(YDisplacements, l) ||
+                hasInvalidLength(FlipXDisplacements, l) ||
+                hasInvalidLength(FlipYDisplacements, l) ||
+                hasInvalidLength(Sizes, l))
             {
                 logging.Add(new DrawInfoInconsistentTableSizes(ContextName));
                 validation = false;
@@ -132,44 +140,59 @@ namespace DynamicXtremeLibrary.Infos
         }
         public override string ToString() => $"{ID}_{ContextName}_{Name}";
         public int GetLength()
-            => Tiles != null ? Tiles.Length :
-                Properties != null ? Properties.Length :
-                XDisplacements != null ? XDisplacements.Length :
-                YDisplacements != null ? YDisplacements.Length :
-                Sizes != null ? Sizes.Length : 1;
+        {
+            if (Tiles is { Length: > 0 })
+                return Tiles.Length;
+            if (Properties is { Length: > 0 })
+                return Properties.Length;
+            if (XDisplacements is { Length: > 0 })
+                return XDisplacements.Length;
+            if (YDisplacements is { Length: > 0 })
+                return YDisplacements.Length;
+            if (FlipXDisplacements is { Length: > 0 })
+                return FlipXDisplacements.Length;
+            if (FlipYDisplacements is { Length: > 0 })
+                return FlipYDisplacements.Length;
+            if (Sizes is { Length: > 0 })
+                return Sizes.Length;
+            return 1;
+        }
+        private static bool hasInvalidLength(int[]? table, int expectedLength)
+            => table is { Length: > 0 } && table.Length != expectedLength;
         public int GetRenderBoxXDistanceOutOfScreen()
             => getRenderBoxDistanceOutOfScreen(XDisplacements, FlipXDisplacements);
         public int GetRenderBoxYDistanceOutOfScreen()
             => getRenderBoxDistanceOutOfScreen(YDisplacements, FlipYDisplacements);
-        private static int getRenderBoxDistanceOutOfScreen(int[]? disps, int[]? flipdisps)
+        private int getRenderBoxDistanceOutOfScreen(int[]? disps, int[]? flipdisps)
         {
-            if (disps == null || disps.Length == 0)
+            int minEdge = 0;
+            int maxEdge = 0;
+            int length = GetLength();
+
+            for (int i = 0; i < length; i++)
             {
-                return 16;
-            }
-            int min = int.MaxValue;
-            int max = int.MinValue;
-            int v;
-            foreach (var x in disps)
-            {
-                v = x < 128 ? x : 1 + (x^0xFF);
-                if (v < min)
-                    min = v;
-                if (v > max)
-                    max = v;
-            }
-            if (flipdisps != null && flipdisps.Length > 0)
-            {
-                foreach (var x in flipdisps)
+                int tileSize = Sizes is { Length: > 0 } && Sizes[i] == 0 ? 8 : 16;
+                int displacement = disps is { Length: > 0 }
+                    ? toSignedByte(disps[i])
+                    : 0;
+                updateEdges(displacement, tileSize, ref minEdge, ref maxEdge);
+
+                if (flipdisps is { Length: > 0 })
                 {
-                    v = x < 128 ? x : 1 + (x ^ 0xFF);
-                    if (v < min)
-                        min = v;
-                    if (v > max)
-                        max = v;
+                    int flipDisplacement = toSignedByte(flipdisps[i]);
+                    updateEdges(flipDisplacement, tileSize, ref minEdge, ref maxEdge);
                 }
             }
-            return Math.Max(Math.Abs(min), max + 16);
+
+            return Math.Max(Math.Abs(minEdge), maxEdge);
+        }
+        private static int toSignedByte(int value)
+            => value < 0x80 ? value : value - 0x100;
+        private static void updateEdges(int displacement, int tileSize,
+            ref int minEdge, ref int maxEdge)
+        {
+            minEdge = Math.Min(minEdge, displacement);
+            maxEdge = Math.Max(maxEdge, displacement + tileSize);
         }
         public static int GetMaximumRenderBoxXDistanceOutOfScreen(IEnumerable<DrawInfo> list)
             => maximumValue(list
@@ -200,10 +223,12 @@ namespace DynamicXtremeLibrary.Infos
             }
             return groups;
         }
-        public bool EqualArrays(int[] arr1, int[] arr2)
+        public bool EqualArrays(int[]? arr1, int[]? arr2)
         {
             if (arr1 == null && arr2 == null)
                 return true;
+            if (arr1 == null || arr2 == null)
+                return false;
             if (arr1.Length != arr2.Length)
                 return false;
             for (int i = 0; i < arr1.Length; i++)
@@ -211,6 +236,19 @@ namespace DynamicXtremeLibrary.Infos
                 if (arr1[i] != arr2[i])
                     return false;
             }
+            return true;
+        }
+        private static bool validateAllowedValues(int[]? values, int[] allowedValues, out int res)
+        {
+            res = -1;
+            if (values == null)
+                return true;
+            foreach (int value in values)
+                if (!allowedValues.Contains(value))
+                {
+                    res = value;
+                    return false;
+                }
             return true;
         }
     }

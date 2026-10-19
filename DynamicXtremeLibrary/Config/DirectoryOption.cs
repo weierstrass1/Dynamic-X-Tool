@@ -16,7 +16,9 @@
         }
         public override bool Validate(string value)
         {
-            if(Path.GetExtension(value) != ".exe" && !GetFromSettings)
+            if (string.IsNullOrWhiteSpace(value))
+                return true;
+            if (Path.GetExtension(value) != ".exe" && !GetFromSettings)
                 return false;
             string? directory = Path.GetDirectoryName(value);
             return string.IsNullOrWhiteSpace(directory) || Directory.Exists(directory);

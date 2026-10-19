@@ -1,7 +1,10 @@
 ﻿using DynamicXtremeLibrary;
 using DynamicXtremeLibrary.Config;
+using DynamicXtremeLibrary.Logging.Categories;
 using DynamicXtremeLibrary.Logging.Wrappers;
 using LogRegister;
+using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace DynamicXtremeTool
 {
@@ -11,10 +14,57 @@ namespace DynamicXtremeTool
         {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
 
-            var opt = Options.Instance;
+            bool useSettings = false;
+            bool verbose = false;
+           
+            if(args != null && args.Length > 0)
+            {
+                var lowerArgs = args.Select(a => a.ToLower().Trim());
+                if(lowerArgs.Count() == 1)
+                {
+                    string command = lowerArgs.First();
+                    string message = "";
+                    if (command == "-version")
+                    {
+                        string stringversion = Assembly.GetExecutingAssembly()
+                            .GetName()
+                            .Version?
+                            .ToString() ?? "Unknown";
+                        message = $"Current version: {stringversion}";
+                    }
+                    else if(command == "-help")
+                    {
+                        message = """
+                            Usage:
+                            dxt [options]
 
-            if(!opt.SettingsForm(args != null && args.Length > 0 && 
-                args[0].ToLower().Trim() == "-use-settings"))
+                            Options:
+                            -help
+                            Show this help message.
+
+                            -version
+                            Show the current application version.
+
+                            -use-settings, -us
+                            Use the settings defined in the Settings file.
+
+                            -verbose, -v
+                            Enable verbose logging and display detailed execution information.
+                            """;
+                    }
+                    if (command == "-version" || command == "-help")
+                    {
+                        Console.WriteLine(message);
+                        Console.ResetColor();
+                        Console.Read();
+                        return;
+                    }
+                }
+                useSettings = lowerArgs.Any(a => a == "-use-settings" || a == "-us");
+                verbose = lowerArgs.Any(a => a == "-v" || a == "-verbose");
+            }
+            var opt = Options.Instance;
+            if(!opt.SettingsForm(useSettings))
             {
                 Console.WriteLine("The process was interrupted.");
                 Console.ResetColor();
@@ -58,7 +108,8 @@ namespace DynamicXtremeTool
             MultiWrapper mw = new();
             mw.Actions += ConsoleWrapper.RenderAction;
             mw.Actions += rawText.RenderAction;
-            renderer.RenderAll(logRegisterSystem.GetRegisters(), mw.RenderAction);
+            bool hasErrors = logRegisterSystem.HasLogsOfType<Error>();
+            renderer.RenderAll(logRegisterSystem.GetRegisters(), mw.RenderAction, error: hasErrors, verbose: verbose);
             File.WriteAllText("log.txt", rawText.ToString());
             Console.ResetColor();
             Console.Read();

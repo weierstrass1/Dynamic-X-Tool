@@ -84,7 +84,9 @@ namespace DynamicXtremeLibrary
 
             IReadOnlyList<PaletteEffectCollection>? palEffects = null;
             if (boolOpts["PalettesEffects"])
-                palEffects = processPaletteEffects();
+                palEffects = processPaletteEffects(out validation);
+            if (!validation)
+                return false;
 
             File.WriteAllBytes(tmpROM, rom);
 
@@ -125,19 +127,29 @@ namespace DynamicXtremeLibrary
 
             printSummary(patchResult, allRefs, drawInfos, dynamicInfos, allGrs, palEffects);
 
-            ExternalToolsLinker linker = new(TemplateASMDirectory,
-                ExtraDefinesDirectory,
+            string outputROM = opt.OutputRomPath.Value;
+            string backupROM = $"{outputROM}.bak";
+
+            if (File.Exists(outputROM))
+                File.Replace(tmpROM, outputROM, backupROM);
+            else
+                File.Move(tmpROM, outputROM);
+
+            ExternalToolsLinker linker = new(TemplateASMDirectory, ExtraDefinesDirectory,
                 RoutinesDirectory);
+
             linker.PixiLinker();
             linker.GPSLinker();
             linker.UberASMToolLinker();
 
-            File.Replace(tmpROM, opt.OutputRomPath.Value, $"{opt.OutputRomPath.Value}.bak");
             return true;
         }
-        private IReadOnlyList<PaletteEffectCollection> processPaletteEffects()
+        private IReadOnlyList<PaletteEffectCollection> processPaletteEffects(out bool validation)
         {
-            IReadOnlyList<PaletteEffectCollection>? palEffects = PaletteEffectExtension.GetCollections(PaletteEffectsDirectory);
+            IReadOnlyList<PaletteEffectCollection> palEffects = PaletteEffectExtension.GetCollections(
+                PaletteEffectsDirectory, _log, out validation);
+            if (!validation)
+                return palEffects;
             PaletteEffectExtension.ToFile(_log, palEffects,
                                 Path.Combine(PatchDirectory, DataDirectory, $"{PaletteEffectsDataFilename}.asm"));
             return palEffects;
@@ -145,6 +157,13 @@ namespace DynamicXtremeLibrary
         private void processDynamicInfos(byte[] rom, ReadInfo ri, out bool validation, out IReadOnlyList<DynamicInfo>? dynamicInfos, out IReadOnlyList<Resource>? resources, out IReadOnlyList<ResourceBuffer>? buffers, out ResourceAllReferences? allRefs)
         {
             dynamicInfos = ri.GetAllDynamicInfos(DynamicInfoDirectory, DynamicResourcesDirectory, out validation);
+            if(!validation)
+            {
+                resources = null;
+                buffers = null;
+                allRefs = null;
+                return;
+            }
             string dataDir = Path.Combine(PatchDirectory, DataDirectory);
             if(dynamicInfos == null)
             {
@@ -160,6 +179,11 @@ namespace DynamicXtremeLibrary
             resources = DynamicInfo.GetAllResources(dynamicInfos);
             buffers = ResourceManager.MergeResources(resources);
             allRefs = ResourceManager.InsertBuffers(_log, rom, buffers);
+            if (allRefs == null)
+            {
+                validation = false;
+                return;
+            }
             string bufferTable = ResourceManager.BuildBufferTable(allRefs.Buffers);
             string dynamicPoseData = DynamicPoseDataGenerator.GenerateData(
                 SNESROMUtils.GetMapper(rom), allRefs.DynamicPoses, dynamicInfos);
@@ -176,13 +200,23 @@ namespace DynamicXtremeLibrary
         private void processDrawInfos(ReadInfo ri, out bool validation, out IReadOnlyList<DrawInfo>? drawInfos, out IEnumerable<GraphicRoutine>? allGrs)
         {
             drawInfos = ri.GetAllDrawInfos(DrawInfoDirectory, out validation);
-            if (drawInfos.Count == 0)
+            if (drawInfos.Count == 0 || !validation)
             {
                 drawInfos = null;
                 allGrs = null;
                 return;
             }
             var graphicRoutines = GraphicRoutine.GetGraphicRoutines(drawInfos);
+            GraphicRoutine[] generatedRoutines = [.. graphicRoutines
+                .SelectMany(kvp => kvp.Value)];
+            if (generatedRoutines.Length > 256)
+            {
+                _log.Add(new ValueExceedsLimit("Drawing system", "Number of graphic routines",
+                    generatedRoutines.Length, 256));
+                validation = false;
+                allGrs = null;
+                return;
+            }
             GraphicRoutineGenerator grg = new(
                 Path.Combine(TemplateASMDirectory, $"{GraphicRoutineIncludeTemplateFilename}.asm"),
                 Path.Combine(TemplateASMDirectory, $"{GraphicRoutineTemplateFilename}.asm"),
@@ -191,8 +225,7 @@ namespace DynamicXtremeLibrary
                 $"{GraphicRoutineProtsFilename}.asm");
             grg.GenerateAllGraphicRoutine(graphicRoutines);
 
-            allGrs = graphicRoutines
-                .SelectMany(kvp => kvp.Value);
+            allGrs = generatedRoutines;
 
             string poseData = PoseDataGenerator.GenerateData(allGrs, Path.Combine(TemplateASMDirectory, PoseDataTemplateFilename));
             File.WriteAllText(Path.Combine(PatchDirectory, DataDirectory, $"{PoseDataFilename}.asm"), poseData);
@@ -238,7 +271,10 @@ namespace DynamicXtremeLibrary
                     grSizes += int.Parse(patchResult[i]);
                 }
             }
-            _log.Add(new Title("Summary"));
+            _log.Add(new Title("Summary")
+            {
+                AppearWithoutVerbose = true
+            });
             _log.Add(new NumberOf("Drawable Poses", dis == null ? 0 : dis.Count()));
             _log.Add(new NumberOf("Graphic Routines", grs == null ? 0 : grs.Count(), grSizes));
             _log.Add(new NumberOf("Dynamic Poses", 

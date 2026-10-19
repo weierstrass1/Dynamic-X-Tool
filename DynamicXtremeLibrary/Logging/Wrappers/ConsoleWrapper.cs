@@ -1,12 +1,14 @@
-﻿using LogRegister;
-using DynamicXtremeLibrary.Logging.Categories;
+﻿using DynamicXtremeLibrary.Logging.Categories;
+using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.Wrappers
 {
     public class ConsoleWrapper
     {
-        public static void RenderAction(string text, ILogCategory category, SpanType type)
+        public static void RenderAction(string text, ILogCategory category, SpanType type, bool mustWrite = false)
         {
+            if (!mustWrite)
+                return;
             if (type == SpanType.Prefix)
                 return;
             ConsoleColor color;

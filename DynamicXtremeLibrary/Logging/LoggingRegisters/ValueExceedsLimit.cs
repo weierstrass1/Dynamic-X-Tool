@@ -5,10 +5,10 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class ValueExceedsLimit : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => true;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Error();
-
         public string MessageType => "VALUE EXCEEDS LIMIT";
-
         public IReadOnlyDictionary<string, string> Parameters { get; }
         public ValueExceedsLimit(string context, string parameter, int value, int limit)
         {

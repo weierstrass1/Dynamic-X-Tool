@@ -5,6 +5,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class NotEnoughSpaceInROM : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => true;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Error();
         public string MessageType => "NOT ENOUGH SPACE IN ROM";
         public IReadOnlyDictionary<string, string> Parameters { get; }

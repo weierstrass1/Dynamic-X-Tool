@@ -2169,16 +2169,16 @@ RTL
 	dw .MixRGB
 	dw .MixHSL
 	dw .MixRG
-	dw .MixRB
-	dw .MixGB
-	dw .MixHL
 	dw .MixHS
+	dw .MixRB
+	dw .MixHL
+	dw .MixGB
 	dw .MixSL
 	dw .MixR
-	dw .MixG
-	dw .MixB
 	dw .MixH
+	dw .MixG
 	dw .MixS
+	dw .MixB
 	dw .MixL
 	dw .PalTransitionRGB
 	dw .PalTransitionHSL
@@ -2372,16 +2372,16 @@ RTL
 	dw .MixRGB
 	dw .MixHSL
 	dw .MixRG
-	dw .MixRB
-	dw .MixGB
-	dw .MixHL
 	dw .MixHS
+	dw .MixRB
+	dw .MixHL
+	dw .MixGB
 	dw .MixSL
 	dw .MixR
-	dw .MixG
-	dw .MixB
 	dw .MixH
+	dw .MixG
 	dw .MixS
+	dw .MixB
 	dw .MixL
 	dw .PalTransitionRGB
 	dw .PalTransitionHSL

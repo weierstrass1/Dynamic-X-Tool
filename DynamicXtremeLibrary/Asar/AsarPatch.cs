@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace DynamicXtremeLibrary.Asar
@@ -7,9 +8,7 @@ namespace DynamicXtremeLibrary.Asar
     {
         public async static Task<(bool, string)> Run()
         {
-            string asarPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Path.Combine(AppContext.BaseDirectory, "Asar", "asar.exe")
-                : Path.Combine(AppContext.BaseDirectory, "Asar", "asar");
+            string asarPath = EnsureExecutable();
 
             ProcessStartInfo psi = new()
             {
@@ -40,6 +39,32 @@ namespace DynamicXtremeLibrary.Asar
             bool success = string.IsNullOrWhiteSpace(stderr);
 
             return (success, stdout + stderr);
+        }
+        private static string EnsureExecutable()
+        {
+            string asarPath = Path.Combine(AppContext.BaseDirectory, "Asar", "asar.exe");
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return asarPath;
+
+            asarPath = Path.Combine(AppContext.BaseDirectory, "Asar", "asar");
+
+            using Process chmod = new()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "chmod",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            chmod.StartInfo.ArgumentList.Add("+x");
+            chmod.StartInfo.ArgumentList.Add(asarPath);
+
+            chmod.Start();
+            chmod.WaitForExit();
+
+            return asarPath;
         }
     }
 }

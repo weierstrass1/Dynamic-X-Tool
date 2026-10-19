@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <AssemblyVersion>1.0.0.180</AssemblyVersion>
-    <FileVersion>1.0.0.180</FileVersion>
+    <AssemblyVersion>1.0.0.205</AssemblyVersion>
+    <FileVersion>1.0.0.205</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -123,7 +123,13 @@
     <None Update="Patch\ExtraDefines\Macros\MultAndDiv.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Patch\ExtraDefines\Macros\PaletteEffectsMacros.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Patch\ExtraDefines\Macros\Palettes.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Patch\ExtraDefines\Macros\PalettesMacros.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Patch\ExtraDefines\Macros\PalettesOld.asm">

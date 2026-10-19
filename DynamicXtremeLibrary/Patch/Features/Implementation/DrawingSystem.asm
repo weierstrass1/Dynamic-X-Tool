@@ -19,7 +19,7 @@ elseif <DefaultXdisp>
 JML Routines_Draw_Return
 +
     LDA !TileSize
-    STA !Iterator
+    STA !Iterator+1
 elseif <DefaultYdisp>
     STZ !TileY
     JSL Routines_YIsValid
@@ -263,7 +263,7 @@ if <FlipX> && <FlipY>
         %GRSection("<IsDynamic>", "<DefaultXdisp>", "<DefaultYdisp>", ".XDisplacements", ".YDisplacements", "<DefaultTile>", "<DefaultProp>", "<DefaultSize>", "<Size16>")
     .Flip
         CMP #$C0
-        BNE .FlipXY
+        BEQ .FlipXY
         JMP .FlipXOrY
     .FlipXY
         %GRSection("<IsDynamic>", "<DefaultXdisp>", "<DefaultYdisp>", ".XDisplacementsFlip", ".YDisplacementsFlip", "<DefaultTile>", "<DefaultProp>", "<DefaultSize>", "<Size16>")

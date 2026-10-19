@@ -1,4 +1,5 @@
 ﻿using DynamicXtremeLibrary.Logging.LoggingRegisters;
+using DynamicXtremeLibrary.Defines;
 using DynamicXtremeLibrary.Readers;
 using DynamicXtremePaletteCreatorLibrary;
 using LogRegister;
@@ -8,19 +9,61 @@ namespace DynamicXtremeLibrary.PaletteEffec
 {
     public class PaletteEffectExtension
     {
-        public static IReadOnlyList<PaletteEffectCollection> GetCollections(string paletteDirectory)
+        public static IReadOnlyList<PaletteEffectCollection> GetCollections(string paletteDirectory,
+            LogRegisterSystem log, out bool validation)
         {
-            string[] paths = Directory.GetFiles(paletteDirectory, "*.paleffect");
+            string[] paths = [.. Directory.GetFiles(paletteDirectory, "*.paleffect")
+                .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
+                .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
             PaletteEffectCollection? collection;
             List<PaletteEffectCollection> res = [];
+            validation = AsarSymbolName.ValidateUnique(paths, log);
             foreach (var path in paths)
             {
                 collection = new()
                 {
-                    Name = Path.GetFileNameWithoutExtension(path)
+                    Name = AsarSymbolName.FromPath(path)
                 };
                 if (collection.Load(path))
-                    res.Add(collection);
+                {
+                    bool collectionIsValid = true;
+                    foreach (var effect in collection.Effects)
+                    {
+                        (string Parameter, int Value, int Limit)[] values =
+                        [
+                            ("Channel1", effect.Channel1, 31),
+                            ("Channel2", effect.Channel2, 31),
+                            ("Channel3", effect.Channel3, 31),
+                            ("Ratio1", effect.Ratio1, 127),
+                            ("Ratio2", effect.Ratio2, 127),
+                            ("Ratio3", effect.Ratio3, 127)
+                        ];
+                        foreach (var value in values)
+                        {
+                            if (value.Value <= value.Limit)
+                                continue;
+                            log.Add(new ValueExceedsLimit(path, value.Parameter,
+                                value.Value, value.Limit));
+                            collectionIsValid = false;
+                        }
+                        if (!Enum.IsDefined(effect.EffectType))
+                        {
+                            log.Add(new ValueNotAllowed(path, "EffectType",
+                                (int)effect.EffectType,
+                                Enum.GetValues<EffectType>().Select(type => (int)type)));
+                            collectionIsValid = false;
+                        }
+                    }
+                    if (collectionIsValid)
+                        res.Add(collection);
+                    else
+                        validation = false;
+                }
+                else
+                {
+                    validation = false;
+                    log.Add(new FailedToProcessFile(path));
+                }
             }
             return res.AsReadOnly();
         }

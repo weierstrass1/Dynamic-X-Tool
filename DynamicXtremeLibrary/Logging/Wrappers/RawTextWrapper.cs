@@ -10,7 +10,7 @@ namespace DynamicXtremeLibrary.Logging.Wrappers
         {
             builder = new();
         }
-        public void RenderAction(string text, ILogCategory category, SpanType type)
+        public void RenderAction(string text, ILogCategory category, SpanType type, bool mustWrite = false)
         {
             if (type == SpanType.Prefix)
                 return;

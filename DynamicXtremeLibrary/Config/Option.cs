@@ -33,7 +33,7 @@ namespace DynamicXtremeLibrary.Config
                 Console.ResetColor();
             }
             Console.WriteLine(Question);
-            T def = Value != null && string.IsNullOrWhiteSpace(Value.ToString()) ?
+            T def = Value != null && !string.IsNullOrWhiteSpace(Value.ToString()) ?
                     Value :
                     DefaultValue;
             string value = Console.ReadLine()!;

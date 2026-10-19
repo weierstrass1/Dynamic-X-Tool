@@ -336,7 +336,7 @@ DynamicRoutine:
 
     LDY !doubledID
     LDA.w Data_PoseResourceSizePerLine+2,y : BNE +
-        SEP #$30 : RTS
+        SEP #$30 : RTL
     +
     STA !SourceSize
 
@@ -368,6 +368,7 @@ DynamicRoutineLine:
 .Loop
 		LDA !SourceSize : SEC : SBC !SentData : CMP !CurrentLine1Size : BCC .EndLineReDir : BEQ .EndLineReDir
 		CMP #$0200 : BCC .TwoLinesWithEndLine : BEQ .TwoLinesWithEndLine
+        BRA .TwoLines
 .EndLineReDir
     JMP .EndLine
 .TwoLines

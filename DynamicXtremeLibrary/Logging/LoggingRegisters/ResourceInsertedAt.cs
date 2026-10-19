@@ -6,10 +6,10 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class ResourceInsertedAt : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => false;
+        public bool AppearInErrors => false;
         public ILogCategory Category => new Info();
-
         public string MessageType => "RESOURCE INSERTED AT";
-
         public IReadOnlyDictionary<string, string> Parameters { get; }
         public ResourceInsertedAt(ResourceReference reference)
         {
@@ -28,7 +28,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
                 { "id", $"'{reference.Resource.ID}'" },
                 { "name",
                      reference.Resource.Type != ResourceType.Buffer?
-                        $" {type}":
+                        $" {reference.Resource.Name}":
                         ""},
                 { "address", $"${reference.Position:X6}" },
                 { "size", $"{reference.Resource.Length} bytes" },

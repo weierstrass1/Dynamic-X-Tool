@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DynamicXtremeTool": {
+      "commandName": "Project",
+      "commandLineArgs": "-v -us"
+    }
+  }
+}

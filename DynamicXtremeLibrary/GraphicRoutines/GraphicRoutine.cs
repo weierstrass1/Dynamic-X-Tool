@@ -25,7 +25,6 @@ namespace DynamicXtremeLibrary.GraphicRoutines
         private GraphicRoutine(int id, DrawInfo drawInfo)
         {
             _drawInfos = [];
-            TryAddDrawInfo(drawInfo);
             ID = id;
             OneTile = drawInfo.OneTile();
             FlipX = drawInfo.HasXFlip();
@@ -52,6 +51,7 @@ namespace DynamicXtremeLibrary.GraphicRoutines
             if (!DefaultSize)
                 TileSize++;
             DataSize = 0;
+            TryAddDrawInfo(drawInfo);
             Key = GetKey(drawInfo);
 
             if (OneTile)
@@ -85,10 +85,11 @@ namespace DynamicXtremeLibrary.GraphicRoutines
         }
         public bool TryAddDrawInfo(DrawInfo drawInfo)
         {
-            if(DataSize + drawInfo.GetLength() > 30000)
+            int addedSize = drawInfo.GetLength() * TileSize;
+            if(DataSize + addedSize > 30000)
                 return false;
             _drawInfos.Add(drawInfo);
-            DataSize += drawInfo.GetLength() * TileSize;
+            DataSize += addedSize;
             return true;
         }
         public static IReadOnlyDictionary<int, IReadOnlyList<GraphicRoutine>> GetGraphicRoutines(IEnumerable<DrawInfo> drawInfos)

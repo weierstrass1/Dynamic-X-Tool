@@ -14,6 +14,9 @@
   "FILE IS TOO BIG": "\tFile {file} is too large: {size} bytes (max {maxSize}).",
   "NOT ENOUGH SPACE IN ROM": "\tNot enough free space in ROM.",
   "VALUE EXCEEDS LIMIT": "\t{parameter} value exceeds allowed limit (value = {value}, max = {limit}) in {context}.",
+  "VALUE NOT ALLOWED": "\t{parameter} value is not allowed (value = {value}, allowed values = {allowedValues}) in {context}.",
   "DRAW INFO INCONSISTENT TABLE SIZES": "\tTable size mismatch in '{context}': table sizes are inconsistent.",
-  "SYNTAX ERROR": "\tSyntax Error in file {file}, line {line}{message}.\n\t\tLine Content: {lineContent}."
+  "SYNTAX ERROR": "\tSyntax Error in file {file}, line {line}{message}.\n\t\tLine Content: {lineContent}.",
+  "EMPTY GENERATED NAME": "\tName {name} has no alphanumeric characters and cannot generate an ASM symbol.",
+  "GENERATED NAME COLLISION": "\tNames {firstName} and {secondName} both generate the ASM name {generatedName}."
 }

@@ -1,0 +1,19 @@
+BufferTable:
+	dl !BufferBuffer0
+	dl !BufferBuffer1
+	dl !BufferBuffer2
+	dl !BufferBuffer3
+	dl !BufferBuffer4
+	dl !BufferBuffer5
+	dl !BufferBuffer6
+	dl !BufferBuffer7
+	dl !BufferBuffer8
+	dl !BufferBuffer9
+	dl !BufferBuffer10
+	dl !BufferBuffer11
+	dl !BufferBuffer12
+	dl !BufferBuffer13
+	dl !BufferBuffer14
+	dl !BufferBuffer15
+	dl !BufferBuffer16
+	dl $FFFFFF

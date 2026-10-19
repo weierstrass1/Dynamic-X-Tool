@@ -5,6 +5,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class ProcessingFile : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => false;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Info();
         public string MessageType => "PROCESSING FILE";
         public IReadOnlyDictionary<string, string> Parameters { get; }

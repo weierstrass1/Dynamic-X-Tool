@@ -47,8 +47,12 @@ namespace DynamicXtremeLibrary.ExternalTools
         }
         public void UberASMToolLinker()
         {
-            Link(Path.Combine(Options.Instance.UberasmPath.Value, UBERASM_OTHER_DIR),
-                UBERASMTOOL_DEFINES);
+            string path = Options.Instance.UberasmPath.Value;
+
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+                return;
+
+            Link(Path.Combine(path, UBERASM_OTHER_DIR), UBERASMTOOL_DEFINES);
         }
         public void GPSLinker()
         {
@@ -101,7 +105,7 @@ namespace DynamicXtremeLibrary.ExternalTools
                     }
                 }
                 if (alreadyAdded)
-                    break;
+                    continue;
                 f = file.Replace("\\", "/");
                 content.AppendLine($"incsrc \"{f}\"");
             }

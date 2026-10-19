@@ -5,10 +5,10 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
     public class DrawInfoInconsistentTableSizes : ILoggingRegister
     {
+        public bool AppearWithoutVerbose => true;
+        public bool AppearInErrors => true;
         public ILogCategory Category => new Error();
-
         public string MessageType => "DRAW INFO INCONSISTENT TABLE SIZES";
-
         public IReadOnlyDictionary<string, string> Parameters { get; }
         public DrawInfoInconsistentTableSizes(string context)
         {

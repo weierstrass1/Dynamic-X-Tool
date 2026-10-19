@@ -1,0 +1,204 @@
+namespace GraphicRoutines
+!XOffSet = $00
+!YOffSet = $02
+!Property = $04
+!Tile = $05
+!PoseID = $06
+!PoseOffset = $08
+!MaxTilePriority = $0A
+
+!GraphicRoutine = $45
+!Iterator = !GraphicRoutine+3
+!maxtile_pointer = !Iterator+2
+
+!maxtile_pointer_max        = $6180       ; 16 bytes
+!maxtile_pointer_high       = $6190       ; 16 bytes
+!maxtile_pointer_normal     = $61A0       ; 16 bytes
+!maxtile_pointer_low        = $61B0       ; 16 bytes
+
+!TileX = $0B
+!TileY = $0D
+!TileSize = $0F
+
+!OAMTiles = $0202
+!OAMProps = $0203
+!OAMXPos = $0200
+!OAMYPos = $0201
+!OAMSize = $0420
+
+if !sa1
+!OAMTiles = $400002
+!OAMProps = $400003
+!OAMXPos = $400000
+!OAMYPos = $400001
+!OAMSize = $400000
+endif
+
+freecode
+incsrc "Dynamic_OneTileDefaultTilesPropsX16x16_0.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16_0)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16_0_End-GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16_0)
+freecode
+incsrc "Dynamic_DefaultTiles8x8_1.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultTiles8x8_1)
+print dec(GraphicRoutines_Dynamic_DefaultTiles8x8_1_End-GraphicRoutines_Dynamic_DefaultTiles8x8_1)
+freecode
+incsrc "Dynamic_Default8x8_2.asm"
+.End
+print dec(GraphicRoutines_Dynamic_Default8x8_2)
+print dec(GraphicRoutines_Dynamic_Default8x8_2_End-GraphicRoutines_Dynamic_Default8x8_2)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesPropsXY16x16_3.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY16x16_3)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY16x16_3_End-GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY16x16_3)
+freecode
+incsrc "Dynamic_OneTileDefaultPropsXY16x16_4.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultPropsXY16x16_4)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultPropsXY16x16_4_End-GraphicRoutines_Dynamic_OneTileDefaultPropsXY16x16_4)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesPropsXY8x8_5.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY8x8_5)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY8x8_5_End-GraphicRoutines_Dynamic_OneTileDefaultTilesPropsXY8x8_5)
+freecode
+incsrc "Dynamic_OneTileDefaultPropsXY8x8_6.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultPropsXY8x8_6)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultPropsXY8x8_6_End-GraphicRoutines_Dynamic_OneTileDefaultPropsXY8x8_6)
+freecode
+incsrc "Dynamic_DefaultProps16x16WithXYFlip_7.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16WithXYFlip_7)
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16WithXYFlip_7_End-GraphicRoutines_Dynamic_DefaultProps16x16WithXYFlip_7)
+freecode
+incsrc "Dynamic_DefaultPropsWithXYFlip_8.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultPropsWithXYFlip_8)
+print dec(GraphicRoutines_Dynamic_DefaultPropsWithXYFlip_8_End-GraphicRoutines_Dynamic_DefaultPropsWithXYFlip_8)
+freecode
+incsrc "Dynamic_DefaultProps_9.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps_9)
+print dec(GraphicRoutines_Dynamic_DefaultProps_9_End-GraphicRoutines_Dynamic_DefaultProps_9)
+freecode
+incsrc "Dynamic_DefaultProps16x16_10.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16_10)
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16_10_End-GraphicRoutines_Dynamic_DefaultProps16x16_10)
+freecode
+incsrc "Dynamic_NotDefault_11.asm"
+.End
+print dec(GraphicRoutines_Dynamic_NotDefault_11)
+print dec(GraphicRoutines_Dynamic_NotDefault_11_End-GraphicRoutines_Dynamic_NotDefault_11)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesProps8x8_12.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8_12)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8_12_End-GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8_12)
+freecode
+incsrc "Dynamic_OneTileDefaultProps8x8_13.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultProps8x8_13)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultProps8x8_13_End-GraphicRoutines_Dynamic_OneTileDefaultProps8x8_13)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesPropsX16x16WithYFlip_14.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16WithYFlip_14)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16WithYFlip_14_End-GraphicRoutines_Dynamic_OneTileDefaultTilesPropsX16x16WithYFlip_14)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesProps16x16WithXYFlip_15.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXYFlip_15)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXYFlip_15_End-GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXYFlip_15)
+freecode
+incsrc "Dynamic_DefaultTiles16x16_16.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultTiles16x16_16)
+print dec(GraphicRoutines_Dynamic_DefaultTiles16x16_16_End-GraphicRoutines_Dynamic_DefaultTiles16x16_16)
+freecode
+incsrc "Dynamic_Default16x16_17.asm"
+.End
+print dec(GraphicRoutines_Dynamic_Default16x16_17)
+print dec(GraphicRoutines_Dynamic_Default16x16_17_End-GraphicRoutines_Dynamic_Default16x16_17)
+freecode
+incsrc "Dynamic_DefaultPropsY16x16WithXFlip_18.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultPropsY16x16WithXFlip_18)
+print dec(GraphicRoutines_Dynamic_DefaultPropsY16x16WithXFlip_18_End-GraphicRoutines_Dynamic_DefaultPropsY16x16WithXFlip_18)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesProps16x16_19.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16_19)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16_19_End-GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16_19)
+freecode
+incsrc "Dynamic_DefaultY8x8_20.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultY8x8_20)
+print dec(GraphicRoutines_Dynamic_DefaultY8x8_20_End-GraphicRoutines_Dynamic_DefaultY8x8_20)
+freecode
+incsrc "Dynamic_DefaultY16x16_21.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultY16x16_21)
+print dec(GraphicRoutines_Dynamic_DefaultY16x16_21_End-GraphicRoutines_Dynamic_DefaultY16x16_21)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesProps8x8WithXFlip_22.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8WithXFlip_22)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8WithXFlip_22_End-GraphicRoutines_Dynamic_OneTileDefaultTilesProps8x8WithXFlip_22)
+freecode
+incsrc "Dynamic_OneTileDefaultProps8x8WithXFlip_23.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultProps8x8WithXFlip_23)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultProps8x8WithXFlip_23_End-GraphicRoutines_Dynamic_OneTileDefaultProps8x8WithXFlip_23)
+freecode
+incsrc "Dynamic_OneTileDefaultTilesProps16x16WithXFlip_24.asm"
+.End
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXFlip_24)
+print dec(GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXFlip_24_End-GraphicRoutines_Dynamic_OneTileDefaultTilesProps16x16WithXFlip_24)
+freecode
+incsrc "Dynamic_DefaultProps16x16WithXFlip_25.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16WithXFlip_25)
+print dec(GraphicRoutines_Dynamic_DefaultProps16x16WithXFlip_25_End-GraphicRoutines_Dynamic_DefaultProps16x16WithXFlip_25)
+freecode
+incsrc "Dynamic_DefaultProps8x8WithXFlip_26.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8WithXFlip_26)
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8WithXFlip_26_End-GraphicRoutines_Dynamic_DefaultProps8x8WithXFlip_26)
+freecode
+incsrc "Dynamic_DefaultPropsWithXFlip_27.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultPropsWithXFlip_27)
+print dec(GraphicRoutines_Dynamic_DefaultPropsWithXFlip_27_End-GraphicRoutines_Dynamic_DefaultPropsWithXFlip_27)
+freecode
+incsrc "Dynamic_DefaultProps8x8WithXYFlip_28.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8WithXYFlip_28)
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8WithXYFlip_28_End-GraphicRoutines_Dynamic_DefaultProps8x8WithXYFlip_28)
+freecode
+incsrc "Dynamic_DefaultPropsY8x8WithXFlip_29.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultPropsY8x8WithXFlip_29)
+print dec(GraphicRoutines_Dynamic_DefaultPropsY8x8WithXFlip_29_End-GraphicRoutines_Dynamic_DefaultPropsY8x8WithXFlip_29)
+freecode
+incsrc "Dynamic_DefaultPropsY16x16_30.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultPropsY16x16_30)
+print dec(GraphicRoutines_Dynamic_DefaultPropsY16x16_30_End-GraphicRoutines_Dynamic_DefaultPropsY16x16_30)
+freecode
+incsrc "Dynamic_DefaultProps8x8_31.asm"
+.End
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8_31)
+print dec(GraphicRoutines_Dynamic_DefaultProps8x8_31_End-GraphicRoutines_Dynamic_DefaultProps8x8_31)
+freecode
+incsrc "Static_OneTileDefaultPropsXY8x8_32.asm"
+.End
+print dec(GraphicRoutines_Static_OneTileDefaultPropsXY8x8_32)
+print dec(GraphicRoutines_Static_OneTileDefaultPropsXY8x8_32_End-GraphicRoutines_Static_OneTileDefaultPropsXY8x8_32)
+
+
+namespace off

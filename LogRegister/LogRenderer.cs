@@ -15,12 +15,12 @@ namespace LogRegister
             _messageTypeMapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json)
                 ?? [];
         }
-        public void RenderAll(IEnumerable<ILoggingRegister> logRegister, LogRenderAction action)
+        public void RenderAll(IEnumerable<ILoggingRegister> logRegister, LogRenderAction action, bool verbose = false, bool error = false)
         {
             foreach (var log in logRegister)
             {
                 var result = Render(log);
-                result.Render(action);
+                result.Render(action, mustWrite: (!error && (verbose || log.AppearWithoutVerbose)) || (error && log.AppearInErrors));
             }
         }
         public LogRenderResult Render(ILoggingRegister logRegister)
