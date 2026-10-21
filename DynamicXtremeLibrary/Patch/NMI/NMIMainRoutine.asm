@@ -43,6 +43,9 @@ endif
 if !PalettesChange
     JSR CGRAMDMA
 endif
+if !PalettesEffects
+    JSR PaletteColor00NMI
+endif
 
     PLD
 

@@ -107,8 +107,10 @@ if !PalettesEffects
 	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
 	STA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
     STA DX_PPU_CGRAM_BGEffectLoaded
-	STA DX_PPU_FixedColor_RGBBaseLoaded
-    STA DX_PPU_FixedColor_CopyLoaded
+	STA DX_PPU_FixedColor_Base
+	STA DX_PPU_FixedColor_Result
+	STA DX_PPU_PaletteColor00_Base
+	STA DX_PPU_PaletteColor00_Result
 endif
 if !DynamicPoses
     STA.w DX_Dynamic_Pose_Length
@@ -167,6 +169,7 @@ if !PalettesEffects
 	STA.w DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$1C
 	STA.w DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$1E
 	STA DX_PPU_FixedColor_LastGlobalEffectID
+	STA DX_PPU_PaletteColor00_LastGlobalEffectID
 endif
 if !PlayerFeatures
     STA $0D85|!normalBnk
@@ -203,7 +206,14 @@ if !GraphicsChange
     STA DX_PPU_VRAM_Transfer_Length
 endif
 if !PalettesEffects
-    STA DX_PPU_FixedColor_Enable
+    STA DX_PPU_ColorEffect_Enable
+    STA DX_PPU_ColorEffect_RGBBaseLoaded
+    STA DX_PPU_ColorEffect_HSLBaseLoaded
+    STA DX_PPU_PaletteColor00_Update
+
+    LDA #$02
+    STA DX_PPU_ColorEffect_BaseLoaded
+    LDA #$00
 endif
 
 if !DynamicPoses

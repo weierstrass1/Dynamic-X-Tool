@@ -363,6 +363,9 @@
     <None Update="Routines\DX\ClusterConcatenateRGBPaletteEffectToGlobal.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Routines\DX\ClusterConcatenateHSLPaletteEffectToGlobal.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Routines\DX\ClusterDraw.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -391,6 +394,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DX\ExtendedConcatenateRGBPaletteEffectToGlobal.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DX\ExtendedConcatenateHSLPaletteEffectToGlobal.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DX\ExtendedDraw.asm">
@@ -424,6 +430,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DX\NormalConcatenateRGBPaletteEffectToGlobal.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Routines\DX\NormalConcatenateHSLPaletteEffectToGlobal.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Routines\DX\NormalDraw.asm">
@@ -525,6 +534,9 @@
     <None Update="Settings\Options\Paths\PixiPath.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Settings\Options\Paths\PixiListPath.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Settings\Options\PlayerFeatures.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -532,6 +544,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Settings\Options\Paths\UberasmToolPath.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Settings\Options\Paths\UberasmListPath.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Settings\Options\YoshiFeatures.json">

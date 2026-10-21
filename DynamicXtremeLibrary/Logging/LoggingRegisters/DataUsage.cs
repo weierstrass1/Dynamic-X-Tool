@@ -3,6 +3,7 @@ using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports the byte usage of one generated data category.</summary>
     public class DataUsage : ILoggingRegister
     {
         public bool AppearWithoutVerbose => true;
@@ -11,6 +12,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public string MessageType => "DATA USAGE";
         public IReadOnlyDictionary<string, string> Parameters { get; }
 
+        /// <summary>Initializes a data-usage record.</summary>
         public DataUsage(string name, long size)
 		{
 			float banks = size / (32 * 1024f);

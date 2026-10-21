@@ -4,8 +4,12 @@ using System.Text;
 
 namespace DynamicXtremeLibrary.Defines
 {
+    /// <summary>Normalizes filenames into stable alphanumeric Asar symbol components.</summary>
     public static class AsarSymbolName
     {
+        /// <summary>Removes separators and invalid characters while applying Pascal-style word starts.</summary>
+        /// <param name="name">The source name to normalize.</param>
+        /// <returns>An alphanumeric component that preserves existing letter casing.</returns>
         public static string Normalize(string name)
         {
             StringBuilder result = new();
@@ -30,9 +34,16 @@ namespace DynamicXtremeLibrary.Defines
             return result.ToString();
         }
 
+        /// <summary>Normalizes the filename without its extension.</summary>
+        /// <param name="path">The source file path.</param>
+        /// <returns>The generated Asar symbol component.</returns>
         public static string FromPath(string path)
             => Normalize(Path.GetFileNameWithoutExtension(path));
 
+        /// <summary>Checks that every path generates a non-empty and unique normalized name.</summary>
+        /// <param name="paths">The paths whose filenames are normalized.</param>
+        /// <param name="logging">The log that receives empty-name and collision errors.</param>
+        /// <returns>Whether every generated name is valid and unique.</returns>
         public static bool ValidateUnique(IEnumerable<string> paths, LogRegisterSystem logging)
         {
             Dictionary<string, string> generatedNames = new(StringComparer.Ordinal);

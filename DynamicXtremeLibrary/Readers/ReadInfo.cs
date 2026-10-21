@@ -10,16 +10,19 @@ using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Readers
 {
+    /// <summary>Parses current and legacy DynamicInfo and DrawInfo source formats with validation logs.</summary>
     public partial class ReadInfo
     {
         private readonly LogRegisterSystem _logRegisterSystem;
+        /// <summary>Initializes the reader with its validation log.</summary>
         public ReadInfo(LogRegisterSystem logRegisterSystem)
         {
             _logRegisterSystem = logRegisterSystem;
         }
+        /// <summary>Recursively loads, validates, and assigns IDs to traditional DrawInfo files.</summary>
         public IReadOnlyList<DrawInfo> GetAllDrawInfos(string drawInfoDirectory, out bool validation)
         {
-            string[] paths = [.. Directory.GetFiles(drawInfoDirectory, "*.drawinfo")
+            string[] paths = [.. Directory.GetFiles(drawInfoDirectory, "*.drawinfo", SearchOption.AllDirectories)
                 .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
             if (paths == null || paths.Length == 0)
@@ -66,9 +69,10 @@ namespace DynamicXtremeLibrary.Readers
             }
             return drawInfos.OrderBy(di => di.ID).ToList().AsReadOnly();
         }
+        /// <summary>Recursively loads and validates traditional DynamicInfo files and generated names.</summary>
         public IReadOnlyList<DynamicInfo> GetAllDynamicInfos(string dynamicInfoDirectory, string resourceDirectory, out bool validation)
         {
-            string[] paths = [.. Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo")
+            string[] paths = [.. Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo", SearchOption.AllDirectories)
                 .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
             if (paths == null || paths.Length == 0)
@@ -91,7 +95,7 @@ namespace DynamicXtremeLibrary.Readers
             foreach (string path in paths)
             {
                 _logRegisterSystem.Add(new ProcessingFile(path));
-                di = ReadDynamicInfo(path, out validation);
+                di = ReadDynamicInfo(path, resourceDirectory, resourceDirectory, out validation);
                 if (!validation || !di!.Validate(resourceDirectory, _logRegisterSystem))
                 {
                     validation = false;
@@ -117,7 +121,27 @@ namespace DynamicXtremeLibrary.Readers
                 validation = false;
             return dynamicInfos.AsReadOnly();
         }
+        /// <summary>
+        /// Reads a DynamicInfo using the traditional Dynamic Xtreme resource and temporary
+        /// directories.
+        /// </summary>
+        /// <param name="path">The DynamicInfo definition to read.</param>
+        /// <param name="validation">Whether parsing completed successfully.</param>
+        /// <returns>The parsed DynamicInfo, or <see langword="null"/> on failure.</returns>
         public DynamicInfo? ReadDynamicInfo(string path, out bool validation)
+            => ReadDynamicInfo(path, "DynamicResources", "DynamicResources", out validation);
+
+        /// <summary>
+        /// Reads a DynamicInfo with explicit directories for resolving declared resources and
+        /// storing temporary converted graphics.
+        /// </summary>
+        /// <param name="path">The DynamicInfo definition to read.</param>
+        /// <param name="resourceDirectory">The base directory for relative resource declarations.</param>
+        /// <param name="temporaryDirectory">The directory used for generated intermediate graphics.</param>
+        /// <param name="validation">Whether parsing completed successfully.</param>
+        /// <returns>The parsed DynamicInfo configured with the supplied directories, or <see langword="null"/> on failure.</returns>
+        public DynamicInfo? ReadDynamicInfo(string path, string resourceDirectory,
+            string temporaryDirectory, out bool validation)
         {
             string dynamicInfo = CleanFileContent(path);
 
@@ -223,7 +247,12 @@ namespace DynamicXtremeLibrary.Readers
             {
                 Palettes = [.. palettes],
                 PoseGraphics = [.. posesGraphics],
-                Resources = [.. resources]
+                Resources = [.. resources],
+                DeclaredPalettes = [.. palettes],
+                DeclaredPoseGraphics = [.. posesGraphics],
+                DeclaredResources = [.. resources],
+                ResourceDirectory = resourceDirectory,
+                TemporaryDirectory = temporaryDirectory
             };
             if (legacyDone)
             {
@@ -240,6 +269,7 @@ namespace DynamicXtremeLibrary.Readers
             validation = true;
             return di;
         }
+        /// <summary>Reads every pose in one DrawInfo file using either its current or legacy format.</summary>
         public DrawInfo[] ReadDrawInfo(string path, int idOffset, out bool validation)
         {
             List<DrawInfo> dis = [];
@@ -426,12 +456,11 @@ namespace DynamicXtremeLibrary.Readers
 
             Dictionary<string, DrawInfo> drawInfosDic = [];
 
-            List<string> names = tiles.Keys.Union(properties.Keys)
+            List<string> names = [.. tiles.Keys.Union(properties.Keys)
                     .Union(xDisplacements.Keys)
                     .Union(yDisplacements.Keys)
                     .Union(sizes.Keys)
-                    .Distinct()
-                    .ToList();
+                    .Distinct()];
             string context = AsarSymbolName.FromPath(path);
 
             foreach (var name in names)
@@ -463,6 +492,7 @@ namespace DynamicXtremeLibrary.Readers
              
             return [.. drawInfosDic.Values];
         }
+        /// <summary>Determines whether a line begins a recognized DynamicInfo section.</summary>
         private static bool isDynamicInfoLabel(string line)
         {
             return line == "PosesGraphics:" ||
@@ -471,6 +501,7 @@ namespace DynamicXtremeLibrary.Readers
                    line == "PosesChunksSizes:" ||
                    line == "NumberOf16x16TilesPerPose:";
         }
+        /// <summary>Determines whether a line begins a recognized DrawInfo section.</summary>
         private static bool isDrawInfoLabel(string line)
         {
             return line == "Dynamic:" ||
@@ -481,6 +512,7 @@ namespace DynamicXtremeLibrary.Readers
                    line == "Sizes:" ||
                    drawInfoCurrent().IsMatch(line);
         }
+        /// <summary>Removes comments and normalizes whitespace before parsing an info file.</summary>
         public static string CleanFileContent(string path)
         {
             string content = File.ReadAllText(path).Replace("\r\n", "\n");
@@ -493,6 +525,7 @@ namespace DynamicXtremeLibrary.Readers
                                     .Select(l => space.Replace(l, " ").Trim()));
             return content;
         }
+        /// <summary>Reads the single Boolean value beneath a legacy Dynamic label.</summary>
         private bool readDrawInfoIsDynamic(int line, string[] content, out int outLine, string path, out bool validation)
         {
             validation = true;
@@ -514,13 +547,14 @@ namespace DynamicXtremeLibrary.Readers
                     validation = false;
                     return true;
                 }
-                return lowercase == "true" ? true : false;
+                return lowercase == "true";
             }
             validation = false;
-            _logRegisterSystem.Add(new SyntaxError(path, outLine, content[outLine], "Empty Dynamic label"));
+            _logRegisterSystem.Add(new SyntaxError(path, outLine - 1, content[outLine - 1], "Empty Dynamic label"));
             validation = false;
             return true;
         }
+        /// <summary>Reads a list of resource paths beneath a DynamicInfo section label.</summary>
         private IReadOnlyList<string> readDynamicInfoTables(int line, string[] content, out int outLine, string path, out bool validation)
         {
             validation = true;
@@ -546,6 +580,7 @@ namespace DynamicXtremeLibrary.Readers
             return listMembers.AsReadOnly();
         }
         
+        /// <summary>Reads legacy upper-and-lower pose chunk pairs.</summary>
         private IReadOnlyList<(int, int)> readDynamicInfoLegacy(int line, string[] content, out int outLine, string path, out bool validation)
         {
             validation = true;
@@ -607,6 +642,7 @@ namespace DynamicXtremeLibrary.Readers
             }
             return posechunkSizes.Values.ToList().AsReadOnly();
         }
+        /// <summary>Reads current pose ranges and their tile-count expressions.</summary>
         private IDictionary<int, string> readDynamicInfoCurrent(int line, string[] content, out int outLine, string path, out bool validation)
         {
             validation = true;
@@ -681,6 +717,7 @@ namespace DynamicXtremeLibrary.Readers
             }
             return numberOf16x16TilesPerPose;
         }
+        /// <summary>Reads a legacy named DrawInfo table and its optional flipped values.</summary>
         private Dictionary<string, (List<int>, List<int>)> readDrawInfoTable(string suffix, int line, string[] content, out int outLine, string path, out bool validation, string? allowFlip = null)
         {
             Dictionary<string, (List<int>, List<int>)> table = [];
@@ -755,6 +792,7 @@ namespace DynamicXtremeLibrary.Readers
             "YOffset",
             "Size"
             ];
+        /// <summary>Reads one current-format pose block and expands all declared pose IDs.</summary>
         private IEnumerable<DrawInfo> readDrawInfoCurrent(int offset, int line, string[] content, out int outLine, string path, out bool validation)
         {
             validation = true;
@@ -1012,20 +1050,28 @@ namespace DynamicXtremeLibrary.Readers
             return dis;
         }
 
+        /// <summary>Creates the parser used to collapse runs of whitespace.</summary>
         [GeneratedRegex(@"\s+")]
         private static partial Regex spaceRegex();
+        /// <summary>Creates the parser used to remove semicolon comments.</summary>
         [GeneratedRegex(@";.*")]
         private static partial Regex commentRegex();
+        /// <summary>Creates the recognizer for legacy DynamicInfo pose-chunk labels.</summary>
         [GeneratedRegex(@"[a-zA-Z_][a-zA-Z0-9_]*\d+_PoseChunksSizes:")]
         private static partial Regex dynInfoLegacy();
+        /// <summary>Creates the parser for Asar byte, word, and long data rows.</summary>
         [GeneratedRegex(@"(db (\$[a-fA-F0-9]{2}|[0-9]+)(,(\$[a-fA-F0-9]{2}|[0-9]+))*|dw (\$[a-fA-F0-9]{4}|[0-9]+)(,(\$[a-fA-F0-9]{4}|[0-9]+))*|dl (\$[a-fA-F0-9]{6}|[0-9]+)(,(\$[a-fA-F0-9]{6}|[0-9]+))*)")]
         private static partial Regex numberTableRegex();
+        /// <summary>Creates the parser for current DynamicInfo pose ranges and tile counts.</summary>
         [GeneratedRegex(@"^\.Pose(?<start>\d+)(?:\.\.(?<end>\d+))? (?<tiles>\d+)(?<modifier>q3|h|q)?$")]
         private static partial Regex dynInfoCurrent();
+        /// <summary>Creates the parser for current DrawInfo pose-block labels.</summary>
         [GeneratedRegex(@"^(?<name>[a-zA-Z][a-zA-Z0-9]*)_Pose(?<start>\d+)(?:\.\.(?<end>\d+))?:$")]
         private static partial Regex drawInfoCurrent();
+        /// <summary>Creates the parser for current DrawInfo tile-count directives.</summary>
         [GeneratedRegex(@"^\.NumberOfTiles: (?<tiles>\d+)$")]
         private static partial Regex numOfTilesRegex();
+        /// <summary>Creates the parser for current DrawInfo table directives and optional tile ranges.</summary>
         [GeneratedRegex(@"^\.(?<directives>[a-zA-Z]+)((?<start>\d+)(\.\.(?<end>\d+))?)?:? (?<values>(\$[a-fA-F0-9]{2}|\d+)(,(\$[a-fA-F0-9]{2}|\d+))*)$")]
         private static partial Regex directiveRegex();
     }

@@ -4,6 +4,7 @@ using DynamicXtremeLibrary.ResourceManagement;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports a resource's assigned ROM address and size.</summary>
     public class ResourceInsertedAt : ILoggingRegister
     {
         public bool AppearWithoutVerbose => false;
@@ -11,6 +12,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public ILogCategory Category => new Info();
         public string MessageType => "RESOURCE INSERTED AT";
         public IReadOnlyDictionary<string, string> Parameters { get; }
+        /// <summary>Initializes an inserted-resource record from its resolved reference.</summary>
         public ResourceInsertedAt(ResourceReference reference)
         {
             string type = reference.Resource.Type switch

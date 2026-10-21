@@ -9,6 +9,7 @@
   "RESOURCE NOT FOUND": "\tResource {file} was not found.",
   "PROCESSING FILE": "Processing file {file}.",
   "DYNAMIC INFO WITHOUT CHUNKS": "\tIn {context}: 'PosesGraphics' exists but 'PosesChunksSizes' is missing.",
+  "DYNAMIC INFO INVALID CHUNKS": "\tInvalid 'PosesChunksSizes' in {context}: {reason}.",
   "FAILED TO PROCESS FILE": "\tFailed to process file {file}.",
   "DYNAMIC INFO SIZE MISMATCH": "\tSize mismatch in {context}: chunks*32={size1}, graphics={size2}.",
   "FILE IS TOO BIG": "\tFile {file} is too large: {size} bytes (max {maxSize}).",
@@ -18,5 +19,7 @@
   "DRAW INFO INCONSISTENT TABLE SIZES": "\tTable size mismatch in '{context}': table sizes are inconsistent.",
   "SYNTAX ERROR": "\tSyntax Error in file {file}, line {line}{message}.\n\t\tLine Content: {lineContent}.",
   "EMPTY GENERATED NAME": "\tName {name} has no alphanumeric characters and cannot generate an ASM symbol.",
-  "GENERATED NAME COLLISION": "\tNames {firstName} and {secondName} both generate the ASM name {generatedName}."
+  "GENERATED NAME COLLISION": "\tNames {firstName} and {secondName} both generate the ASM name {generatedName}.",
+  "INPUT DISCOVERY ERROR": "\tInput discovery failed: {message}.",
+  "GENERATED NAME CHANGED": "Changed {oldName} to {newName}. Affected ASM files: {files}."
 }

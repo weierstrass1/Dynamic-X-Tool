@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicXtremeTool", "Dynami
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicXtremeLibrary", "DynamicXtremeLibrary\DynamicXtremeLibrary.csproj", "{3D74776C-9581-4AA7-BFE8-60E0B3C13C70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicXtremeLibrary.Tests", "DynamicXtremeLibrary.Tests\DynamicXtremeLibrary.Tests.csproj", "{A19A664A-A71B-4C63-AC95-6B67A39370C5}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogRegister", "LogRegister\LogRegister.csproj", "{B55319C4-F1C1-4471-A8AC-860687F9FE10}"
 EndProject
 Global
@@ -53,6 +55,14 @@ Global
 		{3D74776C-9581-4AA7-BFE8-60E0B3C13C70}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3D74776C-9581-4AA7-BFE8-60E0B3C13C70}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D74776C-9581-4AA7-BFE8-60E0B3C13C70}.Release|x86.Build.0 = Release|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Debug|x86.Build.0 = Debug|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{A19A664A-A71B-4C63-AC95-6B67A39370C5}.Release|x86.Build.0 = Release|Any CPU
 		{B55319C4-F1C1-4471-A8AC-860687F9FE10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B55319C4-F1C1-4471-A8AC-860687F9FE10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B55319C4-F1C1-4471-A8AC-860687F9FE10}.Debug|x86.ActiveCfg = Debug|Any CPU

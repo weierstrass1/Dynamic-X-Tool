@@ -4,7 +4,6 @@ using DynamicXtremeLibrary.GraphicRoutines;
 using DynamicXtremeLibrary.ResourceManagement;
 using SNESLibrary;
 using DynamicXtremeLibrary.Config;
-using DynamicXtremeLibrary.Readers;
 using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.PaletteEffec;
 using DynamicXtremeLibrary.Asar;
@@ -12,42 +11,83 @@ using DynamicXtremeLibrary.Defines;
 using DynamicXtremePaletteCreatorLibrary;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.ExternalTools;
+using DynamicXtremeLibrary.Inputs;
 
 namespace DynamicXtremeLibrary
 {
+    /// <summary>Orchestrates input resolution, resource generation, patching, and transactional installation.</summary>
     public class DynamicXtreme
     {
+        /// <summary>Gets the SNES address containing the Dynamic Xtreme installation marker.</summary>
         public const int DX_MARK = 0x008241;
+        /// <summary>Gets the SNES address of the Dynamic Xtreme resource-table vector.</summary>
         public const int VECTOR_ADDRESS = 0x00821F;
         private LogRegisterSystem _log;
+        /// <summary>Gets the traditional DynamicInfo directory.</summary>
         public required string DynamicInfoDirectory { get; init; }
+        /// <summary>Gets the traditional DrawInfo directory.</summary>
         public required string DrawInfoDirectory { get; init; }
+        /// <summary>Gets the resource base for traditional DynamicInfo files.</summary>
         public required string DynamicResourcesDirectory { get; init; }
+        /// <summary>Gets the traditional palette-effect directory.</summary>
         public required string PaletteEffectsDirectory { get; init; }
+        /// <summary>Gets the directory containing ASM templates and exported defines.</summary>
         public required string TemplateASMDirectory { get; init; }
+        /// <summary>Gets the root directory of the Asar patch.</summary>
         public required string PatchDirectory { get; init; }
+        /// <summary>Gets the extra-defines directory name or path.</summary>
         public required string ExtraDefinesDirectory { get; init; }
+        /// <summary>Gets the generated graphic-routines directory.</summary>
         public required string GraphicRoutinesDirectory { get; init; }
+        /// <summary>Gets the temporary working directory.</summary>
         public required string TMPDirectory { get; init; }
+        /// <summary>Gets the patch data directory name.</summary>
         public required string DataDirectory { get; init; }
+        /// <summary>Gets the shared routines directory exported to external tools.</summary>
         public required string RoutinesDirectory { get; init; }
+        /// <summary>Gets the generated options-defines filename without extension.</summary>
         public required string OptionsDefinesFilename { get; init; }
+        /// <summary>Gets the generated buffer-table filename without extension.</summary>
         public required string BufferDataFilename {  get; init; }
+        /// <summary>Gets the generated dynamic-pose data filename without extension.</summary>
         public required string DynamicPoseDataFilename { get; init; }
+        /// <summary>Gets the generated palette-table filename without extension.</summary>
         public required string PaletteDataFilename { get; init; }
+        /// <summary>Gets the generated drawing-pose data filename without extension.</summary>
         public required string PoseDataFilename { get; init; }
+        /// <summary>Gets the generated palette-effect data filename without extension.</summary>
         public required string PaletteEffectsDataFilename { get; init; }
+        /// <summary>Gets the pose-data template filename.</summary>
         public required string PoseDataTemplateFilename { get; init; }
+        /// <summary>Gets the individual graphic-routine template filename.</summary>
         public required string GraphicRoutineTemplateFilename { get; init; }
+        /// <summary>Gets the aggregate graphic-routine include-template filename.</summary>
         public required string GraphicRoutineIncludeTemplateFilename { get; init; }
+        /// <summary>Gets the generated aggregate routine-include filename.</summary>
         public required string GraphicRoutineIncludeFilename { get; init; }
+        /// <summary>Gets the generated routine-protection filename.</summary>
         public required string GraphicRoutineProtsFilename { get; init; }
+        /// <summary>Gets the base input-defines filename.</summary>
         public required string InputDefinesFilename { get; init; }
+        /// <summary>Gets the generated output-defines filename.</summary>
         public required string OutputDefinesFilename { get; init; }
+        /// <summary>
+        /// Gets the callback used to approve or reject automatic name changes when distinct
+        /// external inputs generate colliding Asar symbols.
+        /// </summary>
+        public Func<NameCollision, bool>? CollisionResolver { get; init; }
+        /// <summary>Initializes the installer with its structured log.</summary>
         public DynamicXtreme(LogRegisterSystem log)
         {
             _log = log;
         }
+
+        /// <summary>
+        /// Resolves all enabled inputs, generates and applies the Dynamic Xtreme patch, and commits
+        /// the output ROM together with any required external-tool updates.
+        /// </summary>
+        /// <param name="rom">The input ROM bytes to process in memory.</param>
+        /// <returns><see langword="true"/> when the complete installation is committed.</returns>
         public bool Run(byte[] rom)
         {
             if (Directory.Exists(TMPDirectory))
@@ -58,33 +98,45 @@ namespace DynamicXtremeLibrary
 
             File.WriteAllBytes(tmpROM, rom);
 
-            RemoveResources(rom);
-
             Options opt = Options.Instance;
-            ReadInfo ri = new(_log);
             var boolOpts = opt.BoolOptions.ToDictionary(o => o.Name, o => o.Value);
 
             bool validation = true;
+
+            InputSources inputSources = new(
+                DynamicInfoDirectory, DrawInfoDirectory, PaletteEffectsDirectory,
+                DynamicResourcesDirectory, opt.PixiListPath.Value, opt.PixiPath.Value,
+                opt.UberasmListPath.Value, opt.UberasmPath.Value);
+            EnabledInputs enabledInputs = new(
+                boolOpts["GraphicsChange"] || boolOpts["PalettesChange"],
+                boolOpts["DrawingSystem"], boolOpts["PalettesEffects"]);
+            InputPreparation inputPreparation = new(_log, TMPDirectory, CollisionResolver);
+            ResolvedInputs? resolvedInputs = inputPreparation.Prepare(inputSources, enabledInputs);
+            if (resolvedInputs == null)
+                return false;
+
+            RemoveResources(rom);
 
             IReadOnlyList<DynamicInfo>? dynamicInfos = null;
             IReadOnlyList<Resource>? resources = null;
             IReadOnlyList<ResourceBuffer>? buffers = null;
             ResourceAllReferences? allRefs = null;
             if (boolOpts["GraphicsChange"] || boolOpts["PalettesChange"])
-                processDynamicInfos(rom, ri, out validation, out dynamicInfos, out resources, out buffers, out allRefs);
+                processDynamicInfos(rom, resolvedInputs.DynamicInfos, out validation,
+                    out dynamicInfos, out resources, out buffers, out allRefs);
             if (!validation)
                 return false;
 
             IReadOnlyList<DrawInfo>? drawInfos = null;
             IEnumerable<GraphicRoutine>? allGrs = null;
             if (boolOpts["DrawingSystem"])
-                processDrawInfos(ri, out validation, out drawInfos, out allGrs);
+                processDrawInfos(resolvedInputs.DrawInfos, out validation, out drawInfos, out allGrs);
             if (!validation)
                 return false;
 
             IReadOnlyList<PaletteEffectCollection>? palEffects = null;
             if (boolOpts["PalettesEffects"])
-                palEffects = processPaletteEffects(out validation);
+                palEffects = processPaletteEffects(resolvedInputs.PaletteEffects, out validation);
             if (!validation)
                 return false;
 
@@ -128,42 +180,49 @@ namespace DynamicXtremeLibrary
             printSummary(patchResult, allRefs, drawInfos, dynamicInfos, allGrs, palEffects);
 
             string outputROM = opt.OutputRomPath.Value;
-            string backupROM = $"{outputROM}.bak";
-
-            if (File.Exists(outputROM))
-                File.Replace(tmpROM, outputROM, backupROM);
-            else
-                File.Move(tmpROM, outputROM);
-
             ExternalToolsLinker linker = new(TemplateASMDirectory, ExtraDefinesDirectory,
                 RoutinesDirectory);
+            InstallationCommitter committer = new(_log, linker);
+            if (!committer.TryCommit(resolvedInputs.SourceRewrites, tmpROM, outputROM))
+                return false;
 
-            linker.PixiLinker();
-            linker.GPSLinker();
-            linker.UberASMToolLinker();
+            foreach (var change in resolvedInputs.NameChanges)
+                _log.Add(new GeneratedNameChanged(change.OldName, change.NewName, change.Files));
 
             return true;
         }
-        private IReadOnlyList<PaletteEffectCollection> processPaletteEffects(out bool validation)
+        /// <summary>
+        /// Serializes already resolved palette-effect collections into the patch data file.
+        /// </summary>
+        /// <param name="palEffects">The validated palette-effect collections to serialize.</param>
+        /// <param name="validation">Whether palette-effect data generation succeeded.</param>
+        /// <returns>The same collections supplied to the method.</returns>
+        private IReadOnlyList<PaletteEffectCollection> processPaletteEffects(
+            IReadOnlyList<PaletteEffectCollection> palEffects, out bool validation)
         {
-            IReadOnlyList<PaletteEffectCollection> palEffects = PaletteEffectExtension.GetCollections(
-                PaletteEffectsDirectory, _log, out validation);
-            if (!validation)
-                return palEffects;
+            validation = true;
             PaletteEffectExtension.ToFile(_log, palEffects,
                                 Path.Combine(PatchDirectory, DataDirectory, $"{PaletteEffectsDataFilename}.asm"));
             return palEffects;
         }
-        private void processDynamicInfos(byte[] rom, ReadInfo ri, out bool validation, out IReadOnlyList<DynamicInfo>? dynamicInfos, out IReadOnlyList<Resource>? resources, out IReadOnlyList<ResourceBuffer>? buffers, out ResourceAllReferences? allRefs)
+        /// <summary>
+        /// Merges resolved DynamicInfo resources, inserts their buffers into the ROM, and generates
+        /// the buffer, pose, and palette tables consumed by the patch.
+        /// </summary>
+        /// <param name="rom">The in-memory ROM being prepared for Asar.</param>
+        /// <param name="resolvedDynamicInfos">The validated and deduplicated DynamicInfo models.</param>
+        /// <param name="validation">Whether resource insertion and table generation succeeded.</param>
+        /// <param name="dynamicInfos">The DynamicInfo models passed to downstream generators.</param>
+        /// <param name="resources">The resources collected from all DynamicInfo models.</param>
+        /// <param name="buffers">The merged resource buffers.</param>
+        /// <param name="allRefs">The ROM references assigned to inserted buffers and resources.</param>
+        private void processDynamicInfos(byte[] rom, IReadOnlyList<DynamicInfo> resolvedDynamicInfos,
+            out bool validation, out IReadOnlyList<DynamicInfo>? dynamicInfos,
+            out IReadOnlyList<Resource>? resources, out IReadOnlyList<ResourceBuffer>? buffers,
+            out ResourceAllReferences? allRefs)
         {
-            dynamicInfos = ri.GetAllDynamicInfos(DynamicInfoDirectory, DynamicResourcesDirectory, out validation);
-            if(!validation)
-            {
-                resources = null;
-                buffers = null;
-                allRefs = null;
-                return;
-            }
+            validation = true;
+            dynamicInfos = resolvedDynamicInfos;
             string dataDir = Path.Combine(PatchDirectory, DataDirectory);
             if(dynamicInfos == null)
             {
@@ -197,9 +256,20 @@ namespace DynamicXtremeLibrary
                 paletteTable);
         }
 
-        private void processDrawInfos(ReadInfo ri, out bool validation, out IReadOnlyList<DrawInfo>? drawInfos, out IEnumerable<GraphicRoutine>? allGrs)
+        /// <summary>
+        /// Generates the unique graphic routines and pose data required by the resolved DrawInfo
+        /// poses.
+        /// </summary>
+        /// <param name="resolvedDrawInfos">The validated DrawInfo poses with final IDs and names.</param>
+        /// <param name="validation">Whether the graphic-routine limit and generation succeeded.</param>
+        /// <param name="drawInfos">The DrawInfo poses passed to downstream generators.</param>
+        /// <param name="allGrs">The generated graphic routines in output order.</param>
+        private void processDrawInfos(IReadOnlyList<DrawInfo> resolvedDrawInfos,
+            out bool validation, out IReadOnlyList<DrawInfo>? drawInfos,
+            out IEnumerable<GraphicRoutine>? allGrs)
         {
-            drawInfos = ri.GetAllDrawInfos(DrawInfoDirectory, out validation);
+            validation = true;
+            drawInfos = resolvedDrawInfos;
             if (drawInfos.Count == 0 || !validation)
             {
                 drawInfos = null;
@@ -231,6 +301,7 @@ namespace DynamicXtremeLibrary
             File.WriteAllText(Path.Combine(PatchDirectory, DataDirectory, $"{PoseDataFilename}.asm"), poseData);
         }
 
+        /// <summary>Removes resources referenced by a previously installed Dynamic Xtreme vector.</summary>
         public void RemoveResources(byte[] rom)
         {
             Mapper mapper = SNESROMUtils.GetMapper(rom);
@@ -256,6 +327,7 @@ namespace DynamicXtremeLibrary
                 _log.Add(new RemovedBufferAt(res.Item1, res.Item2));
             }
         }
+        /// <summary>Records installed item counts and aggregate byte usage after Asar succeeds.</summary>
         private void printSummary(string[] patchResult,
             ResourceAllReferences? allRefs,
             IEnumerable<DrawInfo>? dis,
@@ -294,6 +366,7 @@ namespace DynamicXtremeLibrary
             _log.Add(new DataUsage("Dynamic Xtreme Patch", long.Parse(patchResult[^1])));
             _log.Add(new DataUsage("All", buffSize + long.Parse(patchResult[^1])));
         }
+        /// <summary>Records each generated graphic routine using addresses and sizes printed by Asar.</summary>
         private void printGraphicRoutineLog(string[] patchResult, IEnumerable<GraphicRoutine>? allgrs)
         {
             if (allgrs == null || !allgrs.Any())

@@ -3,6 +3,7 @@ using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports a parameter value outside its explicit allowed-value set.</summary>
     public class ValueNotAllowed : ILoggingRegister
     {
         public bool AppearWithoutVerbose => true;
@@ -11,6 +12,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public string MessageType => "VALUE NOT ALLOWED";
         public IReadOnlyDictionary<string, string> Parameters { get; }
 
+        /// <summary>Initializes a disallowed-value record.</summary>
         public ValueNotAllowed(string context, string parameter, int value,
             IEnumerable<int> allowedValues)
         {

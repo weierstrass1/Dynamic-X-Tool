@@ -3,6 +3,7 @@ using DynamicXtremeLibrary.Logging.Categories;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports a mismatch between declared pose data and graphics-file sizes.</summary>
     public class DynamicInfoSizeMismatch : ILoggingRegister
     {
         public bool AppearWithoutVerbose => true;
@@ -10,6 +11,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public ILogCategory Category => new Error();
         public string MessageType => "DYNAMIC INFO SIZE MISMATCH";
         public IReadOnlyDictionary<string, string> Parameters { get; }
+        /// <summary>Initializes a DynamicInfo size-mismatch record.</summary>
         public DynamicInfoSizeMismatch(string contextName, long size1, long size2)
         {
             Parameters = new Dictionary<string, string>

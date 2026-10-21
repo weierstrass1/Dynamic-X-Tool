@@ -3,8 +3,10 @@ using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.Wrappers
 {
+    /// <summary>Renders categorized log spans to the console with semantic colors.</summary>
     public class ConsoleWrapper
     {
+        /// <summary>Writes one non-prefix span when the renderer marks it for output.</summary>
         public static void RenderAction(string text, ILogCategory category, SpanType type, bool mustWrite = false)
         {
             if (!mustWrite)

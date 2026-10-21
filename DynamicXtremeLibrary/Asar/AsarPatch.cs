@@ -4,8 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace DynamicXtremeLibrary.Asar
 {
+    /// <summary>Runs the bundled Asar executable against the generated Dynamic Xtreme patch.</summary>
     public class AsarPatch
     {
+        /// <summary>Applies the patch to the temporary ROM and captures Asar output.</summary>
+        /// <returns>The process success flag and combined standard output and error text.</returns>
         public async static Task<(bool, string)> Run()
         {
             string asarPath = EnsureExecutable();
@@ -40,6 +43,8 @@ namespace DynamicXtremeLibrary.Asar
 
             return (success, stdout + stderr);
         }
+        /// <summary>Locates the platform-specific Asar binary and grants execute permission on Linux.</summary>
+        /// <returns>The executable path to launch.</returns>
         private static string EnsureExecutable()
         {
             string asarPath = Path.Combine(AppContext.BaseDirectory, "Asar", "asar.exe");

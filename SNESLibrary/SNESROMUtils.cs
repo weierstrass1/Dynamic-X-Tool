@@ -1,5 +1,6 @@
 ﻿namespace SNESLibrary
 {
+    /// <summary>Identifies supported SNES cartridge address mappings.</summary>
     public enum Mapper { 
 		NoROM,
 		LoROM,
@@ -15,10 +16,13 @@
 		ExHiROMFastROM,
 		SFXROM
 	};
+    /// <summary>Provides headered-ROM address conversion, free-space, RATS, and resource-table utilities.</summary>
     public class SNESROMUtils
     {
+		/// <summary>Gets the copier-header size assumed by file offsets.</summary>
 		public const int HEADER_SIZE = 0x200;
-		public static Mapper GetMapper(byte[] rom)
+        /// <summary>Detects the cartridge mapper from known internal-header locations.</summary>
+        public static Mapper GetMapper(byte[] rom)
 		{
 			switch(rom[0x000081D5])
 			{
@@ -49,6 +53,7 @@
             };
 		}
 		private static readonly int[] sa1Banks = { 0, 1 << 20, -1, -1, 2 << 20, 3 << 20, -1, -1 };
+        /// <summary>Converts a headered PC file offset into a 24-bit SNES bus address.</summary>
         public static int PCtoSNES(int addr, Mapper mapper)
 		{
 			if (addr < 0) 
@@ -114,23 +119,27 @@
 					return -1;
 			}
 		}
-		public static int Join3(byte[] rom, int address, Mapper m)
+        /// <summary>Reads a little-endian 24-bit pointer and converts it to a PC offset.</summary>
+        public static int Join3(byte[] rom, int address, Mapper m)
         {
 			int snes = JoinAddress(rom[address + 2], rom[address + 1], rom[address]);
 			return SNEStoPC(snes, m);
 		}
-		public static int JoinAddress(byte[] rom, int address)
+        /// <summary>Reads a little-endian 24-bit value from a ROM buffer.</summary>
+        public static int JoinAddress(byte[] rom, int address)
 		{
 			if (rom == null || address < 0 || address + 2 >= rom.Length)
 				return -1;
 			return JoinAddress(rom[address + 2], rom[address + 1], rom[address]);
 		}
 
+        /// <summary>Combines bank, high, and low bytes into a 24-bit address.</summary>
         public static int JoinAddress(byte bnk, byte hb, byte lb)
         {
 			return ((bnk << 16) + (hb << 8) + lb) & 0x00FFFFFF;
         }
-		public static int RemoveAt(byte[] rom, int address)
+        /// <summary>Validates and clears one RATS-protected block at its tag address.</summary>
+        public static int RemoveAt(byte[] rom, int address)
 		{
             if (rom == null || address < 0 || address + 2 >= rom.Length)
                 return -1;
@@ -152,7 +161,8 @@
 			}
 			return l - address - 8;
 		}
-		public static int SNEStoPC(int addr, Mapper mapper)
+        /// <summary>Converts a 24-bit SNES bus address into a headered PC file offset.</summary>
+        public static int SNEStoPC(int addr, Mapper mapper)
 		{
 			if (addr < 0 || addr > 0xFFFFFF) return -1;//not 24bit
 			switch(mapper)
@@ -237,7 +247,8 @@
 					return -1;
 			}
 		}
-		public static List<(int, int)> FindFreeSpace(byte[] rom)
+        /// <summary>Finds unprotected free-space runs without crossing LoROM bank boundaries.</summary>
+        public static List<(int, int)> FindFreeSpace(byte[] rom)
         {
             List < (int, int)> map = new();
 
@@ -289,7 +300,8 @@
             }
             return map;
         }
-		public static byte[] GetRATS(byte[] data)
+        /// <summary>Builds the eight-byte RATS header for a data payload.</summary>
+        public static byte[] GetRATS(byte[] data)
         {
 			byte[] rats = new byte[8];
 			rats[0] = 0x53;										//S
@@ -302,12 +314,14 @@
 			rats[7] = (byte)(rats[5] ^ 0xFF);					//~(size-1 hight byte)
 			return rats;
         }
+        /// <summary>Writes a RATS header and payload at a PC file offset.</summary>
         public static void InsertDataWithRats(byte[] rom, int address , byte[] data)
         {
 			GetRATS(data).CopyTo(rom, address);
 			data.CopyTo(rom, address + 8);                              //data
         }
-		public static (List<(int, int, int)>, List<byte[]>) MergeResources(List<byte[]> resources)
+        /// <summary>Packs raw resources into buffers and returns each original resource location.</summary>
+        public static (List<(int, int, int)>, List<byte[]>) MergeResources(List<byte[]> resources)
 		{
 			List<(int, byte[])> positions = new();
 
@@ -362,6 +376,7 @@
 
 			return (orderAndPosition, result);
 		}
+        /// <summary>Follows a terminated pointer table and removes each referenced RATS block.</summary>
         public static List<(int, int)> Remove(byte[] rom, int address, Mapper mapper, int offset = 0)
         {
 			int addr = address;

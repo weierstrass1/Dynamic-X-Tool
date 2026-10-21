@@ -5,11 +5,14 @@ using DynamicXtremeLibrary.Logging.Wrappers;
 using LogRegister;
 using System.Reflection;
 using System.Reflection.Metadata;
+using DynamicXtremeLibrary.Inputs;
 
 namespace DynamicXtremeTool
 {
+    /// <summary>Provides the Dynamic Xtreme command-line entry point and interactive setup flow.</summary>
     public class Program
     {
+        /// <summary>Processes command-line options, runs installation, and renders the resulting log.</summary>
         private static void Main(string[]? args)
         {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
@@ -99,7 +102,8 @@ namespace DynamicXtremeTool
                 PaletteEffectsDataFilename = "PaletteEffectsData",
                 OutputDefinesFilename = "DXDefines",
                 OptionsDefinesFilename = "Options",
-                RoutinesDirectory = "Routines"
+                RoutinesDirectory = "Routines",
+                CollisionResolver = ConfirmCollisionRename
             };
             dx.Run(File.ReadAllBytes(opt.InputRomPath.Value));
 
@@ -113,6 +117,29 @@ namespace DynamicXtremeTool
             File.WriteAllText("log.txt", rawText.ToString());
             Console.ResetColor();
             Console.Read();
+        }
+
+        /// <summary>
+        /// Displays a generated-name collision and asks the user whether Dynamic Xtreme may rename
+        /// the affected symbols and update their primary ASM consumers.
+        /// </summary>
+        /// <param name="collision">The conflicting files and proposed collision-free names.</param>
+        /// <returns><see langword="true"/> only when the user explicitly accepts the rename.</returns>
+        private static bool ConfirmCollisionRename(NameCollision collision)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine();
+            Console.WriteLine($"Dynamic Xtreme found different resources that generate the name '{collision.GeneratedName}':");
+            foreach (string file in collision.Files)
+                Console.WriteLine($"  {file}");
+            Console.WriteLine("Proposed generated names:");
+            foreach (string name in collision.ProposedNames)
+                Console.WriteLine($"  {name}");
+            Console.Write("Rename the generated symbols and update the affected primary ASM files? [y/N]: ");
+            Console.ResetColor();
+            string answer = Console.ReadLine()?.Trim() ?? "";
+            return answer.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+                answer.Equals("yes", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -7,8 +7,10 @@ using DynamicXtremeLibrary.Infos;
 
 namespace DynamicXtremeLibrary.ResourceManagement
 {
+    /// <summary>Packs resources, allocates ROM space, and generates resource lookup tables.</summary>
     public class ResourceManager
     {
+        /// <summary>Builds parallel palette ID and address tables in DynamicInfo order.</summary>
         public static string BuildPalettesTable(IEnumerable<DynamicInfo> dynamicInfos)
         {
             StringBuilder ids = new();
@@ -19,7 +21,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
             {
                 foreach (var pal in dyn.Palettes ?? [])
                 {
-                    filename = AsarSymbolName.FromPath(pal);
+                    filename = dyn.GetPaletteName(pal);
                     ids.AppendLine($"\tdw !PaletteID{filename}");
                     addresses.AppendLine($"\tdl !Palette{filename}");
                 }
@@ -33,6 +35,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 """;
             return result;
         }
+        /// <summary>Builds the terminated long-address table for inserted buffers.</summary>
         public static string BuildBufferTable(IEnumerable<ResourceReference> buffers)
         {
             var res = buffers.OrderBy(r => r.Resource.ID);
@@ -45,6 +48,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
             sb.AppendLine("\tdl $FFFFFF");
             return sb.ToString();
         }
+        /// <summary>Builds address defines for a resource-reference sequence.</summary>
         public static string BuildResourceDefines(IEnumerable<ResourceReference> resources, string prefix)
         {
             var res = resources.OrderBy(r=>r.Resource.ID);
@@ -55,6 +59,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
             }
             return sb.ToString();
         }
+        /// <summary>Allocates every buffer in free ROM space and returns absolute references.</summary>
         public static ResourceAllReferences? InsertBuffers(LogRegisterSystem logging, byte[] rom, IReadOnlyList<ResourceBuffer> buffers)
         {
             Mapper mapper = SNESROMUtils.GetMapper(rom);
@@ -132,6 +137,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 GeneralResources = resRefs!.AsReadOnly()
             };
         }
+        /// <summary>Orders free-space blocks by preferred ROM region, size, and address.</summary>
         private static int comp((int, int) x1, (int, int) x2)
         {
 
@@ -149,6 +155,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 return 1;
             return 0;
         }
+        /// <summary>Packs resources into buffers without exceeding the 32 KiB allocation limit.</summary>
         public static IReadOnlyList<ResourceBuffer> MergeResources(IEnumerable<Resource> resources)
         {
             List<Resource> positions = [.. resources.OrderByDescending(r=>r.Length)];

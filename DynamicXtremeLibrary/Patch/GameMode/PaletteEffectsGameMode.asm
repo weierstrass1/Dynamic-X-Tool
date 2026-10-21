@@ -18,6 +18,9 @@
 !ratio2Inv = $D6
 !ratio3Inv = $D7
 
+!FixedColorFlag = $01
+!PaletteColor00Flag = $02
+
 ..PalettEffects
 	REP #$20
 	LDA DX_Dynamic_Palettes_GlobalEffectID
@@ -28,8 +31,6 @@
 
 	LDA #$0000
 	STA DX_PPU_CGRAM_BGEffectLoaded
-	SEP #$20
-	STA DX_PPU_FixedColor_EffectLoaded
 +
 	SEP #$20
 
@@ -38,6 +39,7 @@
 	PLB
 
 	JSL LoadFixedGlobalColorEffect
+	JSL LoadPaletteColor00GlobalEffect
 	LDA DX_Dynamic_Palettes_GlobalBGEnable
 	BEQ +
 !i = 0
@@ -66,12 +68,13 @@ endif
 ;Input:
 ;$98 = Palette Effect ID, 16 bits
 LoadFixedGlobalColorEffect:
-	LDA DX_PPU_FixedColor_Enable
+	LDA DX_PPU_ColorEffect_Enable
+	AND #!FixedColorFlag
 	BNE +
 RTL
 +
 	REP #$20
-	LDA DX_Dynamic_Palettes_GlobalEffectID
+	LDA $98
 	CMP DX_PPU_FixedColor_LastGlobalEffectID
 	SEP #$20
 	BNE +
@@ -80,7 +83,189 @@ RTL
 ;Input:
 ;$98 = Palette Effect ID, 16 bits
 ForceLoadFixedGlobalColorEffect:
+	LDA #!FixedColorFlag
+	BRA ProcessGlobalColorEffect
+
+;Input:
+;$98 = Palette Effect ID, 16 bits
+LoadPaletteColor00GlobalEffect:
+	LDA DX_PPU_ColorEffect_Enable
+	AND #!PaletteColor00Flag
+	BNE +
 RTL
++
+	REP #$20
+	LDA $98
+	CMP DX_PPU_PaletteColor00_LastGlobalEffectID
+	SEP #$20
+	BNE +
+RTL
++
+;Input:
+;$98 = Palette Effect ID, 16 bits
+ForceLoadPaletteColor00GlobalEffect:
+	LDA #!PaletteColor00Flag
+
+;Input:
+;$98 = Palette Effect ID, 16 bits
+;A = !FixedColorFlag or !PaletteColor00Flag, 8 bits
+;Scratch:
+;$65 = Color model (0 = RGB, 1 = HSL)
+;$66 = Target flag
+ProcessGlobalColorEffect:
+	STA $66
+
+	LDA DX_PPU_ColorEffect_BaseLoaded
+	AND $66
+	BNE .BaseLoaded
+
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE .SetBaseLoaded
+
+	REP #$20
+	LDA DX_PPU_FixedColor_Mirror
+	STA DX_PPU_FixedColor_Base
+	SEP #$20
+
+.SetBaseLoaded
+	LDA DX_PPU_ColorEffect_BaseLoaded
+	ORA $66
+	STA DX_PPU_ColorEffect_BaseLoaded
+
+.BaseLoaded
+	REP #$30
+	LDA $98
+	BNE +
+	SEP #$30
+	JMP .CopyBase
++
+	DEC A
+	TAX
+	SEP #$20
+
+	LDA !PaletteEffectsTypes,x
+	SEP #$10
+	AND #$01
+	STA $65
+	BNE .LoadHSLBase
+
+.LoadRGBBase
+	LDA DX_PPU_ColorEffect_RGBBaseLoaded
+	AND $66
+	BNE .ApplyEffect
+
+	JSR .SetRGBBase
+	LDA DX_PPU_ColorEffect_RGBBaseLoaded
+	ORA $66
+	STA DX_PPU_ColorEffect_RGBBaseLoaded
+	BRA .ApplyEffect
+
+.LoadHSLBase
+	LDA DX_PPU_ColorEffect_HSLBaseLoaded
+	AND $66
+	BNE .ApplyEffect
+
+	JSR .SetHSLBase
+	LDA DX_PPU_ColorEffect_HSLBaseLoaded
+	ORA $66
+	STA DX_PPU_ColorEffect_HSLBaseLoaded
+
+.ApplyEffect
+	JSR .DoEffect
+	BRA .Publish
+
+.CopyBase
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE .CopyPaletteColor00Base
+
+	REP #$20
+	LDA DX_PPU_FixedColor_Base
+	STA DX_PPU_FixedColor_Result
+	SEP #$20
+	BRA .Publish
+
+.CopyPaletteColor00Base
+	REP #$20
+	LDA DX_PPU_PaletteColor00_Base
+	STA DX_PPU_PaletteColor00_Result
+	SEP #$20
+
+.Publish
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE .PublishPaletteColor00
+
+	REP #$20
+	LDA DX_PPU_FixedColor_Result
+	STA DX_PPU_FixedColor_Mirror
+	LDA $98
+	STA DX_PPU_FixedColor_LastGlobalEffectID
+	SEP #$20
+RTL
+
+.PublishPaletteColor00
+	LDA #$01
+	STA DX_PPU_PaletteColor00_Update
+	REP #$20
+	LDA $98
+	STA DX_PPU_PaletteColor00_LastGlobalEffectID
+	SEP #$20
+RTL
+
+.SetRGBBase
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE ..PaletteColor00
+
+	%SetRGBBase("#DX_PPU_FixedColor_Base","#DX_PPU_FixedColor_Base>>16","#DX_PPU_FixedColor_RGBBase","#DX_PPU_FixedColor_RGBBase>>16","s",#$0001)
+RTS
+
+..PaletteColor00
+	%SetRGBBase("#DX_PPU_PaletteColor00_Base","#DX_PPU_PaletteColor00_Base>>16","#DX_PPU_PaletteColor00_RGBBase","#DX_PPU_PaletteColor00_RGBBase>>16","s",#$0001)
+RTS
+
+.SetHSLBase
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE ..PaletteColor00
+
+	%SetHSLBase("#DX_PPU_FixedColor_Base","#DX_PPU_FixedColor_Base>>16","#DX_PPU_FixedColor_HSLBase","#DX_PPU_FixedColor_HSLBase>>16","s",#$0001)
+RTS
+
+..PaletteColor00
+	%SetHSLBase("#DX_PPU_PaletteColor00_Base","#DX_PPU_PaletteColor00_Base>>16","#DX_PPU_PaletteColor00_HSLBase","#DX_PPU_PaletteColor00_HSLBase>>16","s",#$0001)
+RTS
+
+.DoEffect
+	LDA $65
+	BEQ +
+	JMP ..HSL
++
+
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE ..PaletteColor00RGB
+
+	%DoEffectAndMerge($98,"#DX_PPU_FixedColor_RGBBase","#DX_PPU_FixedColor_RGBBase>>16","#DX_PPU_FixedColor_Result","#DX_PPU_FixedColor_Result>>16","s",#$0001)
+RTS
+
+..PaletteColor00RGB
+	%DoEffectAndMerge($98,"#DX_PPU_PaletteColor00_RGBBase","#DX_PPU_PaletteColor00_RGBBase>>16","#DX_PPU_PaletteColor00_Result","#DX_PPU_PaletteColor00_Result>>16","s",#$0001)
+RTS
+
+..HSL
+	LDA $66
+	CMP #!FixedColorFlag
+	BNE ..PaletteColor00HSL
+
+	%DoEffectAndMerge($98,"#DX_PPU_FixedColor_HSLBase","#DX_PPU_FixedColor_HSLBase>>16","#DX_PPU_FixedColor_Result","#DX_PPU_FixedColor_Result>>16","s",#$0001)
+RTS
+
+..PaletteColor00HSL
+	%DoEffectAndMerge($98,"#DX_PPU_PaletteColor00_HSLBase","#DX_PPU_PaletteColor00_HSLBase>>16","#DX_PPU_PaletteColor00_Result","#DX_PPU_PaletteColor00_Result>>16","s",#$0001)
+RTS
 
 ;Input:
 ;$98 = Palette Effect ID, 16 bits

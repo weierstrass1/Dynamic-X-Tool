@@ -3,6 +3,7 @@ using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports an invalid source line with its location and optional detail.</summary>
     public class SyntaxError : ILoggingRegister
     {
         public bool AppearWithoutVerbose => true;
@@ -12,6 +13,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public string MessageType => "SYNTAX ERROR";
 
         public IReadOnlyDictionary<string, string> Parameters { get; private set; }
+        /// <summary>Initializes a syntax-error record.</summary>
         public SyntaxError(string file, int line, string lineContent, string message = "")
         {
             Parameters = new Dictionary<string, string>

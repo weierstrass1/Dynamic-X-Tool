@@ -33,4 +33,5 @@
 !DXDraw = %DXExtendedDraw()
 !DXDrawWithOffset = %DXExtendedDrawWithOffset()
 !ConcatenateRGBPaletteEffectToGlobal = %DXExtendedConcatenateRGBPaletteEffectToGlobal()
+!ConcatenateHSLPaletteEffectToGlobal = %DXExtendedConcatenateHSLPaletteEffectToGlobal()
 !ReplacePalette = %DXExtendedReplacePalette()

@@ -39,4 +39,5 @@
 !DXDraw = %DXNormalDraw()
 !DXDrawWithOffset = %DXNormalDrawWithOffset()
 !ConcatenateRGBPaletteEffectToGlobal = %DXNormalConcatenateRGBPaletteEffectToGlobal()
+!ConcatenateHSLPaletteEffectToGlobal = %DXNormalConcatenateHSLPaletteEffectToGlobal()
 !ReplacePalette = %DXNormalReplacePalette()

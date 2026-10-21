@@ -3,8 +3,13 @@ using DynamicXtremeLibrary.Readers;
 
 namespace DynamicXtremeLibrary.Generators
 {
+    /// <summary>Generates pose-to-routine lookup tables from resolved graphic routines.</summary>
     public class PoseDataGenerator
     {
+        /// <summary>Populates a pose-data template with offsets, lengths, routine IDs, and addresses.</summary>
+        /// <param name="grs">The generated graphic routines.</param>
+        /// <param name="path">The pose-data template path.</param>
+        /// <returns>The populated Asar source.</returns>
         public static string GenerateData(IEnumerable<GraphicRoutine> grs, string path)
         {
             string content = File.ReadAllText(path);

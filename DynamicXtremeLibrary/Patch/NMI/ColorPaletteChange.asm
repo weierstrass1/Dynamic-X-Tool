@@ -41,3 +41,20 @@ RTS
     LDA.b #$FF
     STA.l DX_PPU_CGRAM_Transfer_Length
 RTS
+
+if !PalettesEffects
+PaletteColor00NMI:
+    LDA DX_PPU_PaletteColor00_Update
+    BNE +
+RTS
++
+    STZ $2121
+    LDA DX_PPU_PaletteColor00_Result
+    STA $2122
+    LDA DX_PPU_PaletteColor00_Result+1
+    STA $2122
+
+    LDA #$00
+    STA DX_PPU_PaletteColor00_Update
+RTS
+endif

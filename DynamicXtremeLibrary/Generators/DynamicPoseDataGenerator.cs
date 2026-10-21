@@ -4,6 +4,7 @@ using SNESLibrary;
 
 namespace DynamicXtremeLibrary.Generators
 {
+    /// <summary>Populates the Asar tables used to locate and describe dynamic poses.</summary>
     public class DynamicPoseDataGenerator
     {
         private static readonly string template_path = Path.Combine("ASM", "DynamicPoseDataTemplate.asm");
@@ -12,6 +13,8 @@ namespace DynamicXtremeLibrary.Generators
         private const string resource_label = "<Resource>";
         private const string sizes_label = "<Sizes>";
         private const string last_row_label = "<LastRow>";
+        /// <summary>Builds a valid template containing only sentinel and zero-sized entries.</summary>
+        /// <returns>The empty dynamic-pose table source.</returns>
         public static string GenerateEmpty()
         {
             string content = File.ReadAllText(template_path);
@@ -27,6 +30,11 @@ namespace DynamicXtremeLibrary.Generators
 
             return content;
         }
+        /// <summary>Builds dynamic-pose size, block, address, chunk-size, and last-row tables.</summary>
+        /// <param name="mapper">The ROM mapping used for address conversion.</param>
+        /// <param name="refs">The inserted dynamic-pose resource references.</param>
+        /// <param name="dis">The DynamicInfo definitions that describe each pose.</param>
+        /// <returns>The populated Asar table source.</returns>
         public static string GenerateData(Mapper mapper, IEnumerable<ResourceReference> refs, IEnumerable<DynamicInfo> dis)
         {
             string content = File.ReadAllText(template_path);

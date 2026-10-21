@@ -3,12 +3,14 @@ using System.Text;
 
 namespace DynamicXtremeLibrary
 {
+    /// <summary>Generates and removes pointer tables whose entries reference RATS-protected data.</summary>
     public class ResourceTablePatchManager
     {
         private static readonly string template_path = Path.Combine("ASM", "ResourceTableTemplate.asm");
         private const string empty_value = "\tdl $000000";
         private const string offset_label = "<Offset>";
         private const string values_label = "<Values>";
+        /// <summary>Builds an empty terminated pointer table from its Asar template.</summary>
         public static string Generate(int numberOfValues, int offset)
         {
             StringBuilder sb = new();
@@ -19,6 +21,7 @@ namespace DynamicXtremeLibrary
                     .Replace(offset_label, offset.ToString("X4"))
                     .Replace(values_label, sb.ToString());
         }
+        /// <summary>Removes every RATS block referenced by a table and then removes the table itself.</summary>
         public static List<(int,int)> Remove(byte[] rom, int address, Mapper mapper, int offset = 0)
         {
             int pointer = SNESROMUtils.JoinAddress(rom[address + 2], rom[address + 1], rom[address]);

@@ -37,4 +37,5 @@
 !DXDraw = %DXClusterDraw()
 !DXDrawWithOffset = %DXClusterDrawWithOffset()
 !ConcatenateRGBPaletteEffectToGlobal = %DXClusterConcatenateRGBPaletteEffectToGlobal()
+!ConcatenateHSLPaletteEffectToGlobal = %DXClusterConcatenateHSLPaletteEffectToGlobal()
 !ReplacePalette = %DXClusterReplacePalette()

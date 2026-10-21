@@ -35,6 +35,9 @@ endif
 pushpc
 namespace nested on
 
+org (!normalBnk+$0701)|!addr
+DX_PPU_FixedColor_Mirror:
+
 org (!PalCopyBNK+$0703)|!addr
 DX_PPU_CGRAM_PaletteCopy:
 
@@ -117,16 +120,26 @@ org !Variables2
         namespace PPU
             if !PalettesChange
             if !PalettesEffects
-            namespace FixedColor
+            namespace ColorEffect
                 Enable: skip 1
-                RGBBase: skip 3
-                HSLBase: skip 3
-                CopyLoaded: skip 1
-                EffectLoaded: skip 1
-                Copy: skip 2
+                BaseLoaded: skip 1
                 RGBBaseLoaded: skip 1
                 HSLBaseLoaded: skip 1
+            namespace off
+            namespace FixedColor
+                Base: skip 2
+                RGBBase: skip 3
+                HSLBase: skip 3
+                Result: skip 2
                 LastGlobalEffectID: skip 2
+            namespace off
+            namespace PaletteColor00
+                Base: skip 2
+                RGBBase: skip 3
+                HSLBase: skip 3
+                Result: skip 2
+                LastGlobalEffectID: skip 2
+                Update: skip 1
             namespace off
             endif
             namespace CGRAM

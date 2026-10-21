@@ -4,9 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace LogRegister
 {
+    /// <summary>Renders structured log events using configurable text templates and typed spans.</summary>
     public partial class LogRenderer
     {
         private readonly Dictionary<string, string> _messageTypeMapper;
+        /// <summary>Loads message templates from a JSON mapping.</summary>
         public LogRenderer(string jsonConfigPath)
         {
             if (!File.Exists(jsonConfigPath))
@@ -15,6 +17,7 @@ namespace LogRegister
             _messageTypeMapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json)
                 ?? [];
         }
+        /// <summary>Renders a sequence while applying verbose and error visibility rules.</summary>
         public void RenderAll(IEnumerable<ILoggingRegister> logRegister, LogRenderAction action, bool verbose = false, bool error = false)
         {
             foreach (var log in logRegister)
@@ -23,6 +26,7 @@ namespace LogRegister
                 result.Render(action, mustWrite: (!error && (verbose || log.AppearWithoutVerbose)) || (error && log.AppearInErrors));
             }
         }
+        /// <summary>Resolves one event template and marks substituted parameters as spans.</summary>
         public LogRenderResult Render(ILoggingRegister logRegister)
         {
             if (!_messageTypeMapper.TryGetValue(logRegister.MessageType, out var message))
@@ -106,6 +110,7 @@ namespace LogRegister
             };
         }
 
+        /// <summary>Creates the parser for named template placeholders.</summary>
         [GeneratedRegex(@"\{(\w+)\}")]
         private static partial Regex ParameterRegex();
     }

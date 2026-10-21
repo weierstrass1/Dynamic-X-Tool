@@ -5,13 +5,20 @@ using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Generators
 {
+    /// <summary>Generates specialized Asar drawing routines and their aggregate include files.</summary>
     public class GraphicRoutineGenerator
     {
+        /// <summary>Gets the aggregate include-template path.</summary>
         public string IncludeTemplatePath { get; private set; }
+        /// <summary>Gets the individual graphic-routine template path.</summary>
         public string TemplatePath { get; private set; }
+        /// <summary>Gets the directory that receives generated routines.</summary>
         public string OutputDirectory { get; private set; }
+        /// <summary>Gets the aggregate include filename.</summary>
         public string OutputIncludeFileName { get; private set; }
+        /// <summary>Gets the generated Asar protection-list filename.</summary>
         public string OutputProtsFileName { get; private set; }
+        /// <summary>Initializes the generator and verifies or creates its required paths.</summary>
         public GraphicRoutineGenerator(string includeTemplatePath, string templatePath, string outputDirectory, string outputIncludeFileName, string outputProtsFileName)
         {
             TemplatePath = templatePath;
@@ -26,6 +33,8 @@ namespace DynamicXtremeLibrary.Generators
             OutputIncludeFileName = outputIncludeFileName;
             OutputProtsFileName = outputProtsFileName;
         }
+        /// <summary>Regenerates every specialized routine, aggregate include, and protection list.</summary>
+        /// <param name="grs">Graphic routines grouped by their behavioral key.</param>
         public void GenerateAllGraphicRoutine(IReadOnlyDictionary<int, IReadOnlyList<GraphicRoutine>> grs)
         {
             string[] files = Directory.GetFiles(OutputDirectory);
@@ -60,6 +69,8 @@ namespace DynamicXtremeLibrary.Generators
             File.WriteAllText(Path.Combine(OutputDirectory, OutputProtsFileName), prots.ToString());
             File.WriteAllText(Path.Combine(OutputDirectory, OutputIncludeFileName), includeContent);
         }
+        /// <summary>Populates one routine template with only the tables required by its configuration.</summary>
+        /// <param name="gr">The routine model to generate.</param>
         public void GenerateGraphicRoutine(GraphicRoutine gr)
         {
             string title = $"{gr.Name}:";
@@ -106,6 +117,7 @@ namespace DynamicXtremeLibrary.Generators
 
             File.WriteAllText(Path.Combine(OutputDirectory, $"{title[..^1]}.asm"), content);
         }
+        /// <summary>Serializes one DrawInfo table beneath context-and-pose labels.</summary>
         private string GetTable(IReadOnlyList<DrawInfo> list, Func<DrawInfo, string> stringValue)
         {
             StringBuilder sb = new();

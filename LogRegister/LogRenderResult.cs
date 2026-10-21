@@ -1,12 +1,18 @@
 ﻿namespace LogRegister
 {
+    /// <summary>Consumes one categorized span produced by the log renderer.</summary>
     public delegate void LogRenderAction(string text, ILogCategory category, SpanType type, bool mustWrite = false);
+    /// <summary>Contains rendered text and the categorized spans embedded within it.</summary>
     public struct LogRenderResult
     {
+        /// <summary>Gets or sets the default category for unannotated text.</summary>
         public ILogCategory Category;
+        /// <summary>Gets or sets the rendered message text.</summary>
         public string Text;
+        /// <summary>Gets or sets categorized spans within the text.</summary>
         public IReadOnlyList<LogSpan> Spans;
 
+        /// <summary>Emits normal text and annotated spans in source order.</summary>
         public readonly void Render(LogRenderAction action, bool mustWrite = false)
         {
             int cursor = 0;

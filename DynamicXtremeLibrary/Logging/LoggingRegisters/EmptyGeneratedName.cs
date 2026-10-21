@@ -3,6 +3,7 @@ using LogRegister;
 
 namespace DynamicXtremeLibrary.Logging.LoggingRegisters
 {
+    /// <summary>Reports a source filename that normalizes to an empty Asar symbol.</summary>
     public class EmptyGeneratedName : ILoggingRegister
     {
         public bool AppearWithoutVerbose => true;
@@ -11,6 +12,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         public string MessageType => "EMPTY GENERATED NAME";
         public IReadOnlyDictionary<string, string> Parameters { get; }
 
+        /// <summary>Initializes an empty-generated-name record.</summary>
         public EmptyGeneratedName(string sourceName)
         {
             Parameters = new Dictionary<string, string>

@@ -3,9 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Readers
 {
+    /// <summary>Converts between integer arrays and Asar hexadecimal data declarations.</summary>
     public partial class HexReader
     {
         private static readonly Regex valueRegex = getValueRegex();
+        /// <summary>Formats values as byte, word, or long Asar declarations.</summary>
         public static string ValuesToString(int[]? arr, int valueSize, int linebreak = 16)
         {
             if (arr == null || arr.Length == 0)
@@ -28,6 +30,7 @@ namespace DynamicXtremeLibrary.Readers
             }
             return sb.ToString();
         }
+        /// <summary>Extracts decimal and dollar-prefixed hexadecimal integers from text.</summary>
         public static int[] GetValues(string input)
         {
             MatchCollection matches = valueRegex.Matches(input);
@@ -53,6 +56,7 @@ namespace DynamicXtremeLibrary.Readers
             return values;
         }
 
+        /// <summary>Creates the parser for decimal and Asar hexadecimal numeric literals.</summary>
         [GeneratedRegex("(\\$[A-Fa-z0-9]+|[0-9]+)", RegexOptions.Multiline)]
         private static partial Regex getValueRegex();
     }

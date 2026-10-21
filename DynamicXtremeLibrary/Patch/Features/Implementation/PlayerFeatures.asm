@@ -94,7 +94,7 @@ JML $00F69E|!rom
     BEQ ++
 
     LDA DX_Dynamic_Palettes_GlobalEffectID
-    CMP DX_Dynamic_Palettes_LastGlobalEffectID+$10
+    CMP DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$10
     BNE +
 
 ++
@@ -169,7 +169,7 @@ JML $00F69E|!rom
     STA.w DX_PPU_CGRAM_PaletteCopy+$011E
 
     LDA #$FFFF
-    STA DX_Dynamic_Palettes_LastGlobalEffectID+$10
+    STA DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$10
     SEP #$20
     LDA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
     AND #$7F

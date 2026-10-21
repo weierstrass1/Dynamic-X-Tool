@@ -7,11 +7,19 @@ using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Defines
 {
+    /// <summary>Generates the Asar defines that expose installed resources, poses, and palette effects.</summary>
     public class DefineGenerator
     {
+        /// <summary>Gets the template prepended to generated defines.</summary>
         public string BaseDefineFile { get; private set; }
+        /// <summary>Gets the patch-local output path.</summary>
         public string OutputFile { get; private set; }
+        /// <summary>Gets the externally exported output path.</summary>
         public string OutputFileExternal { get; private set; }
+        /// <summary>Initializes a define generator and verifies its template exists.</summary>
+        /// <param name="baseDefineFile">The define template path.</param>
+        /// <param name="outputFile">The patch-local output path.</param>
+        /// <param name="outputFileExternal">The externally exported output path.</param>
         public DefineGenerator(string baseDefineFile, string outputFile, string outputFileExternal)
         {
             BaseDefineFile = baseDefineFile;
@@ -20,6 +28,7 @@ namespace DynamicXtremeLibrary.Defines
             OutputFile = outputFile;
             OutputFileExternal = outputFileExternal;
         }
+        /// <summary>Combines the template with every generated define family and writes both outputs.</summary>
         public void GenerateDefinesFile(ResourceAllReferences? refs, Mapper mapper, IEnumerable<DrawInfo>? drawInfos, IEnumerable<DynamicInfo>? dynamicInfos, IEnumerable<PaletteEffectCollection>? paletteEffects)
         {
             string content = File.ReadAllText(BaseDefineFile);
@@ -29,6 +38,9 @@ namespace DynamicXtremeLibrary.Defines
             File.WriteAllText(OutputFile, content);
             File.WriteAllText(OutputFileExternal, content);
         }
+        /// <summary>Builds palette-table offsets for each DynamicInfo context.</summary>
+        /// <param name="dynamicInfos">The installed DynamicInfo definitions.</param>
+        /// <returns>The generated palette-table define source.</returns>
         public static string GeneratePaletteOffsets(IEnumerable<DynamicInfo>? dynamicInfos)
         {
             if (dynamicInfos == null || dynamicInfos.Count() == 0)
@@ -50,6 +62,10 @@ namespace DynamicXtremeLibrary.Defines
             """;
             return $"{start}\n{sb}";
         }
+        /// <summary>Builds IDs, ROM addresses, and sizes for every inserted resource.</summary>
+        /// <param name="refs">The inserted resource references.</param>
+        /// <param name="mapper">The ROM mapping used to convert PC addresses.</param>
+        /// <returns>The generated resource define source.</returns>
         public static string GenerateReferenceDefines(ResourceAllReferences? refs, Mapper mapper)
         {
             if (refs == null)
@@ -105,6 +121,9 @@ namespace DynamicXtremeLibrary.Defines
             result.Append($"{ids}\n{addrs}\n{sizes}");
             return result.ToString();
         }
+        /// <summary>Builds pose IDs and maximum render-box distances grouped by DrawInfo context.</summary>
+        /// <param name="drawInfos">The installed drawable poses.</param>
+        /// <returns>The generated pose define source.</returns>
         public static string GeneratePoseDefines(IEnumerable<DrawInfo>? drawInfos)
         {
             if (drawInfos == null)
@@ -133,6 +152,9 @@ namespace DynamicXtremeLibrary.Defines
             result.Append($"\n{renderx}\n{rendery}");
             return result.ToString();
         }
+        /// <summary>Builds consecutive IDs for non-empty palette effects.</summary>
+        /// <param name="paletteEffects">The installed palette-effect collections.</param>
+        /// <returns>The generated palette-effect define source.</returns>
         public static string GeneratePaletteEffectDefines(IEnumerable<PaletteEffectCollection>? paletteEffects)
         {
             if (paletteEffects == null)

@@ -3,12 +3,14 @@ using System.Text.RegularExpressions;
 
 namespace DynamicXtremeLibrary.Readers
 {
+    /// <summary>Parses legacy nested Asar-style tables into DynamicInfo and DrawInfo models.</summary>
     public partial class TablesReader
     {
         private const string BIG_TABLE_PATTERN = @"[A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n([A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n(\s*d(b|w|l)\s*((\$[A-Fa-z0-9]+|[0-9]+)\s*,?\s*)+)+\s*\n?)+";
         private const string SUB_TABLE_PATTERN = @"^(?!(ResourceLastRow))[A-Za-z]([A-Za-z0-9]|(_|-))*:\s*\n(\s*d(b|w|l)\s*((\$[A-Fa-z0-9]+|[0-9]+)\s*\,?\s*)+\s*\n?)+";
         private static readonly Regex bigTableRegex = getBigTableRegex();
         private static readonly Regex subTableRegex = getSubTableRegex();
+        /// <summary>Reads DynamicInfo chunk and last-row tables from cleaned source text.</summary>
         public static DynamicInfo ReadDynamicInfoTables(string contextName, string input)
         {
             (string, string)[] tables = split(input, bigTableRegex);
@@ -32,6 +34,7 @@ namespace DynamicXtremeLibrary.Readers
             }
             return di;
         }
+        /// <summary>Reads all named DrawInfo pose tables from cleaned source text.</summary>
         public static DrawInfo[] ReadDrawInfoTables(int idOffset, string contextName, string input)
         {
             (string, string)[] tables = split(input, bigTableRegex);
@@ -88,18 +91,21 @@ namespace DynamicXtremeLibrary.Readers
                     Sizes = sizes,
                 });
             }
-            return fis.Values.ToArray();
+            return [.. fis.Values];
         }
+        /// <summary>Parses a table entry at an index when that entry exists.</summary>
         private static int[]? getValues(int id, (string, string)[]? values)
             => values != null ?
                     HexReader.GetValues(values![id % values.Length].Item2) :
                     null;
+        /// <summary>Looks up and parses an indexed subtable by property name.</summary>
         private static int[]? getValues(string prop, int id, Dictionary<string, (string, string)[]> dic)
         {
             dic.TryGetValue(prop, out (string, string)[]? values);
 
             return getValues(id, values);
         }
+        /// <summary>Splits matched labeled table blocks into name-and-body pairs.</summary>
         private static (string, string)[] split(string input, Regex reg)
         {
             MatchCollection matches = reg.Matches(input);
@@ -120,8 +126,10 @@ namespace DynamicXtremeLibrary.Readers
             }
             return vals;
         }
+        /// <summary>Creates the parser for nested labeled table groups.</summary>
         [GeneratedRegex(BIG_TABLE_PATTERN, RegexOptions.Multiline)]
         private static partial Regex getBigTableRegex();
+        /// <summary>Creates the parser for individual labeled data tables.</summary>
         [GeneratedRegex(SUB_TABLE_PATTERN, RegexOptions.Multiline)]
         private static partial Regex getSubTableRegex();
     }

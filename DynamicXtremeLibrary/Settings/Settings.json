@@ -4,6 +4,8 @@
   "PixiPath": "",
   "UberasmToolPath": "",
   "GPSPath": "",
+  "PixiListPath": "",
+  "UberasmListPath": "",
   "Features": [
     {
       "Name": "GraphicsChange",
