@@ -91,9 +91,12 @@ namespace DynamicXtremeLibrary.Defines
             sizes.Clear();
             foreach (var dp in dynP)
             {
-                ids.AppendLine($"!DynamicPoseID{dp.Resource.Name} = ${dp.Resource.ID:X4}");
-                addrs.AppendLine($"!DynamicPose{dp.Resource.Name} = ${SNESROMUtils.PCtoSNES(dp.Position, mapper):X6}");
-                sizes.AppendLine($"!DynamicPose{dp.Resource.Name}Size = ${dp.Resource.Length:X4}");
+                foreach (string name in dp.Resource.Names)
+                {
+                    ids.AppendLine($"!DynamicPoseID{name} = ${dp.Resource.ID:X4}");
+                    addrs.AppendLine($"!DynamicPose{name} = ${SNESROMUtils.PCtoSNES(dp.Position, mapper):X6}");
+                    sizes.AppendLine($"!DynamicPose{name}Size = ${dp.Resource.Length:X4}");
+                }
             }
             result.AppendLine($"!NumberOfDynamicPoses = ${dynP.Count():X4}\n");
             result.Append($"{ids}\n{addrs}\n{sizes}\n");
@@ -102,9 +105,12 @@ namespace DynamicXtremeLibrary.Defines
             sizes.Clear();
             foreach (var p in pals)
             {
-                ids.AppendLine($"!PaletteID{p.Resource.Name} = ${p.Resource.ID:X4}");
-                addrs.AppendLine($"!Palette{p.Resource.Name} = ${SNESROMUtils.PCtoSNES(p.Position, mapper):X6}");
-                sizes.AppendLine($"!Palette{p.Resource.Name}Size = ${p.Resource.Length:X4}");
+                foreach (string name in p.Resource.Names)
+                {
+                    ids.AppendLine($"!PaletteID{name} = ${p.Resource.ID:X4}");
+                    addrs.AppendLine($"!Palette{name} = ${SNESROMUtils.PCtoSNES(p.Position, mapper):X6}");
+                    sizes.AppendLine($"!Palette{name}Size = ${p.Resource.Length:X4}");
+                }
             }
             result.AppendLine($"!NumberOfPalettes = ${pals.Count():X4}\n");
             result.Append($"{ids}\n{addrs}\n{sizes}\n");
@@ -113,9 +119,12 @@ namespace DynamicXtremeLibrary.Defines
             sizes.Clear();
             foreach (var r in res)
             {
-                ids.AppendLine($"!ResourceID{r.Resource.Name} = ${r.Resource.ID:X4}");
-                addrs.AppendLine($"!Resource{r.Resource.Name} = ${SNESROMUtils.PCtoSNES(r.Position, mapper):X6}");
-                sizes.AppendLine($"!Resource{r.Resource.Name}Size = ${r.Resource.Length:X4}");
+                foreach (string name in r.Resource.Names)
+                {
+                    ids.AppendLine($"!ResourceID{name} = ${r.Resource.ID:X4}");
+                    addrs.AppendLine($"!Resource{name} = ${SNESROMUtils.PCtoSNES(r.Position, mapper):X6}");
+                    sizes.AppendLine($"!Resource{name}Size = ${r.Resource.Length:X4}");
+                }
             }
             result.AppendLine($"!NumberOfResources = ${res.Count():X4}\n");
             result.Append($"{ids}\n{addrs}\n{sizes}");

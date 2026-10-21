@@ -3,6 +3,7 @@ using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.PaletteEffec;
 using DynamicXtremeLibrary.Readers;
+using DynamicXtremeLibrary.ResourceManagement;
 using DynamicXtremePaletteCreatorLibrary;
 using LogRegister;
 
@@ -193,9 +194,7 @@ namespace DynamicXtremeLibrary.Inputs
                 {
                     Unit left = units[leftIndex];
                     Unit right = units[rightIndex];
-                    if (left.Input.Kind != right.Input.Kind)
-                        continue;
-                    if (!baseSymbols(left).Intersect(baseSymbols(right), StringComparer.Ordinal).Any())
+                    if (!claimsConflict(left, right, useLogicalNames: false))
                         continue;
                     edges[left].Add(right);
                     edges[right].Add(left);
@@ -311,8 +310,12 @@ namespace DynamicXtremeLibrary.Inputs
                 NameCollision collision = new()
                 {
                     GeneratedName = getCollisionName(component),
-                    Files = component.SelectMany(unit => unit.SourcePaths).Distinct().ToArray(),
-                    ProposedNames = component.Select(unit => unit.Input.LogicalName).ToArray()
+                    Candidates = [.. ordered(component).Select(unit => new NameCollisionCandidate
+                    {
+                        OriginalName = unit.Input.OriginalName,
+                        ProposedName = unit.Input.LogicalName,
+                        Files = unit.SourcePaths.Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+                    })]
                 };
                 if (_collisionResolver == null || !_collisionResolver(collision))
                 {
@@ -341,12 +344,21 @@ namespace DynamicXtremeLibrary.Inputs
         /// <returns>The first stable original name in the component.</returns>
         private static string getCollisionName(IEnumerable<Unit> units)
         {
-            string? symbol = units.SelectMany(unit => baseSymbols(unit).Distinct())
-                .GroupBy(value => value, StringComparer.Ordinal)
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key)
-                .OrderBy(value => value, StringComparer.Ordinal)
-                .FirstOrDefault();
+            Unit[] candidates = [.. units];
+            string? symbol = null;
+            for (int leftIndex = 0; leftIndex < candidates.Length; leftIndex++)
+            {
+                for (int rightIndex = leftIndex + 1; rightIndex < candidates.Length; rightIndex++)
+                {
+                    string? candidate = firstConflictingSymbol(candidates[leftIndex],
+                        candidates[rightIndex], useLogicalNames: false);
+                    if (candidate != null && (symbol == null ||
+                        StringComparer.Ordinal.Compare(candidate, symbol) < 0))
+                    {
+                        symbol = candidate;
+                    }
+                }
+            }
             if (symbol == null)
                 return "unknown";
             int separator = symbol.IndexOf(':');
@@ -360,12 +372,47 @@ namespace DynamicXtremeLibrary.Inputs
         /// <returns><see langword="true"/> when at least one final generated symbol is duplicated.</returns>
         private static bool hasFinalSymbolCollision(IEnumerable<Unit> units)
         {
-            HashSet<string> names = new(StringComparer.Ordinal);
-            foreach (Unit unit in units)
-                foreach (string symbol in finalSymbols(unit).Distinct(StringComparer.Ordinal))
-                    if (!names.Add(symbol))
+            Unit[] candidates = [.. units];
+            for (int leftIndex = 0; leftIndex < candidates.Length; leftIndex++)
+            {
+                for (int rightIndex = leftIndex + 1; rightIndex < candidates.Length; rightIndex++)
+                {
+                    if (claimsConflict(candidates[leftIndex], candidates[rightIndex],
+                        useLogicalNames: true))
                         return true;
+                }
+            }
             return false;
+        }
+
+        /// <summary>
+        /// Determines whether two units emit the same symbol for different semantic content.
+        /// Identical binary resources are intentionally shareable across DynamicInfo inputs.
+        /// </summary>
+        private static bool claimsConflict(Unit left, Unit right, bool useLogicalNames)
+        {
+            if (left.Input.Kind != right.Input.Kind)
+                return false;
+
+            return firstConflictingSymbol(left, right, useLogicalNames) != null;
+        }
+
+        /// <summary>Finds the first symbol whose claims cannot safely share one generated define.</summary>
+        private static string? firstConflictingSymbol(Unit left, Unit right,
+            bool useLogicalNames)
+        {
+            foreach (SymbolClaim leftClaim in left.Claims)
+            {
+                string leftSymbol = leftClaim.GetSymbol(left, useLogicalNames);
+                foreach (SymbolClaim rightClaim in right.Claims)
+                {
+                    if (leftSymbol != rightClaim.GetSymbol(right, useLogicalNames))
+                        continue;
+                    if (!leftClaim.IsEquivalentTo(rightClaim))
+                        return leftSymbol;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -524,6 +571,57 @@ namespace DynamicXtremeLibrary.Inputs
                 rewrite.AddSymbolChange($"!{prefix}{oldName}", $"!{prefix}{newName}");
                 rewrite.AddSymbolChange($"!{prefix}{oldName}Size", $"!{prefix}{newName}Size");
             }
+        }
+
+        /// <summary>
+        /// Builds the generated-symbol claims of one parsed input and captures binary content once
+        /// for subsequent collision comparisons.
+        /// </summary>
+        private static IReadOnlyList<SymbolClaim> createClaims(InfoInput input, object value)
+        {
+            List<SymbolClaim> claims = [];
+            switch (value)
+            {
+                case DynamicInfo dynamicInfo:
+                    claims.Add(new(SymbolKind.Context, input.OriginalName));
+
+                    IReadOnlyList<Resource> poses = dynamicInfo.GetPosesData(0);
+                    int[] lastRows = dynamicInfo.GetLastRow();
+                    for (int index = 0; index < poses.Count; index++)
+                    {
+                        Resource pose = poses[index];
+                        claims.Add(new(SymbolKind.Pose, pose.Name, pose.Name.Length - 3,
+                            pose.Data,
+                            [
+                                dynamicInfo.GetPoseSize(index),
+                                dynamicInfo.GetPoseBlocks(index),
+                                dynamicInfo.PosesChunksSizes![index * 2] * 32,
+                                dynamicInfo.PosesChunksSizes[index * 2 + 1] * 32,
+                                index < lastRows.Length ? lastRows[index] : 0
+                            ]));
+                    }
+
+                    foreach (string path in dynamicInfo.Palettes ?? [])
+                    {
+                        claims.Add(new(SymbolKind.Palette,
+                            dynamicInfo.GetPaletteName(path, ""), -1,
+                            File.ReadAllBytes(dynamicInfo.ResolveResourcePath(path)), []));
+                    }
+                    foreach (string path in dynamicInfo.Resources ?? [])
+                    {
+                        claims.Add(new(SymbolKind.Resource,
+                            dynamicInfo.GetResourceName(path, ""), -1,
+                            File.ReadAllBytes(dynamicInfo.ResolveResourcePath(path)), []));
+                    }
+                    break;
+                case DrawInfo[]:
+                    claims.Add(new(SymbolKind.Context, input.OriginalName));
+                    break;
+                case PaletteEffectCollection:
+                    claims.Add(new(SymbolKind.Collection, input.OriginalName));
+                    break;
+            }
+            return claims.AsReadOnly();
         }
 
         /// <summary>
@@ -719,6 +817,74 @@ namespace DynamicXtremeLibrary.Inputs
         private static bool arrayEquals(int[]? left, int[]? right)
             => (left ?? []).SequenceEqual(right ?? []);
 
+        /// <summary>Classifies generated symbols so unrelated define families never collide.</summary>
+        private enum SymbolKind
+        {
+            Context,
+            Pose,
+            Palette,
+            Resource,
+            Collection
+        }
+
+        /// <summary>
+        /// Describes one generated symbol and the content that permits safe sharing with another
+        /// DynamicInfo resource.
+        /// </summary>
+        private sealed class SymbolClaim
+        {
+            private readonly int _suffixIndex;
+            private readonly byte[]? _data;
+            private readonly int[] _metadata;
+
+            /// <summary>Gets the generated-symbol category.</summary>
+            public SymbolKind Kind { get; }
+            /// <summary>Gets the unsuffixed generated name.</summary>
+            public string BaseName { get; }
+
+            /// <summary>Initializes a non-shareable context or collection claim.</summary>
+            public SymbolClaim(SymbolKind kind, string baseName)
+                : this(kind, baseName, -1, null, [])
+            {
+            }
+
+            /// <summary>Initializes a shareable binary-resource claim.</summary>
+            public SymbolClaim(SymbolKind kind, string baseName, int suffixIndex, byte[]? data,
+                int[] metadata)
+            {
+                Kind = kind;
+                BaseName = baseName;
+                _suffixIndex = suffixIndex;
+                _data = data;
+                _metadata = metadata;
+            }
+
+            /// <summary>Builds the complete categorized symbol for original or resolved naming.</summary>
+            public string GetSymbol(Unit unit, bool useLogicalName)
+            {
+                string logicalName = useLogicalName
+                    ? unit.Input.LogicalName
+                    : unit.Input.OriginalName;
+                if (Kind is SymbolKind.Context or SymbolKind.Collection)
+                    return $"{Kind}:{logicalName}";
+
+                string suffix = logicalSuffix(unit.Input.OriginalName, logicalName);
+                string name = _suffixIndex >= 0
+                    ? BaseName.Insert(_suffixIndex, suffix)
+                    : $"{BaseName}{suffix}";
+                return $"{Kind}:{name}";
+            }
+
+            /// <summary>
+            /// Determines whether two claims may safely use the same symbol and canonical binary.
+            /// </summary>
+            public bool IsEquivalentTo(SymbolClaim other)
+                => Kind == other.Kind && _data != null && other._data != null &&
+                    _metadata.SequenceEqual(other._metadata) &&
+                    _data.Length == other._data.Length &&
+                    _data.AsSpan().SequenceEqual(other._data);
+        }
+
         /// <summary>
         /// Couples one physical input with its parsed value and the source paths merged into the
         /// same semantic unit.
@@ -729,6 +895,8 @@ namespace DynamicXtremeLibrary.Inputs
             public InfoInput Input { get; }
             /// <summary>Gets the parsed DynamicInfo, DrawInfo array, or palette-effect collection.</summary>
             public object Value { get; }
+            /// <summary>Gets the generated-symbol claims cached for collision analysis.</summary>
+            public IReadOnlyList<SymbolClaim> Claims { get; }
             /// <summary>Gets every physical definition merged into this semantic unit.</summary>
             public List<string> SourcePaths { get; } = [];
             /// <summary>Gets the deterministic path used to order collision candidates.</summary>
@@ -743,6 +911,7 @@ namespace DynamicXtremeLibrary.Inputs
             {
                 Input = input;
                 Value = value;
+                Claims = createClaims(input, value);
                 SourcePaths.Add(input.Path);
             }
         }

@@ -55,7 +55,8 @@ namespace DynamicXtremeLibrary.ResourceManagement
             StringBuilder sb = new();
             foreach (var reference in res)
             {
-                sb.AppendLine($"!{prefix}{reference.Resource.Name} = ${reference.Position:X6}");
+                foreach (string name in reference.Resource.Names)
+                    sb.AppendLine($"!{prefix}{name} = ${reference.Position:X6}");
             }
             return sb.ToString();
         }

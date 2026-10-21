@@ -32,18 +32,19 @@ namespace DynamicXtremeLibrary.ExternalTools
         /// <param name="backupPath">The optional path that receives the original content.</param>
         public void WriteAllBytes(string path, byte[] content, string? backupPath = null)
         {
-            rememberFile(path);
+            string fullPath = Path.GetFullPath(path);
+            rememberFile(fullPath);
             if (!string.IsNullOrWhiteSpace(backupPath))
             {
                 rememberFile(backupPath);
-                if (_originalFiles[path] != null)
+                if (_originalFiles[fullPath] != null)
                 {
                     ensureDirectory(Path.GetDirectoryName(Path.GetFullPath(backupPath))!);
-                    File.WriteAllBytes(backupPath, _originalFiles[path]!);
+                    File.WriteAllBytes(backupPath, _originalFiles[fullPath]!);
                 }
             }
-            ensureDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-            File.WriteAllBytes(path, content);
+            ensureDirectory(Path.GetDirectoryName(fullPath)!);
+            File.WriteAllBytes(fullPath, content);
         }
 
         /// <summary>

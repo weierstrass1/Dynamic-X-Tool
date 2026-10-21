@@ -236,6 +236,7 @@ namespace DynamicXtremeLibrary.Inputs
 
             string root = getToolRoot(fullListPath, executablePath);
             ConsumerKind? kind = null;
+            HashSet<(ConsumerKind Kind, string Path)> discovered = [];
             foreach (string originalLine in File.ReadLines(fullListPath))
             {
                 string line = stripListComment(originalLine);
@@ -248,19 +249,21 @@ namespace DynamicXtremeLibrary.Inputs
                 }
                 if (kind == null)
                     continue;
-                Match pathMatch = asmPathRegex().Match(line);
-                if (!pathMatch.Success)
-                    continue;
-                string listedPath = pathMatch.Groups["quoted"].Success
-                    ? pathMatch.Groups["quoted"].Value
-                    : pathMatch.Groups["plain"].Value;
-                string asmPath = resolveListedPath(root, uberasmSubdirectory(kind.Value), listedPath);
-                yield return new()
+                foreach (Match pathMatch in asmPathRegex().Matches(line))
                 {
-                    AsmPath = asmPath,
-                    Kind = kind.Value,
-                    Name = AsarSymbolName.FromPath(asmPath)
-                };
+                    string listedPath = pathMatch.Groups["quoted"].Success
+                        ? pathMatch.Groups["quoted"].Value
+                        : pathMatch.Groups["plain"].Value;
+                    string asmPath = resolveListedPath(root, uberasmSubdirectory(kind.Value), listedPath);
+                    if (!discovered.Add((kind.Value, pathKey(asmPath))))
+                        continue;
+                    yield return new()
+                    {
+                        AsmPath = asmPath,
+                        Kind = kind.Value,
+                        Name = AsarSymbolName.FromPath(asmPath)
+                    };
+                }
             }
         }
 
@@ -502,9 +505,10 @@ namespace DynamicXtremeLibrary.Inputs
         private static partial Regex listPathRegex();
 
         /// <summary>
-        /// Creates the parser for UberASMTool list entries ending in ASM paths.
+        /// Creates the parser for every comma-separated UberASMTool ASM entry while allowing
+        /// optional extra-byte arguments after each path.
         /// </summary>
-        [GeneratedRegex("""(?:"(?<quoted>[^"]+\.asm)"|(?<plain>[^\s]+\.asm))\s*$""", RegexOptions.IgnoreCase)]
+        [GeneratedRegex("""(?:"(?<quoted>[^"]+\.asm)"|(?<plain>[^,\s"]+\.asm))(?=\s*(?::[^,]*)?(?:,|$))""", RegexOptions.IgnoreCase)]
         private static partial Regex asmPathRegex();
     }
 }

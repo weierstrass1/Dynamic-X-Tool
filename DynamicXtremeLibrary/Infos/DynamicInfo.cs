@@ -277,44 +277,90 @@ namespace DynamicXtremeLibrary.Infos
         /// <summary>Collects dynamic-pose resources while assigning consecutive IDs.</summary>
         public static IReadOnlyList<Resource> GetPosesData(IEnumerable<DynamicInfo> dis)
         {
-            List<Resource> poses = [];
-            IEnumerable<Resource> currentPoses;
-            int i = 0;
+            List<DynamicPoseResource> poses = [];
             foreach (var di in dis)
             {
-                currentPoses = di.GetPosesData(i);
-                poses.AddRange(currentPoses);
-                i += currentPoses.Count();
+                IReadOnlyList<Resource> currentPoses = di.GetPosesData(0);
+                int[] lastRows = di.GetLastRow();
+                for (int poseIndex = 0; poseIndex < currentPoses.Count; poseIndex++)
+                {
+                    Resource candidate = currentPoses[poseIndex];
+                    int firstChunkSize = di.PosesChunksSizes![poseIndex * 2] * 32;
+                    int secondChunkSize = di.PosesChunksSizes[poseIndex * 2 + 1] * 32;
+                    int poseSize = di.GetPoseSize(poseIndex);
+                    int blocks = di.GetPoseBlocks(poseIndex);
+                    int lastRow = poseIndex < lastRows.Length ? lastRows[poseIndex] : 0;
+
+                    DynamicPoseResource? sameName = poses.FirstOrDefault(resource =>
+                        resource.Names.Contains(candidate.Name, StringComparer.Ordinal));
+                    if (sameName != null && !sameName.IsEquivalentTo(candidate.Data, poseSize,
+                        blocks, firstChunkSize, secondChunkSize, lastRow))
+                    {
+                        throw new InvalidOperationException(
+                            $"Dynamic pose name '{candidate.Name}' refers to different data.");
+                    }
+
+                    DynamicPoseResource? equivalent = poses.FirstOrDefault(resource =>
+                        resource.IsEquivalentTo(candidate.Data, poseSize, blocks,
+                            firstChunkSize, secondChunkSize, lastRow));
+                    if (equivalent != null)
+                    {
+                        equivalent.AddAlias(candidate.Name);
+                        continue;
+                    }
+
+                    poses.Add(new(poses.Count, candidate.Name, candidate.Data, poseSize, blocks,
+                        firstChunkSize, secondChunkSize, lastRow));
+                }
             }
-            return poses;
+            return poses.Cast<Resource>().ToArray();
         }
         /// <summary>Collects unique palette resources while assigning consecutive IDs.</summary>
         public static IReadOnlyList<Resource> GetPaletteData(IEnumerable<DynamicInfo> dis)
-        {
-            Dictionary<string, Resource> pals = [];
-            int i = 0;
-            IReadOnlyDictionary<string, Resource> currentPalettes;
-            foreach (var di in dis)
-            {
-                currentPalettes = di.GetPaletteData(i, pals.AsReadOnly());
-                pals = pals.Concat(currentPalettes).ToDictionary(x => x.Key, x => x.Value);
-                i += currentPalettes.Count;
-            }
-            return pals.Values.ToList().AsReadOnly();
-        }
+            => getBinaryResources(dis, info => info.Palettes,
+                (info, path) => info.GetPaletteName(path), ResourceType.Palette);
         /// <summary>Collects unique general resources while assigning consecutive IDs.</summary>
         public static IReadOnlyList<Resource> GetResourceData(IEnumerable<DynamicInfo> dis)
+            => getBinaryResources(dis, info => info.Resources,
+                (info, path) => info.GetResourceName(path), ResourceType.GeneralResource);
+
+        /// <summary>
+        /// Collects binary resources by content, preserving every generated name as an alias of
+        /// the single canonical resource inserted into the ROM.
+        /// </summary>
+        private static IReadOnlyList<Resource> getBinaryResources(IEnumerable<DynamicInfo> infos,
+            Func<DynamicInfo, string[]?> pathSelector,
+            Func<DynamicInfo, string, string> nameSelector, ResourceType type)
         {
-            Dictionary<string, Resource> res = [];
-            int i = 0;
-            IReadOnlyDictionary<string, Resource> currentResources;
-            foreach (var di in dis)
+            List<Resource> resources = [];
+            foreach (DynamicInfo info in infos)
             {
-                currentResources = di.GetResourceData(i, res.AsReadOnly());
-                res = res.Concat(currentResources).ToDictionary(x => x.Key, x => x.Value);
-                i += currentResources.Count;
+                foreach (string path in pathSelector(info) ?? [])
+                {
+                    string name = nameSelector(info, path);
+                    byte[] data = File.ReadAllBytes(info.ResolveResourcePath(path));
+                    Resource? sameName = resources.FirstOrDefault(resource =>
+                        resource.Names.Contains(name, StringComparer.Ordinal));
+                    if (sameName != null && (sameName.Data.Length != data.Length ||
+                        !sameName.Data.AsSpan().SequenceEqual(data)))
+                    {
+                        throw new InvalidOperationException(
+                            $"Resource name '{name}' refers to different binary data.");
+                    }
+
+                    Resource? equivalent = resources.FirstOrDefault(resource =>
+                        resource.Data.Length == data.Length &&
+                        resource.Data.AsSpan().SequenceEqual(data));
+                    if (equivalent != null)
+                    {
+                        equivalent.AddAlias(name);
+                        continue;
+                    }
+
+                    resources.Add(new(resources.Count, name, type, data));
+                }
             }
-            return res.Values.ToList().AsReadOnly();
+            return resources.AsReadOnly();
         }
         /// <summary>Loads palettes not already present and assigns IDs beginning at an offset.</summary>
         public IReadOnlyDictionary<string, Resource> GetPaletteData(int idOffset, IReadOnlyDictionary<string, Resource> currentPalettes)

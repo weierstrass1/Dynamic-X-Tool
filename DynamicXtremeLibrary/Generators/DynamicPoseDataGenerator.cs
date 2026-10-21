@@ -1,5 +1,6 @@
 ﻿using DynamicXtremeLibrary.Infos;
 using DynamicXtremeLibrary.Readers;
+using DynamicXtremeLibrary.ResourceManagement;
 using SNESLibrary;
 
 namespace DynamicXtremeLibrary.Generators
@@ -38,27 +39,41 @@ namespace DynamicXtremeLibrary.Generators
         public static string GenerateData(Mapper mapper, IEnumerable<ResourceReference> refs, IEnumerable<DynamicInfo> dis)
         {
             string content = File.ReadAllText(template_path);
-            List<int> PoseSizes = [];
-            foreach (var di in dis)
-                PoseSizes.AddRange(di.GetPosesSizes());
+            ResourceReference[] poseReferences = [.. refs.OrderBy(reference => reference.Resource.ID)];
+            DynamicPoseResource[] canonicalPoses =
+                [.. poseReferences.Select(reference => reference.Resource)
+                    .OfType<DynamicPoseResource>()];
+            bool hasCanonicalMetadata = poseReferences.Length > 0 &&
+                canonicalPoses.Length == poseReferences.Length;
+
+            List<int> PoseSizes = hasCanonicalMetadata
+                ? [.. canonicalPoses.Select(pose => pose.PoseSize)]
+                : [.. dis.SelectMany(info => info.GetPosesSizes())];
             content = content.Replace(size_label,
                 HexReader.ValuesToString([.. PoseSizes], 4));
 
-            List<int> PoseBlocks = [];
-            foreach (var di in dis)
-                PoseBlocks.AddRange(di.GetPosesBlocks());
+            List<int> PoseBlocks = hasCanonicalMetadata
+                ? [.. canonicalPoses.Select(pose => pose.Blocks)]
+                : [.. dis.SelectMany(info => info.GetPosesBlocks())];
             content = content.Replace(blocks_label, 
                 HexReader.ValuesToString([.. PoseBlocks], 2));
 
             content = content.Replace(resource_label,
                         HexReader.ValuesToString(
-                            [.. refs.Select(r => SNESROMUtils.PCtoSNES(r.Position, mapper))], 6, 8));
+                            [.. poseReferences.Select(r => SNESROMUtils.PCtoSNES(r.Position, mapper))], 6, 8));
 
+            int[] chunkSizes = hasCanonicalMetadata
+                ? [.. canonicalPoses.SelectMany(pose =>
+                    new[] { pose.FirstChunkSize, pose.SecondChunkSize })]
+                : DynamicInfo.GetSizes(dis);
             content = content.Replace(sizes_label,
-                        HexReader.ValuesToString(DynamicInfo.GetSizes(dis), 4, 2));
+                        HexReader.ValuesToString(chunkSizes, 4, 2));
 
+            int[] lastRows = hasCanonicalMetadata
+                ? [.. canonicalPoses.Select(pose => pose.LastRow)]
+                : DynamicInfo.GetLastRow(dis);
             content = content.Replace(last_row_label,
-                        HexReader.ValuesToString(DynamicInfo.GetLastRow(dis), 4));
+                        HexReader.ValuesToString(lastRows, 4));
 
             return content;
         }

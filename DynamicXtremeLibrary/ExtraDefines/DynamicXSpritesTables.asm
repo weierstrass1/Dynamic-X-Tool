@@ -48,7 +48,7 @@
 !NormalSafeFrameHighByte = !NormalSafeFrameLowByte+!MaxSprites
 
 !ClusterSafeFrameLowByte = !NormalSafeFrameHighByte+!MaxSprites
-!ClusterSafeFrameHighByte = !NormalSafeFrameLowByte+$14
+!ClusterSafeFrameHighByte = !ClusterSafeFrameLowByte+$14
 
 !ExtendedSafeFrameLowByte = !ClusterSafeFrameHighByte+$14
 !ExtendedSafeFrameHighByte = !ExtendedSafeFrameLowByte+$0A
@@ -83,7 +83,7 @@
 
 !ExtendedLastVersion = !ClusterLastVersion+$14
 
-!SmokePoseIndex = !ClusterLastVersion+$0A
+!SmokePoseIndex = !ExtendedLastVersion+$0A
 !SmokeLastPoseIndex = !SmokePoseIndex+$04
 !SmokeGlobalFlip = !SmokeLastPoseIndex+$04
 !SmokeLocalFlip = !SmokeGlobalFlip+$04

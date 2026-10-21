@@ -129,12 +129,14 @@ namespace DynamicXtremeTool
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine();
-            Console.WriteLine($"Dynamic Xtreme found different resources that generate the name '{collision.GeneratedName}':");
-            foreach (string file in collision.Files)
-                Console.WriteLine($"  {file}");
-            Console.WriteLine("Proposed generated names:");
-            foreach (string name in collision.ProposedNames)
-                Console.WriteLine($"  {name}");
+            Console.WriteLine($"Dynamic Xtreme found different inputs that generate '{collision.GeneratedName}'.");
+            Console.WriteLine("Proposed renames:");
+            foreach (NameCollisionCandidate candidate in collision.Candidates)
+            {
+                Console.WriteLine($"  {candidate.OriginalName} -> {candidate.ProposedName}");
+                foreach (string file in candidate.Files)
+                    Console.WriteLine($"    {file}");
+            }
             Console.Write("Rename the generated symbols and update the affected primary ASM files? [y/N]: ");
             Console.ResetColor();
             string answer = Console.ReadLine()?.Trim() ?? "";
