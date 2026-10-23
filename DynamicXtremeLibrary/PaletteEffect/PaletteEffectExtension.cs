@@ -1,54 +1,65 @@
-﻿using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.Defines;
+using DynamicXtremeLibrary.Logging.LoggingRegisters;
 using DynamicXtremeLibrary.Readers;
+using DynamicXtremeLibrary.ResourceManagement;
 using DynamicXtremePaletteCreatorLibrary;
 using LogRegister;
 using System.Text;
 
 namespace DynamicXtremeLibrary.PaletteEffec
 {
-    /// <summary>Loads, validates, and serializes palette-effect collections for the runtime patch.</summary>
-    public class PaletteEffectExtension
+    /// <summary>Loads, validates, resolves, and serializes palette-effect collections.</summary>
+    public static class PaletteEffectExtension
     {
+        /// <summary>Defines the largest converted palette payload that fits in one RATS resource.</summary>
+        private const int MaximumResourceSize = 32760;
+
         /// <summary>Recursively loads all traditional palette-effect files in deterministic order.</summary>
         public static IReadOnlyList<PaletteEffectCollection> GetCollections(string paletteDirectory,
             LogRegisterSystem log, out bool validation)
         {
-            string[] paths = [.. Directory.GetFiles(paletteDirectory, "*.paleffect", SearchOption.AllDirectories)
+            string[] paths = [.. InputPath.GetFiles(paletteDirectory, "*.paleffect")
                 .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
-            PaletteEffectCollection? collection;
-            List<PaletteEffectCollection> res = [];
+            List<PaletteEffectCollection> result = [];
             validation = AsarSymbolName.ValidateUnique(paths, log);
-            foreach (var path in paths)
+            foreach (string path in paths)
             {
-                collection = LoadCollection(path, AsarSymbolName.FromPath(path), log,
-                    out bool collectionIsValid);
-                if (collection != null)
-                {
-                    if (collectionIsValid)
-                        res.Add(collection);
-                    else
-                        validation = false;
-                }
-                else
+                PaletteEffectCollection? collection = LoadCollection(path,
+                    AsarSymbolName.FromPath(path), log, out bool collectionIsValid);
+                if (collection == null || !collectionIsValid)
                 {
                     validation = false;
+                    continue;
                 }
+                result.Add(collection);
             }
-            return res.AsReadOnly();
+            return result.AsReadOnly();
         }
+
         /// <summary>
-        /// Loads and validates one palette-effect collection independently of the traditional
-        /// palette-effect directory scan.
+        /// Loads and validates one collection using its own directory as the resource base.
         /// </summary>
-        /// <param name="path">The palette-effect file to load.</param>
-        /// <param name="name">The normalized logical name assigned to the collection.</param>
-        /// <param name="log">The log that receives invalid channel, ratio, and effect-type errors.</param>
-        /// <param name="validation">Whether loading and all value validations succeeded.</param>
-        /// <returns>The loaded collection, or <see langword="null"/> when the file cannot be loaded.</returns>
         public static PaletteEffectCollection? LoadCollection(string path, string name,
             LogRegisterSystem log, out bool validation)
+        {
+            ResolvedPaletteEffectCollection? resolved = LoadResolvedCollection(path, name,
+                Path.GetDirectoryName(Path.GetFullPath(path))!, log, out validation);
+            return resolved?.Collection;
+        }
+
+        /// <summary>
+        /// Loads one collection, validates its scalar values and source palettes, and converts
+        /// every transition target while its source context is still available.
+        /// </summary>
+        /// <param name="path">The palette-effect file to load.</param>
+        /// <param name="name">The normalized original collection name.</param>
+        /// <param name="resourceDirectory">The base directory for relative palette paths.</param>
+        /// <param name="log">The validation log.</param>
+        /// <param name="validation">Whether the complete collection is valid.</param>
+        /// <returns>The resolved collection, or <see langword="null"/> when JSON loading fails.</returns>
+        public static ResolvedPaletteEffectCollection? LoadResolvedCollection(string path,
+            string name, string resourceDirectory, LogRegisterSystem log, out bool validation)
         {
             PaletteEffectCollection collection = new() { Name = name };
             if (!collection.Load(path))
@@ -59,129 +70,341 @@ namespace DynamicXtremeLibrary.PaletteEffec
             }
 
             validation = true;
-            foreach (var effect in collection.Effects)
+            List<ResolvedPaletteEffectTarget> targets = [];
+            foreach (PaletteEffect effect in collection.Effects)
             {
-                (string Parameter, int Value, int Limit)[] values =
-                [
-                    ("Channel1", effect.Channel1, 31),
-                    ("Channel2", effect.Channel2, 31),
-                    ("Channel3", effect.Channel3, 31),
-                    ("Ratio1", effect.Ratio1, 127),
-                    ("Ratio2", effect.Ratio2, 127),
-                    ("Ratio3", effect.Ratio3, 127)
-                ];
-                foreach (var value in values)
-                {
-                    if (value.Value <= value.Limit)
-                        continue;
-                    log.Add(new ValueExceedsLimit(path, value.Parameter,
-                        value.Value, value.Limit));
-                    validation = false;
-                }
+                validateLimit(path, "Ratio1", effect.Ratio1, 127, log, ref validation);
+                validateLimit(path, "Ratio2", effect.Ratio2, 127, log, ref validation);
+                validateLimit(path, "Ratio3", effect.Ratio3, 127, log, ref validation);
+
                 if (!Enum.IsDefined(effect.EffectType))
                 {
                     log.Add(new ValueNotAllowed(path, "EffectType", (int)effect.EffectType,
                         Enum.GetValues<EffectType>().Select(type => (int)type)));
                     validation = false;
                 }
+
+                if (!isTransition(effect.EffectType))
+                {
+                    validateLimit(path, "Channel1", effect.Channel1, 31, log, ref validation);
+                    validateLimit(path, "Channel2", effect.Channel2, 31, log, ref validation);
+                    validateLimit(path, "Channel3", effect.Channel3, 31, log, ref validation);
+                    if (!string.IsNullOrWhiteSpace(effect.Palette))
+                    {
+                        log.Add(new InputDiscoveryError(
+                            $"palette '{effect.Palette}' is only valid for palette-transition effects in '{path}'"));
+                        validation = false;
+                    }
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(effect.Palette))
+                {
+                    log.Add(new InputDiscoveryError(
+                        $"{effect.EffectType} in '{path}' requires a source palette"));
+                    validation = false;
+                    continue;
+                }
+
+                string palettePath = Path.GetFullPath(InputPath.Resolve(resourceDirectory, effect.Palette));
+                if (!File.Exists(palettePath))
+                {
+                    log.Add(new ResourceNotFound(palettePath));
+                    validation = false;
+                    continue;
+                }
+
+                FileInfo paletteFile = new(palettePath);
+                if (paletteFile.Length == 0 || paletteFile.Length % 2 != 0)
+                {
+                    log.Add(new InputDiscoveryError(
+                        $"palette '{palettePath}' must contain a non-empty sequence of two-byte BGR555 colors"));
+                    validation = false;
+                    continue;
+                }
+
+                long convertedSize = paletteFile.Length / 2 * 3;
+                if (convertedSize > MaximumResourceSize)
+                {
+                    log.Add(new FileIsToBig(palettePath, convertedSize, MaximumResourceSize));
+                    validation = false;
+                    continue;
+                }
+
+                string baseName = AsarSymbolName.FromPath(effect.Palette);
+                if (string.IsNullOrEmpty(baseName))
+                {
+                    log.Add(new EmptyGeneratedName(Path.GetFileNameWithoutExtension(effect.Palette)));
+                    validation = false;
+                    continue;
+                }
+
+                PaletteEffectPaletteFormat format = effect.EffectType == EffectType.PalTransitionRGB
+                    ? PaletteEffectPaletteFormat.RGB
+                    : PaletteEffectPaletteFormat.HSL;
+                targets.Add(new()
+                {
+                    Effect = effect,
+                    SourcePath = palettePath,
+                    Format = format,
+                    BaseName = baseName,
+                    Data = PaletteEffectPaletteConverter.Convert(File.ReadAllBytes(palettePath), format)
+                });
             }
-            return collection;
+
+            foreach (IGrouping<string, ResolvedPaletteEffectTarget> group in targets.GroupBy(
+                target => $"{target.BaseName}{target.Format}", StringComparer.Ordinal))
+            {
+                ResolvedPaletteEffectTarget first = group.First();
+                if (group.Skip(1).Any(target => !target.Data.AsSpan().SequenceEqual(first.Data)))
+                {
+                    log.Add(new InputDiscoveryError(
+                        $"palette-effect resources in '{path}' generate the same name '{group.Key}' with different data"));
+                    validation = false;
+                }
+            }
+
+            return new()
+            {
+                Collection = collection,
+                SourcePath = Path.GetFullPath(path),
+                ResourceDirectory = Path.GetFullPath(resourceDirectory),
+                OriginalName = name,
+                Targets = targets.AsReadOnly()
+            };
         }
-        /// <summary>Writes palette effects as parallel Asar tables and records inserted counts.</summary>
-        public static void ToFile(LogRegisterSystem log, IEnumerable<PaletteEffectCollection> effects, string file)
+
+        /// <summary>
+        /// Creates logical converted-palette resources and binds every transition effect to its
+        /// generated symbol while deduplicating equal data within the same representation.
+        /// </summary>
+        public static PaletteEffectResourceSet CreateResources(
+            IEnumerable<ResolvedPaletteEffectCollection> collections)
         {
-            if (effects == null || !effects.Any())
+            List<(Resource Resource, PaletteEffectPaletteFormat Format)> resources = [];
+            Dictionary<PaletteEffect, PaletteEffectResourceBinding> bindings = [];
+            foreach (ResolvedPaletteEffectCollection collection in collections)
+            {
+                foreach (ResolvedPaletteEffectTarget target in collection.Targets)
+                {
+                    string name = collection.GetPaletteName(target);
+                    Resource? sameName = resources.Select(item => item.Resource).FirstOrDefault(
+                        resource => resource.Names.Contains(name, StringComparer.Ordinal));
+                    if (sameName != null && !sameName.Data.AsSpan().SequenceEqual(target.Data))
+                    {
+                        throw new InvalidOperationException(
+                            $"Palette-effect resource name '{name}' refers to different converted data.");
+                    }
+
+                    Resource? resource = resources.FirstOrDefault(item =>
+                        item.Format == target.Format && item.Resource.Data.Length == target.Data.Length &&
+                        item.Resource.Data.AsSpan().SequenceEqual(target.Data)).Resource;
+                    if (resource == null)
+                    {
+                        resource = new(resources.Count, name,
+                            ResourceType.PaletteEffectPalette, target.Data);
+                        resources.Add((resource, target.Format));
+                    }
+                    else
+                    {
+                        resource.AddAlias(name);
+                    }
+
+                    bindings.Add(target.Effect, new()
+                    {
+                        Effect = target.Effect,
+                        Name = name,
+                        Resource = resource
+                    });
+                }
+            }
+
+            return new()
+            {
+                Resources = resources.Select(item => item.Resource).ToArray(),
+                Bindings = bindings.AsReadOnly()
+            };
+        }
+
+        /// <summary>Writes unresolved or channel-only effects using the legacy literal table path.</summary>
+        public static void ToFile(LogRegisterSystem log,
+            IEnumerable<PaletteEffectCollection> effects, string file)
+        {
+            writeFile(log, effects.Select(collection =>
+                (collection, (IReadOnlyDictionary<PaletteEffect, PaletteEffectResourceBinding>?)null)), file);
+        }
+
+        /// <summary>Writes resolved effects and uses generated palette defines for transitions.</summary>
+        public static void ToFile(LogRegisterSystem log,
+            IEnumerable<ResolvedPaletteEffectCollection> effects,
+            PaletteEffectResourceSet resources, string file)
+        {
+            writeFile(log, effects.Select(effect =>
+                (effect.Collection, (IReadOnlyDictionary<PaletteEffect, PaletteEffectResourceBinding>?)resources.Bindings)),
+                file);
+        }
+
+        /// <summary>Serializes non-empty palette effects into the legacy runtime binary layout.</summary>
+        public static byte[] ToBin(IEnumerable<PaletteEffectCollection> effects)
+            => ToBin(effects, null);
+
+        /// <summary>
+        /// Serializes effects while resolving transition target addresses through a caller-supplied
+        /// mapping.
+        /// </summary>
+        public static byte[] ToBin(IEnumerable<PaletteEffectCollection> effects,
+            Func<PaletteEffect, int>? paletteAddressResolver)
+        {
+            PaletteEffectCollection[] collections = [.. effects];
+            if (collections.Length == 0)
+                return [0, 0, 0, 0];
+            List<PaletteEffect> filtered = [.. collections.SelectMany(effect => effect.Effects)
+                .Where(effect => effect.EffectType != EffectType.None)];
+            if (filtered.Count == 0)
+                return [0, 0];
+
+            List<byte> type = [];
+            List<byte> value1 = [];
+            List<byte> value2 = [];
+            List<byte> value3 = [];
+            List<byte> ratio1 = [];
+            List<byte> ratio2 = [];
+            List<byte> ratio3 = [];
+            foreach (PaletteEffect effect in filtered)
+            {
+                type.Add((byte)effect.EffectType);
+                if (isTransition(effect.EffectType) && !string.IsNullOrWhiteSpace(effect.Palette))
+                {
+                    if (paletteAddressResolver == null)
+                        throw new InvalidOperationException(
+                            "A palette address resolver is required to serialize palette transitions.");
+                    int address = paletteAddressResolver(effect);
+                    value1.Add((byte)address);
+                    value2.Add((byte)(address >> 8));
+                    value3.Add((byte)(address >> 16));
+                }
+                else
+                {
+                    value1.Add(effect.Channel1);
+                    value2.Add(effect.Channel2);
+                    value3.Add(effect.Channel3);
+                }
+                ratio1.Add(effect.Ratio1);
+                ratio2.Add(effect.Ratio2);
+                ratio3.Add(effect.Ratio3);
+            }
+
+            return
+            [
+                (byte)filtered.Count,
+                (byte)(filtered.Count / 256),
+                .. type,
+                .. value1,
+                .. value2,
+                .. value3,
+                .. ratio1,
+                .. ratio2,
+                .. ratio3
+            ];
+        }
+
+        /// <summary>Writes the shared parallel-table format for literal and resolved effects.</summary>
+        private static void writeFile(LogRegisterSystem log,
+            IEnumerable<(PaletteEffectCollection Collection,
+                IReadOnlyDictionary<PaletteEffect, PaletteEffectResourceBinding>? Bindings)> sources,
+            string file)
+        {
+            var sourceList = sources.ToArray();
+            if (sourceList.Length == 0)
             {
                 File.WriteAllText(file, "PaletteEffectsTable:\n.Length\n\tdw $0000\n");
                 return;
             }
-            List<int> type = [];
-            List<int> c1 = [];
-            List<int> c2 = [];
-            List<int> c3 = [];
-            List<int> r1 = [];
-            List<int> r2 = [];
-            List<int> r3 = [];
-            int counter = 0;
-            IEnumerable<PaletteEffect> filtered;
+
+            List<string> types = [];
+            List<string> value1 = [];
+            List<string> value2 = [];
+            List<string> value3 = [];
+            List<string> ratio1 = [];
+            List<string> ratio2 = [];
+            List<string> ratio3 = [];
             log.Add(new Title("Palette Effects"));
-            foreach (PaletteEffectCollection effect in effects)
+            foreach (var source in sourceList)
             {
-                filtered = effect.Effects.Where(x => x.EffectType != EffectType.None);
-                log.Add(new InsertedPaletteEffect(effect.Name, filtered.Count()));
-                type.AddRange(filtered.Select(x => (int)x.EffectType));
-                c1.AddRange(filtered.Select(x => (int)x.Channel1));
-                c2.AddRange(filtered.Select(x => (int)x.Channel2));
-                c3.AddRange(filtered.Select(x => (int)x.Channel3));
-                r1.AddRange(filtered.Select(x => (int)x.Ratio1));
-                r2.AddRange(filtered.Select(x => (int)x.Ratio2));
-                r3.AddRange(filtered.Select(x => (int)x.Ratio3));
-                counter += filtered.Count();
+                PaletteEffect[] filtered = [.. source.Collection.Effects.Where(
+                    effect => effect.EffectType != EffectType.None)];
+                log.Add(new InsertedPaletteEffect(source.Collection.Name ?? "", filtered.Length));
+                foreach (PaletteEffect effect in filtered)
+                {
+                    types.Add($"${(int)effect.EffectType:X2}");
+                    bool transitionWithPalette = isTransition(effect.EffectType) &&
+                        !string.IsNullOrWhiteSpace(effect.Palette);
+                    if (transitionWithPalette)
+                    {
+                        if (source.Bindings == null || !source.Bindings.TryGetValue(effect,
+                            out PaletteEffectResourceBinding? binding))
+                        {
+                            throw new InvalidOperationException(
+                                $"No converted palette resource was bound to {effect.EffectType}.");
+                        }
+                        value1.Add($"(!Palette{binding.Name})&$FF");
+                        value2.Add($"(!Palette{binding.Name}>>8)&$FF");
+                        value3.Add($"(!Palette{binding.Name}>>16)&$FF");
+                    }
+                    else
+                    {
+                        value1.Add($"${effect.Channel1:X2}");
+                        value2.Add($"${effect.Channel2:X2}");
+                        value3.Add($"${effect.Channel3:X2}");
+                    }
+                    ratio1.Add($"${effect.Ratio1:X2}");
+                    ratio2.Add($"${effect.Ratio2:X2}");
+                    ratio3.Add($"${effect.Ratio3:X2}");
+                }
             }
-            StringBuilder sb = new();
-            sb.AppendLine($"PaletteEffectsTable:\n.Length\n\tdw ${counter:X4}\n");
-            sb.Append(".Types:");
-            sb.AppendLine(HexReader.ValuesToString([.. type], 2));
-            sb.AppendLine();
-            sb.Append(".Value1");
-            sb.AppendLine(HexReader.ValuesToString([.. c1], 2));
-            sb.AppendLine();
-            sb.Append(".Value2");
-            sb.AppendLine(HexReader.ValuesToString([.. c2], 2));
-            sb.AppendLine();
-            sb.Append(".Value3");
-            sb.AppendLine(HexReader.ValuesToString([.. c3], 2));
-            sb.AppendLine();
-            sb.Append(".Ratio1");
-            sb.AppendLine(HexReader.ValuesToString([.. r1], 2));
-            sb.AppendLine();
-            sb.Append(".Ratio2");
-            sb.AppendLine(HexReader.ValuesToString([.. r2], 2));
-            sb.AppendLine();
-            sb.Append(".Ratio3");
-            sb.AppendLine(HexReader.ValuesToString([.. r3], 2));
-            File.WriteAllText(file, sb.ToString());
+
+            StringBuilder output = new();
+            output.AppendLine($"PaletteEffectsTable:\n.Length\n\tdw ${types.Count:X4}\n");
+            appendTable(output, ".Types:", types);
+            appendTable(output, ".Value1", value1);
+            appendTable(output, ".Value2", value2);
+            appendTable(output, ".Value3", value3);
+            appendTable(output, ".Ratio1", ratio1);
+            appendTable(output, ".Ratio2", ratio2);
+            appendTable(output, ".Ratio3", ratio3, false);
+            File.WriteAllText(file, output.ToString());
         }
-        /// <summary>Serializes non-empty palette effects into the runtime binary table layout.</summary>
-        public static byte[] ToBin(IEnumerable<PaletteEffectCollection> effects)
+
+        /// <summary>Appends one Asar byte table with the established sixteen-value line width.</summary>
+        private static void appendTable(StringBuilder output, string label,
+            IReadOnlyList<string> values, bool trailingBlankLine = true)
         {
-            if(effects == null || effects.Count() == 0)
-                return [0, 0, 0, 0];
-            List<byte> type = [];
-            List<byte> c1 = [];
-            List<byte> c2 = [];
-            List<byte> c3 = [];
-            List<byte> r1 = [];
-            List<byte> r2 = [];
-            List<byte> r3 = [];
-            int counter = 0;
-            IEnumerable<PaletteEffect> filtered;
-            foreach (PaletteEffectCollection effect in effects)
+            output.Append(label);
+            for (int index = 0; index < values.Count; index++)
             {
-                filtered = effect.Effects.Where(x => x.EffectType != EffectType.None);
-                //Log.WriteLine($"{effect.Name}: {filtered.Count()}");
-                type.AddRange(filtered.Select(x => (byte)x.EffectType));
-                c1.AddRange(filtered.Select(x => x.Channel1));
-                c2.AddRange(filtered.Select(x => x.Channel2));
-                c3.AddRange(filtered.Select(x => x.Channel3));
-                r1.AddRange(filtered.Select(x => x.Ratio1));
-                r2.AddRange(filtered.Select(x => x.Ratio2));
-                r3.AddRange(filtered.Select(x => x.Ratio3));
-                counter += filtered.Count();
+                if (index % 16 == 0)
+                    output.Append("\n\tdb ");
+                else
+                    output.Append(',');
+                output.Append(values[index]);
             }
-            List<byte> res =
-            [
-                (byte)counter,
-                (byte)(counter / 256),
-                .. type,
-                .. c1,
-                .. c2,
-                .. c3,
-                .. r1,
-                .. r2,
-                .. r3,
-            ];
-            return [.. res];
+            output.AppendLine();
+            if (trailingBlankLine)
+                output.AppendLine();
         }
+
+        /// <summary>Validates one byte-sized field against its format-specific upper bound.</summary>
+        private static void validateLimit(string path, string parameter, int value, int limit,
+            LogRegisterSystem log, ref bool validation)
+        {
+            if (value <= limit)
+                return;
+            log.Add(new ValueExceedsLimit(path, parameter, value, limit));
+            validation = false;
+        }
+
+        /// <summary>Determines whether an effect consumes a converted target palette.</summary>
+        private static bool isTransition(EffectType effectType)
+            => effectType is EffectType.PalTransitionRGB or EffectType.PalTransitionHSL;
     }
 }

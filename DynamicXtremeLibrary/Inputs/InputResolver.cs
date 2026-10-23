@@ -79,10 +79,10 @@ namespace DynamicXtremeLibrary.Inputs
                                 dynamicInfo.DeclaredPoseGraphics ?? [], _log) &
                                 AsarSymbolName.ValidateUnique(
                                     (dynamicInfo.DeclaredPalettes ?? [])
-                                        .Distinct(StringComparer.OrdinalIgnoreCase), _log) &
+                                        .Distinct(InputPath.Comparer), _log) &
                                 AsarSymbolName.ValidateUnique(
                                     (dynamicInfo.DeclaredResources ?? [])
-                                        .Distinct(StringComparer.OrdinalIgnoreCase), _log);
+                                        .Distinct(InputPath.Comparer), _log);
                         }
                         break;
                     case InfoKind.DrawInfo:
@@ -92,8 +92,8 @@ namespace DynamicXtremeLibrary.Inputs
                             valid = drawInfos.All(drawInfo => drawInfo.Validate(_log));
                         break;
                     default:
-                        value = PaletteEffectExtension.LoadCollection(input.Path,
-                            input.OriginalName, _log, out valid);
+                        value = PaletteEffectExtension.LoadResolvedCollection(input.Path,
+                            input.OriginalName, input.ResourceDirectory, _log, out valid);
                         break;
                 }
                 if (!valid || value == null)
@@ -119,7 +119,7 @@ namespace DynamicXtremeLibrary.Inputs
                 return null;
             }
 
-            Dictionary<string, SourceRewrite> rewrites = new(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, SourceRewrite> rewrites = new(InputPath.Comparer);
             List<(string OldName, string NewName, IReadOnlyList<string> Files)> changes = [];
             foreach (Unit unit in units)
                 buildRewrites(unit, rewrites, changes);
@@ -141,7 +141,7 @@ namespace DynamicXtremeLibrary.Inputs
                     .Select(unit => (DynamicInfo)unit.Value).ToArray(),
                 DrawInfos = allDrawInfos,
                 PaletteEffects = units.Where(unit => unit.Input.Kind == InfoKind.PaletteEffect)
-                    .Select(unit => (PaletteEffectCollection)unit.Value).ToArray(),
+                    .Select(unit => (ResolvedPaletteEffectCollection)unit.Value).ToArray(),
                 SourceRewrites = rewrites.Values.OrderBy(rewrite => rewrite.Path,
                     StringComparer.OrdinalIgnoreCase).ToArray(),
                 NameChanges = changes
@@ -314,7 +314,7 @@ namespace DynamicXtremeLibrary.Inputs
                     {
                         OriginalName = unit.Input.OriginalName,
                         ProposedName = unit.Input.LogicalName,
-                        Files = unit.SourcePaths.Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+                        Files = unit.SourcePaths.Distinct(InputPath.Comparer).ToArray()
                     })]
                 };
                 if (_collisionResolver == null || !_collisionResolver(collision))
@@ -391,9 +391,6 @@ namespace DynamicXtremeLibrary.Inputs
         /// </summary>
         private static bool claimsConflict(Unit left, Unit right, bool useLogicalNames)
         {
-            if (left.Input.Kind != right.Input.Kind)
-                return false;
-
             return firstConflictingSymbol(left, right, useLogicalNames) != null;
         }
 
@@ -401,11 +398,16 @@ namespace DynamicXtremeLibrary.Inputs
         private static string? firstConflictingSymbol(Unit left, Unit right,
             bool useLogicalNames)
         {
+            bool differentInputKinds = left.Input.Kind != right.Input.Kind;
             foreach (SymbolClaim leftClaim in left.Claims)
             {
+                if (differentInputKinds && leftClaim.Kind != SymbolKind.Palette)
+                    continue;
                 string leftSymbol = leftClaim.GetSymbol(left, useLogicalNames);
                 foreach (SymbolClaim rightClaim in right.Claims)
                 {
+                    if (differentInputKinds && rightClaim.Kind != SymbolKind.Palette)
+                        continue;
                     if (leftSymbol != rightClaim.GetSymbol(right, useLogicalNames))
                         continue;
                     if (!leftClaim.IsEquivalentTo(rightClaim))
@@ -463,8 +465,8 @@ namespace DynamicXtremeLibrary.Inputs
                     foreach (DrawInfo drawInfo in drawInfos)
                         drawInfo.ContextName = unit.Input.LogicalName;
                     break;
-                case PaletteEffectCollection paletteEffects:
-                    paletteEffects.Name = unit.Input.LogicalName;
+                case ResolvedPaletteEffectCollection paletteEffects:
+                    paletteEffects.SetLogicalName(unit.Input.LogicalName);
                     break;
             }
         }
@@ -481,7 +483,7 @@ namespace DynamicXtremeLibrary.Inputs
             ICollection<(string OldName, string NewName, IReadOnlyList<string> Files)> changes)
         {
             foreach (IGrouping<string, InputOrigin> origins in unit.Input.Origins.GroupBy(
-                origin => origin.AsmPath, StringComparer.OrdinalIgnoreCase))
+                origin => origin.AsmPath, InputPath.Comparer))
             {
                 if (!rewrites.TryGetValue(origins.Key, out SourceRewrite? rewrite))
                 {
@@ -502,7 +504,7 @@ namespace DynamicXtremeLibrary.Inputs
             {
                 changes.Add((oldName, unit.Input.LogicalName,
                     unit.Input.Origins.Select(origin => origin.AsmPath)
-                        .Distinct(StringComparer.OrdinalIgnoreCase).ToArray()));
+                        .Distinct(InputPath.Comparer).ToArray()));
             }
         }
 
@@ -546,11 +548,21 @@ namespace DynamicXtremeLibrary.Inputs
                     rewrite.AddSymbolChange($"!{oldLogicalName}PaletteTableOffset",
                         $"!{newLogicalName}PaletteTableOffset");
                     break;
-                case PaletteEffectCollection paletteEffects:
-                    int count = paletteEffects.Effects.Count(effect => effect.EffectType != EffectType.None);
+                case ResolvedPaletteEffectCollection paletteEffects:
+                    int count = paletteEffects.Collection.Effects.Count(
+                        effect => effect.EffectType != EffectType.None);
                     for (int index = 0; index < count; index++)
                         rewrite.AddSymbolChange($"!PaletteEffectID{oldLogicalName}{index}",
                             $"!PaletteEffectID{newLogicalName}{index}");
+                    string paletteOldSuffix = logicalSuffix(unit.Input.OriginalName, oldLogicalName);
+                    string paletteNewSuffix = logicalSuffix(unit.Input.OriginalName, newLogicalName);
+                    foreach (ResolvedPaletteEffectTarget target in paletteEffects.Targets)
+                    {
+                        string oldName = paletteEffects.GetPaletteName(target, paletteOldSuffix);
+                        string newName = paletteEffects.GetPaletteName(target, paletteNewSuffix);
+                        rewrite.AddSymbolChange($"!Palette{oldName}", $"!Palette{newName}");
+                        rewrite.AddSymbolChange($"!Palette{oldName}Size", $"!Palette{newName}Size");
+                    }
                     break;
             }
         }
@@ -605,7 +617,7 @@ namespace DynamicXtremeLibrary.Inputs
                     {
                         claims.Add(new(SymbolKind.Palette,
                             dynamicInfo.GetPaletteName(path, ""), -1,
-                            File.ReadAllBytes(dynamicInfo.ResolveResourcePath(path)), []));
+                            File.ReadAllBytes(dynamicInfo.ResolveResourcePath(path)), [0]));
                     }
                     foreach (string path in dynamicInfo.Resources ?? [])
                     {
@@ -617,8 +629,15 @@ namespace DynamicXtremeLibrary.Inputs
                 case DrawInfo[]:
                     claims.Add(new(SymbolKind.Context, input.OriginalName));
                     break;
-                case PaletteEffectCollection:
+                case ResolvedPaletteEffectCollection paletteEffects:
                     claims.Add(new(SymbolKind.Collection, input.OriginalName));
+                    foreach (ResolvedPaletteEffectTarget target in paletteEffects.Targets)
+                    {
+                        string baseName = paletteEffects.GetPaletteName(target, "");
+                        claims.Add(new(SymbolKind.Palette, baseName,
+                            target.BaseName.Length, target.Data,
+                            [(int)target.Format + 1]));
+                    }
                     break;
             }
             return claims.AsReadOnly();
@@ -657,8 +676,10 @@ namespace DynamicXtremeLibrary.Inputs
                 case DrawInfo[]:
                     yield return $"Context:{unit.Input.OriginalName}";
                     break;
-                case PaletteEffectCollection:
+                case ResolvedPaletteEffectCollection paletteEffects:
                     yield return $"Collection:{unit.Input.OriginalName}";
+                    foreach (ResolvedPaletteEffectTarget target in paletteEffects.Targets)
+                        yield return $"Palette:{paletteEffects.GetPaletteName(target, "")}";
                     break;
             }
         }
@@ -686,8 +707,10 @@ namespace DynamicXtremeLibrary.Inputs
                 case DrawInfo[]:
                     yield return $"Context:{unit.Input.LogicalName}";
                     break;
-                case PaletteEffectCollection:
+                case ResolvedPaletteEffectCollection paletteEffects:
                     yield return $"Collection:{unit.Input.LogicalName}";
+                    foreach (ResolvedPaletteEffectTarget target in paletteEffects.Targets)
+                        yield return $"Palette:{paletteEffects.GetPaletteName(target, suffix)}";
                     break;
             }
         }
@@ -705,8 +728,8 @@ namespace DynamicXtremeLibrary.Inputs
                 return drawInfoEquals(leftDraw, rightDraw);
             if (left.Value is DynamicInfo leftDynamic && right.Value is DynamicInfo rightDynamic)
                 return dynamicInfoEquals(leftDynamic, rightDynamic);
-            if (left.Value is PaletteEffectCollection leftPalette &&
-                right.Value is PaletteEffectCollection rightPalette)
+            if (left.Value is ResolvedPaletteEffectCollection leftPalette &&
+                right.Value is ResolvedPaletteEffectCollection rightPalette)
                 return paletteEffectEquals(leftPalette, rightPalette);
             return false;
         }
@@ -793,19 +816,45 @@ namespace DynamicXtremeLibrary.Inputs
         /// <param name="left">The first palette-effect collection.</param>
         /// <param name="right">The second palette-effect collection.</param>
         /// <returns><see langword="true"/> when both collections are conceptually identical.</returns>
-        private static bool paletteEffectEquals(PaletteEffectCollection left,
-            PaletteEffectCollection right)
+        private static bool paletteEffectEquals(ResolvedPaletteEffectCollection left,
+            ResolvedPaletteEffectCollection right)
         {
-            if (left.Effects.Count != right.Effects.Count)
+            if (left.Collection.Effects.Count != right.Collection.Effects.Count)
                 return false;
-            return left.Effects.Zip(right.Effects).All(pair =>
-                pair.First.Channel1 == pair.Second.Channel1 &&
-                pair.First.Channel2 == pair.Second.Channel2 &&
-                pair.First.Channel3 == pair.Second.Channel3 &&
-                pair.First.Ratio1 == pair.Second.Ratio1 &&
-                pair.First.Ratio2 == pair.Second.Ratio2 &&
-                pair.First.Ratio3 == pair.Second.Ratio3 &&
-                pair.First.EffectType == pair.Second.EffectType);
+            for (int index = 0; index < left.Collection.Effects.Count; index++)
+            {
+                PaletteEffect leftEffect = left.Collection.Effects[index];
+                PaletteEffect rightEffect = right.Collection.Effects[index];
+                if (leftEffect.EffectType != rightEffect.EffectType ||
+                    leftEffect.Ratio1 != rightEffect.Ratio1 ||
+                    leftEffect.Ratio2 != rightEffect.Ratio2 ||
+                    leftEffect.Ratio3 != rightEffect.Ratio3)
+                    return false;
+
+                bool transition = leftEffect.EffectType is EffectType.PalTransitionRGB or
+                    EffectType.PalTransitionHSL;
+                if (!transition)
+                {
+                    if (leftEffect.Channel1 != rightEffect.Channel1 ||
+                        leftEffect.Channel2 != rightEffect.Channel2 ||
+                        leftEffect.Channel3 != rightEffect.Channel3)
+                        return false;
+                    continue;
+                }
+
+                if (AsarSymbolName.FromPath(leftEffect.Palette!) !=
+                    AsarSymbolName.FromPath(rightEffect.Palette!))
+                    return false;
+                ResolvedPaletteEffectTarget leftTarget = left.Targets.First(
+                    target => ReferenceEquals(target.Effect, leftEffect));
+                ResolvedPaletteEffectTarget rightTarget = right.Targets.First(
+                    target => ReferenceEquals(target.Effect, rightEffect));
+                if (leftTarget.Format != rightTarget.Format ||
+                    leftTarget.Data.Length != rightTarget.Data.Length ||
+                    !leftTarget.Data.AsSpan().SequenceEqual(rightTarget.Data))
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>

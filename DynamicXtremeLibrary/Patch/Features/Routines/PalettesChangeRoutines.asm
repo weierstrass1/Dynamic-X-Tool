@@ -6,9 +6,6 @@ while !i < <imax>
     LDA $00
     CMP.l DX_Dynamic_Palettes_ID+$10+(!i*2)
     BNE +
-    LDA DX_Dynamic_Palettes_DisableTimer+$08+!i
-    AND #$00FF
-    BEQ +
     LDA DX_Dynamic_Palettes_EffectEnabled
     EOR $D5
     AND.w #!j
@@ -29,14 +26,30 @@ endwhile
 !i = <imin>
 while !i < <imax>
     LDA DX_Dynamic_Palettes_ID+$10+(!i*2)
+    CMP #$FFFF
+    BNE +
+    LDA $00
+    STA DX_Dynamic_Palettes_ID+$10+(!i*2)
+    SEP #$20
+
+    LDA #$02
+    STA.l DX_Dynamic_Palettes_DisableTimer+$08+!i
+
+    DEY
+    LDA.b #(!i*2)
+    SEC
+RTS
++
+!i #= !i+1
+endwhile
+!i = <imin>
+while !i < <imax>
+    LDA DX_Dynamic_Palettes_ID+$10+(!i*2)
     CMP #$FFFE
     BEQ +
-    CMP #$FFFF
-    BEQ ++
     LDA DX_Dynamic_Palettes_DisableTimer+$08+!i
     AND #$00FF
     BNE +
-++
     LDA $00
     STA DX_Dynamic_Palettes_ID+$10+(!i*2)
     SEP #$20

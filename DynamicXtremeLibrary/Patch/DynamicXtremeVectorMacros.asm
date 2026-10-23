@@ -15,7 +15,7 @@ macro AddDataIfStatement(condition, routine)
 endmacro
 
 macro DataVector()
-    %AddDataIfStatement("!GraphicsChange || !PalettesChange", "BufferTable")
+    %AddDataIfStatement("!GraphicsChange || !PalettesChange || !PalettesEffects", "BufferTable")
     %AddDataIfStatement("!PalettesChange", "PaletteTable")
     %AddDataIfStatement("!PalettesEffects", "PaletteEffectsTable")
 endmacro

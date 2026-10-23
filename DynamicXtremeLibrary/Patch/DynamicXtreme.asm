@@ -33,7 +33,7 @@ incsrc "Features/Hijacks/YoshiFeaturesHijack.asm"
 
 reset freespaceuse
 freecode
-if !GraphicsChange || !PalettesChange 
+if !GraphicsChange || !PalettesChange || !PalettesEffects
 prot Data_BufferTable
 endif
 if !Free7E2000
@@ -100,7 +100,7 @@ namespace off
 endif
 
 namespace Data
-if !GraphicsChange || !PalettesChange
+if !GraphicsChange || !PalettesChange || !PalettesEffects
     incsrc "Data/BufferData.asm"
 endif
 if !Free7E2000

@@ -336,6 +336,27 @@ public sealed class DynamicInfoTests
     }
 
     [Fact]
+    public void GetPosesData_KeepsDistinctLogicalPosesWhenTheirBytesAreIdentical()
+    {
+        using TestDirectory temp = new();
+        temp.CreateFile("first.bin", new byte[32]);
+        temp.CreateFile("second.bin", new byte[32]);
+        DynamicInfo info = new("Enemy")
+        {
+            ResourceDirectory = temp.Path,
+            PoseGraphics = ["first.bin", "second.bin"],
+            PosesChunksSizes = [1, 0, 1, 0]
+        };
+
+        IReadOnlyList<Resource> poses = DynamicInfo.GetPosesData([info]);
+
+        Assert.Equal(2, poses.Count);
+        Assert.Equal(["First000", "Second000"], poses.Select(pose => pose.Name));
+        Assert.Equal([0, 1], poses.Select(pose => pose.ID));
+        Assert.Equal(poses[0].Data, poses[1].Data);
+    }
+
+    [Fact]
     public void GetPoseResourceNames_UsesSameFileBoundariesAsPoseExtraction()
     {
         using TestDirectory temp = new();

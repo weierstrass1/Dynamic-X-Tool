@@ -83,10 +83,15 @@ public sealed class DefineGeneratorTests
         ResourceReference buffer = Ref(3, "Buffer3", ResourceType.Buffer, 0x123456, 4);
         ResourceReference pose = Ref(2, "Pose", ResourceType.DynamicPose, 0x202, 32);
         ResourceReference palette = Ref(1, "Pal", ResourceType.Palette, 0x402, 16);
+        Resource paletteEffectResource = new(4, "FadeRGB",
+            ResourceType.PaletteEffectPalette, new byte[6]);
+        paletteEffectResource.AddAlias("FlashRGB");
+        ResourceReference paletteEffect = new(0, 0x802, paletteEffectResource);
         ResourceReference resource = Ref(0, "Data", ResourceType.GeneralResource, 0x602, 8);
         ResourceAllReferences references = new()
         {
             Buffers = [buffer], DynamicPoses = [pose], Palettes = [palette],
+            PaletteEffectPalettes = [paletteEffect],
             GeneralResources = [resource]
         };
 
@@ -98,6 +103,10 @@ public sealed class DefineGeneratorTests
         Assert.Contains("!DynamicPoseIDPose = $0002", result);
         Assert.Contains("!DynamicPosePose = $000002", result);
         Assert.Contains("!PalettePalSize = $0010", result);
+        Assert.Contains("!PaletteFadeRGB = $000602", result);
+        Assert.Contains("!PaletteFlashRGB = $000602", result);
+        Assert.Contains("!PaletteFadeRGBSize = $0006", result);
+        Assert.DoesNotContain("!PaletteIDFadeRGB", result);
         Assert.Contains("!ResourceDataSize = $0008", result);
     }
 

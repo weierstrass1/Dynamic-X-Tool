@@ -17,16 +17,17 @@ namespace DynamicXtremeLibrary.Inputs
         /// <param name="dynamicInfoDirectory">The directory containing traditional DynamicInfo inputs.</param>
         /// <param name="drawInfoDirectory">The directory containing traditional DrawInfo inputs.</param>
         /// <param name="paletteEffectsDirectory">The directory containing traditional palette-effect inputs.</param>
-        /// <param name="dynamicResourcesDirectory">The resource directory used by traditional DynamicInfo inputs.</param>
+        /// <param name="dynamicResourcesDirectory">The resource directory used by traditional DynamicInfo and palette-effect inputs.</param>
         /// <param name="pixiListPath">The optional PIXI list to inspect.</param>
         /// <param name="pixiExecutablePath">The optional PIXI executable used to locate its installation directory.</param>
         /// <param name="uberasmListPath">The optional UberASMTool list to inspect.</param>
         /// <param name="uberasmExecutablePath">The optional UberASMTool executable used to locate its installation directory.</param>
+        /// <param name="ignorePixiEntry">Approves skipping a problematic PIXI entry; absent callbacks abort discovery.</param>
         /// <returns>Inputs ordered with traditional files first and external files in discovery order.</returns>
         public static IReadOnlyList<InfoInput> Discover(string dynamicInfoDirectory,
             string drawInfoDirectory, string paletteEffectsDirectory, string dynamicResourcesDirectory,
             string? pixiListPath, string? pixiExecutablePath, string? uberasmListPath,
-            string? uberasmExecutablePath)
+            string? uberasmExecutablePath, Func<PixiEntryIssue, bool>? ignorePixiEntry = null)
         {
             Dictionary<(InfoKind Kind, string Path), InfoInput> inputs = new();
             int discoveryOrder = 0;
@@ -36,9 +37,9 @@ namespace DynamicXtremeLibrary.Inputs
             addTraditional(inputs, drawInfoDirectory, "*.drawinfo",
                 InfoKind.DrawInfo, drawInfoDirectory, ref discoveryOrder);
             addTraditional(inputs, paletteEffectsDirectory, "*.paleffect",
-                InfoKind.PaletteEffect, paletteEffectsDirectory, ref discoveryOrder);
+                InfoKind.PaletteEffect, dynamicResourcesDirectory, ref discoveryOrder);
 
-            foreach (var consumer in readPixiConsumers(pixiListPath, pixiExecutablePath)
+            foreach (var consumer in readPixiConsumers(pixiListPath, pixiExecutablePath, ignorePixiEntry)
                 .Concat(readUberasmConsumers(uberasmListPath, uberasmExecutablePath)))
             {
                 readDirectives(consumer, inputs, ref discoveryOrder);
@@ -71,7 +72,7 @@ namespace DynamicXtremeLibrary.Inputs
         {
             if (!Directory.Exists(directory))
                 return;
-            foreach (string path in Directory.GetFiles(directory, pattern, SearchOption.AllDirectories)
+            foreach (string path in InputPath.GetFiles(directory, pattern)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => path, StringComparer.Ordinal))
             {
@@ -147,7 +148,7 @@ namespace DynamicXtremeLibrary.Inputs
                     _ => ".paleffect"
                 };
                 string path = Path.GetFullPath(Path.Combine(
-                    Path.GetDirectoryName(consumer.AsmPath)!, match.Groups["path"].Value));
+                    Path.GetDirectoryName(consumer.AsmPath)!, InputPath.Normalize(match.Groups["path"].Value)));
                 if (!path.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException(
                         $"Directive in '{consumer.AsmPath}', line {lineIndex + 1} must target a '{extension}' file");
@@ -180,19 +181,23 @@ namespace DynamicXtremeLibrary.Inputs
         /// </summary>
         /// <param name="listPath">The optional PIXI list path.</param>
         /// <param name="executablePath">The optional PIXI executable or installation path.</param>
+        /// <param name="ignoreEntry">Approves skipping an entry that cannot be inspected.</param>
         /// <returns>The PIXI ASM consumers in list order.</returns>
-        private static IEnumerable<Consumer> readPixiConsumers(string? listPath, string? executablePath)
+        private static IEnumerable<Consumer> readPixiConsumers(string? listPath, string? executablePath,
+            Func<PixiEntryIssue, bool>? ignoreEntry)
         {
             if (string.IsNullOrWhiteSpace(listPath))
                 yield break;
-            string fullListPath = Path.GetFullPath(listPath);
+            string fullListPath = resolveToolRelativeListPath(listPath, executablePath);
             if (!File.Exists(fullListPath))
                 throw new FileNotFoundException("PIXI list was not found", fullListPath);
 
             string root = getToolRoot(fullListPath, executablePath);
             ConsumerKind kind = ConsumerKind.Sprite;
+            int lineNumber = 0;
             foreach (string originalLine in File.ReadLines(fullListPath))
             {
+                lineNumber++;
                 string line = stripListComment(originalLine);
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
@@ -208,8 +213,33 @@ namespace DynamicXtremeLibrary.Inputs
                 string listedPath = pathMatch.Groups["quoted"].Success
                     ? pathMatch.Groups["quoted"].Value
                     : pathMatch.Groups["plain"].Value;
-                string entryPath = resolveListedPath(root, pixiSubdirectory(kind), listedPath);
-                string asmPath = resolvePixiAsm(entryPath);
+                string subdirectory = pixiSubdirectory(kind);
+                if (kind == ConsumerKind.Sprite)
+                {
+                    string slotText = line[..pathMatch.Index].Trim().Split(':')[^1];
+                    if (!byte.TryParse(slotText, System.Globalization.NumberStyles.HexNumber,
+                        System.Globalization.CultureInfo.InvariantCulture, out byte slot) || slot > 0xDF)
+                        throw new InvalidDataException($"Invalid PIXI slot in '{fullListPath}', line {lineNumber}");
+                    subdirectory = slot < 0xC0 ? "sprites" : slot < 0xD0 ? "shooters" : "generators";
+                }
+                string entryPath = Path.GetFullPath(Path.Combine(root, subdirectory, InputPath.Normalize(listedPath)));
+                string? asmPath;
+                try
+                {
+                    asmPath = resolvePixiAsm(entryPath, listedPath);
+                    if (asmPath != null && !File.Exists(asmPath))
+                        throw new FileNotFoundException($"Primary ASM file was not found at '{asmPath}'", asmPath);
+                }
+                catch (Exception exception) when (exception is IOException or InvalidDataException or JsonException or
+                    UnauthorizedAccessException or ArgumentException or InvalidOperationException)
+                {
+                    PixiEntryIssue issue = new(fullListPath, lineNumber, listedPath, entryPath, exception.Message);
+                    if (ignoreEntry?.Invoke(issue) == true)
+                        continue;
+                    throw;
+                }
+                if (asmPath == null)
+                    continue;
                 yield return new()
                 {
                     AsmPath = asmPath,
@@ -230,7 +260,7 @@ namespace DynamicXtremeLibrary.Inputs
         {
             if (string.IsNullOrWhiteSpace(listPath))
                 yield break;
-            string fullListPath = Path.GetFullPath(listPath);
+            string fullListPath = resolveToolRelativeListPath(listPath, executablePath);
             if (!File.Exists(fullListPath))
                 throw new FileNotFoundException("UberASMTool list was not found", fullListPath);
 
@@ -269,77 +299,47 @@ namespace DynamicXtremeLibrary.Inputs
 
         /// <summary>
         /// Resolves a PIXI ASM entry directly or through the referenced CFG or JSON descriptor.
-        /// JSON properties named <c>AsmFile</c> are preferred over generic ASM strings.
+        /// Type-zero tweaks have no ASM source and are omitted.
         /// </summary>
         /// <param name="entryPath">The resolved PIXI list-entry path.</param>
-        /// <returns>The absolute path of the primary ASM source.</returns>
-        private static string resolvePixiAsm(string entryPath)
+        /// <param name="listedPath">The original path written in the PIXI list.</param>
+        /// <returns>The absolute primary ASM path, or null for a type-zero tweak.</returns>
+        private static string? resolvePixiAsm(string entryPath, string listedPath)
         {
             if (entryPath.EndsWith(".asm", StringComparison.OrdinalIgnoreCase))
                 return Path.GetFullPath(entryPath);
             if (!File.Exists(entryPath))
-                throw new FileNotFoundException("PIXI list entry was not found", entryPath);
+                throw new FileNotFoundException(
+                    $"PIXI list entry '{listedPath}' was not found at '{entryPath}'", entryPath);
 
             string? asmFile = null;
             if (entryPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
             {
                 using JsonDocument document = JsonDocument.Parse(File.ReadAllText(entryPath));
-                asmFile = findAsmString(document.RootElement);
+                JsonElement root = document.RootElement;
+                if (!root.TryGetProperty("Type", out JsonElement type) ||
+                    type.ValueKind != JsonValueKind.Number || !type.TryGetByte(out byte value))
+                    throw new InvalidDataException($"PIXI JSON '{entryPath}' requires a numeric byte Type");
+                if (value == 0)
+                    return null;
+                if (root.TryGetProperty("AsmFile", out JsonElement asm) && asm.ValueKind == JsonValueKind.String)
+                    asmFile = asm.GetString();
             }
             else
             {
-                asmFile = File.ReadLines(entryPath)
+                string[] lines = File.ReadLines(entryPath)
                     .Select(stripListComment)
-                    .Select(line => line.Trim().Trim('"'))
-                    .FirstOrDefault(line => line.EndsWith(".asm", StringComparison.OrdinalIgnoreCase));
+                    .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+                if (lines.Length == 0 || !byte.TryParse(lines[0], System.Globalization.NumberStyles.HexNumber,
+                    System.Globalization.CultureInfo.InvariantCulture, out byte type))
+                    throw new InvalidDataException($"PIXI CFG '{entryPath}' requires a hexadecimal byte type");
+                if (type == 0)
+                    return null;
+                asmFile = lines.Length > 4 ? lines[4].Trim('"') : null;
             }
             if (string.IsNullOrWhiteSpace(asmFile))
                 throw new InvalidDataException($"Could not find the primary ASM file in PIXI entry '{entryPath}'");
-            return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(entryPath)!, asmFile));
-        }
-
-        /// <summary>
-        /// Recursively searches a PIXI JSON value for an ASM path, prioritizing properties named
-        /// <c>AsmFile</c> before other strings.
-        /// </summary>
-        /// <param name="element">The JSON value to inspect.</param>
-        /// <returns>The first matching ASM path, or <see langword="null"/> when none exists.</returns>
-        private static string? findAsmString(JsonElement element)
-        {
-            if (element.ValueKind == JsonValueKind.String)
-            {
-                string? value = element.GetString();
-                return value?.EndsWith(".asm", StringComparison.OrdinalIgnoreCase) == true
-                    ? value
-                    : null;
-            }
-            if (element.ValueKind == JsonValueKind.Object)
-            {
-                foreach (JsonProperty property in element.EnumerateObject()
-                    .Where(property => property.Name.Equals("AsmFile",
-                        StringComparison.OrdinalIgnoreCase)))
-                {
-                    string? result = findAsmString(property.Value);
-                    if (result != null)
-                        return result;
-                }
-                foreach (JsonProperty property in element.EnumerateObject())
-                {
-                    string? result = findAsmString(property.Value);
-                    if (result != null)
-                        return result;
-                }
-            }
-            if (element.ValueKind == JsonValueKind.Array)
-            {
-                foreach (JsonElement child in element.EnumerateArray())
-                {
-                    string? result = findAsmString(child);
-                    if (result != null)
-                        return result;
-                }
-            }
-            return null;
+            return Path.GetFullPath(InputPath.Resolve(Path.GetDirectoryName(entryPath)!, asmFile));
         }
 
         /// <summary>
@@ -353,10 +353,27 @@ namespace DynamicXtremeLibrary.Inputs
         {
             if (!string.IsNullOrWhiteSpace(executablePath))
             {
-                string full = Path.GetFullPath(executablePath);
+                string full = Path.GetFullPath(InputPath.Normalize(executablePath));
                 return Directory.Exists(full) ? full : Path.GetDirectoryName(full)!;
             }
             return Path.GetDirectoryName(listPath)!;
+        }
+
+        /// <summary>
+        /// Resolves an external-tool list path from the corresponding PIXI or UberASMTool root
+        /// while preserving support for absolute paths and configurations without a tool path.
+        /// </summary>
+        /// <param name="listPath">The configured absolute or tool-relative list path.</param>
+        /// <param name="executablePath">The configured external-tool directory or executable.</param>
+        /// <returns>The absolute list path used for discovery.</returns>
+        private static string resolveToolRelativeListPath(string listPath, string? executablePath)
+        {
+            listPath = InputPath.Normalize(listPath);
+            if (Path.IsPathRooted(listPath) || string.IsNullOrWhiteSpace(executablePath))
+                return Path.GetFullPath(listPath);
+            string toolPath = Path.GetFullPath(InputPath.Normalize(executablePath));
+            string root = Directory.Exists(toolPath) ? toolPath : Path.GetDirectoryName(toolPath)!;
+            return Path.GetFullPath(Path.Combine(root, listPath));
         }
 
         /// <summary>
@@ -377,6 +394,7 @@ namespace DynamicXtremeLibrary.Inputs
         /// <returns>The normalized absolute entry path.</returns>
         private static string resolveListedPath(string root, string subdirectory, string listedPath)
         {
+            listedPath = InputPath.Normalize(listedPath);
             if (Path.IsPathRooted(listedPath))
                 return Path.GetFullPath(listedPath);
             string direct = Path.GetFullPath(Path.Combine(root, listedPath));
@@ -455,11 +473,11 @@ namespace DynamicXtremeLibrary.Inputs
             ConsumerKind.Sprite => "sprites",
             ConsumerKind.Cluster => "cluster",
             ConsumerKind.Extended => "extended",
-            ConsumerKind.MinorExtended => "minor_extended",
-            ConsumerKind.Bounce => "bounce",
-            ConsumerKind.Smoke => "smoke",
-            ConsumerKind.SpinningCoin => "spinning_coin",
-            ConsumerKind.Score => "score",
+            ConsumerKind.MinorExtended => Path.Combine("misc_sprites", "minorextended"),
+            ConsumerKind.Bounce => Path.Combine("misc_sprites", "bounce"),
+            ConsumerKind.Smoke => Path.Combine("misc_sprites", "smoke"),
+            ConsumerKind.SpinningCoin => Path.Combine("misc_sprites", "spinningcoin"),
+            ConsumerKind.Score => Path.Combine("misc_sprites", "score"),
             _ => "sprites"
         };
 
@@ -499,9 +517,9 @@ namespace DynamicXtremeLibrary.Inputs
         private static partial Regex directiveRegex();
 
         /// <summary>
-        /// Creates the parser for PIXI list entries ending in CFG, JSON, or ASM paths.
+        /// Creates the parser for PIXI descriptor or ASM paths with optional display flags.
         /// </summary>
-        [GeneratedRegex("""(?:"(?<quoted>[^"]+\.(?:cfg|json|asm))"|(?<plain>[^\s]+\.(?:cfg|json|asm)))\s*$""", RegexOptions.IgnoreCase)]
+        [GeneratedRegex("""(?:"(?<quoted>[^"]+\.(?:cfg|json|asm))"|(?<plain>[^\s]+\.(?:cfg|json|asm)))(?:\s+(?:display|nodisplay))?\s*$""", RegexOptions.IgnoreCase)]
         private static partial Regex listPathRegex();
 
         /// <summary>

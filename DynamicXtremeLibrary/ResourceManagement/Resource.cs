@@ -5,6 +5,8 @@
     {
         GeneralResource,
         Palette,
+        /// <summary>Represents a converted three-byte-per-color palette used by a transition effect.</summary>
+        PaletteEffectPalette,
         DynamicPose,
         Buffer,
         GraphicRoutine

@@ -38,7 +38,7 @@ namespace DynamicXtremeLibrary.Defines
         /// <param name="path">The source file path.</param>
         /// <returns>The generated Asar symbol component.</returns>
         public static string FromPath(string path)
-            => Normalize(Path.GetFileNameWithoutExtension(path));
+            => Normalize(Path.GetFileNameWithoutExtension(InputPath.Normalize(path)));
 
         /// <summary>Checks that every path generates a non-empty and unique normalized name.</summary>
         /// <param name="paths">The paths whose filenames are normalized.</param>
@@ -51,7 +51,7 @@ namespace DynamicXtremeLibrary.Defines
 
             foreach (string path in paths)
             {
-                string sourceName = Path.GetFileNameWithoutExtension(path);
+                string sourceName = Path.GetFileNameWithoutExtension(InputPath.Normalize(path));
                 string generatedName = Normalize(sourceName);
                 if (string.IsNullOrEmpty(generatedName))
                 {

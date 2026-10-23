@@ -53,20 +53,24 @@ namespace DynamicXtremeLibrary.Config
             T def = Value != null && !string.IsNullOrWhiteSpace(Value.ToString()) ?
                     Value :
                     DefaultValue;
-            string value = Console.ReadLine()!;
+            string? value = Console.ReadLine();
+            if (value == null)
+                return false;
             value = value.Replace("\'", "").Replace("\"", "").Trim();
             T tValue = !string.IsNullOrWhiteSpace(value) ?
                 ParseFromString(value) :
                 def;
 
-            while (!Validate(value))
+            while (!validateInput(value, tValue))
             {
                 Console.WriteLine(RedoError);
-                value = Console.ReadLine()!;
-                if (value.ToLower().Trim() != "y")
+                value = Console.ReadLine();
+                if (!string.Equals(value?.Trim(), "y", StringComparison.OrdinalIgnoreCase))
                     return false;
                 Console.WriteLine(Question);
-                value = Console.ReadLine()!;
+                value = Console.ReadLine();
+                if (value == null)
+                    return false;
                 value = value.Replace("\'", "").Replace("\"", "").Trim();
                 tValue = !string.IsNullOrWhiteSpace(value) ?
                     ParseFromString(value) :
@@ -75,6 +79,25 @@ namespace DynamicXtremeLibrary.Config
             Value = tValue;
             return true;
         }
+        /// <summary>
+        /// Validates explicit input in its original form and empty input through the stored value
+        /// that will actually be selected.
+        /// </summary>
+        /// <param name="input">The normalized text entered by the user.</param>
+        /// <param name="selectedValue">The parsed input or fallback value selected for storage.</param>
+        /// <returns>Whether the selected input satisfies the option contract.</returns>
+        private bool validateInput(string input, T selectedValue)
+            => string.IsNullOrWhiteSpace(input)
+                ? ValidateStoredValue(selectedValue)
+                : Validate(input);
+        /// <summary>
+        /// Validates a value already stored by the option when the user selects it through empty
+        /// input. Derived options may override this when stored and interactive forms differ.
+        /// </summary>
+        /// <param name="value">The stored value selected as the fallback.</param>
+        /// <returns>Whether the stored value remains valid.</returns>
+        protected virtual bool ValidateStoredValue(T value)
+            => Validate(value?.ToString() ?? "");
         /// <summary>Converts validated text into the option value.</summary>
         /// <param name="value">The user-supplied text.</param>
         /// <returns>The parsed value.</returns>

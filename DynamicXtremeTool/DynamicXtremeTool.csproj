@@ -10,6 +10,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <AssemblyName>dxt</AssemblyName>
+    <ApplicationIcon>Assets\DynamicXtreme.ico</ApplicationIcon>
     <FileVersion>1.0.0.203</FileVersion>
   </PropertyGroup>
 
@@ -20,6 +21,24 @@
   <ItemGroup>
     <ProjectReference Include="..\DynamicXtremeLibrary\DynamicXtremeLibrary.csproj" />
     <ProjectReference Include="..\LogRegister\LogRegister.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\DynamicXtremeLogo.png"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="DynamicInfos\README.md"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="DrawInfos\README.md"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="DynamicResources\README.md"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="PaletteEffects\README.md"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

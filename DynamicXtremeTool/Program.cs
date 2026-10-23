@@ -15,6 +15,22 @@ namespace DynamicXtremeTool
         /// <summary>Processes command-line options, runs installation, and renders the resulting log.</summary>
         private static void Main(string[]? args)
         {
+            try
+            {
+                Run(args);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine($"Dynamic Xtreme could not access its files: {exception.Message}");
+                Console.Error.WriteLine("Extract the tool to a writable directory and check file permissions and exact filename casing.");
+                Environment.ExitCode = 1;
+            }
+        }
+
+        /// <summary>Runs setup and installation using the application directory as the resource base.</summary>
+        /// <param name="args">The command-line arguments.</param>
+        private static void Run(string[]? args)
+        {
             AppDomain.CurrentDomain.ProcessExit += (_, __) => Console.ResetColor();
 
             bool useSettings = false;
@@ -59,19 +75,35 @@ namespace DynamicXtremeTool
                     {
                         Console.WriteLine(message);
                         Console.ResetColor();
-                        Console.Read();
                         return;
                     }
                 }
                 useSettings = lowerArgs.Any(a => a == "-use-settings" || a == "-us");
                 verbose = lowerArgs.Any(a => a == "-v" || a == "-verbose");
             }
-            var opt = Options.Instance;
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+            bool pauseAtExit = OperatingSystem.IsWindows() && !Console.IsInputRedirected &&
+                !Console.IsOutputRedirected && (args == null || args.Length == 0);
+            Options opt;
+            try
+            {
+                opt = Options.Instance;
+            }
+            catch (InvalidSettingsException exception)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(exception.Message);
+                Console.ResetColor();
+                Environment.ExitCode = 1;
+                PauseIfInteractive(pauseAtExit);
+                return;
+            }
             if(!opt.SettingsForm(useSettings))
             {
                 Console.WriteLine("The process was interrupted.");
                 Console.ResetColor();
-                Console.Read();
+                Environment.ExitCode = 1;
+                PauseIfInteractive(pauseAtExit);
                 return;
             }
             opt.Save();
@@ -103,9 +135,10 @@ namespace DynamicXtremeTool
                 OutputDefinesFilename = "DXDefines",
                 OptionsDefinesFilename = "Options",
                 RoutinesDirectory = "Routines",
-                CollisionResolver = ConfirmCollisionRename
+                CollisionResolver = ConfirmCollisionRename,
+                IgnorePixiEntry = ConfirmIgnorePixiEntry
             };
-            dx.Run(File.ReadAllBytes(opt.InputRomPath.Value));
+            bool installed = dx.Run(File.ReadAllBytes(opt.InputRomPath.Value));
 
             LogRenderer renderer = new(Path.Combine("Logging", "LogMessages.json"));
             RawTextWrapper rawText = new();
@@ -116,7 +149,16 @@ namespace DynamicXtremeTool
             renderer.RenderAll(logRegisterSystem.GetRegisters(), mw.RenderAction, error: hasErrors, verbose: verbose);
             File.WriteAllText("log.txt", rawText.ToString());
             Console.ResetColor();
-            Console.Read();
+            Environment.ExitCode = installed && !hasErrors ? 0 : 1;
+            PauseIfInteractive(pauseAtExit);
+        }
+
+        /// <summary>Preserves the interactive Windows exit pause while allowing scripts and Linux to finish.</summary>
+        /// <param name="enabled">Whether this invocation uses an interactive Windows console without arguments.</param>
+        private static void PauseIfInteractive(bool enabled)
+        {
+            if (enabled)
+                Console.ReadLine();
         }
 
         /// <summary>
@@ -142,6 +184,24 @@ namespace DynamicXtremeTool
             string answer = Console.ReadLine()?.Trim() ?? "";
             return answer.Equals("y", StringComparison.OrdinalIgnoreCase) ||
                 answer.Equals("yes", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Displays an unresolved PIXI entry and asks whether discovery should skip it.</summary>
+        /// <param name="issue">The list location, inspected path, and failure reason.</param>
+        /// <returns>True only when the user explicitly agrees to ignore this entry.</returns>
+        private static bool ConfirmIgnorePixiEntry(PixiEntryIssue issue)
+        {
+            Console.WriteLine($"Dynamic Xtreme could not inspect PIXI entry '{issue.ListedPath}'");
+            Console.WriteLine($"(line {issue.LineNumber} of '{issue.ListPath}'):");
+            Console.WriteLine($"  Path: {issue.ResolvedPath}");
+            Console.WriteLine($"  {issue.Reason}");
+            Console.Write("Ignore this PIXI entry and continue? [y/N]: ");
+            string answer = Console.ReadLine()?.Trim() ?? "";
+            bool ignore = answer.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+                answer.Equals("yes", StringComparison.OrdinalIgnoreCase);
+            if (ignore)
+                Console.WriteLine($"Warning: skipped PIXI entry '{issue.ListedPath}'.");
+            return ignore;
         }
     }
 }

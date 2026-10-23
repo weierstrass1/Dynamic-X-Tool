@@ -161,6 +161,7 @@ if <IsDynamic>
     endif
 else
     if <DefaultTile>
+        LDA !Tile
         STA !OAMTiles,x
         %GRPropertyInLoop("<DefaultProp>", 1)
         STA !OAMProps,x

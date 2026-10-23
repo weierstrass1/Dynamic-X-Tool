@@ -25,10 +25,15 @@
         PalFunctionRGB = 16,
         PalFunctionHSL = 17
     }
-    /// <summary>Stores three channel values, their ratios, and the derived runtime effect type.</summary>
+    /// <summary>
+    /// Stores a palette effect's channel values, interpolation ratios, operation, and optional
+    /// transition target palette.
+    /// </summary>
     [Serializable]
     public class PaletteEffect
     {
+        /// <summary>Gets or sets the source SNES palette used by palette-transition effects.</summary>
+        public string? Palette { get; set; }
         /// <summary>Gets or sets the first channel value.</summary>
         public byte Channel1 { get; set; }
         /// <summary>Gets or sets the second channel value.</summary>

@@ -7,7 +7,7 @@ namespace DynamicXtremeLibrary.ExternalTools
     public sealed class FileTransaction : IDisposable
     {
         private readonly Dictionary<string, byte[]?> _originalFiles =
-            new(StringComparer.OrdinalIgnoreCase);
+            new(InputPath.Comparer);
         private readonly List<string> _createdDirectories = [];
         private bool _completed;
 

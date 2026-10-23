@@ -69,7 +69,7 @@ namespace DynamicXtremeLibrary.Infos
         /// <param name="path">The declared resource path.</param>
         /// <returns>The path used to access the resource.</returns>
         public string ResolveResourcePath(string path)
-            => Path.IsPathRooted(path) ? path : Path.Combine(ResourceDirectory, path);
+            => InputPath.Resolve(ResourceDirectory, path);
 
         /// <summary>Builds the final generated name of a pose-graphics resource.</summary>
         /// <param name="path">The declared pose-graphics path.</param>
@@ -149,9 +149,7 @@ namespace DynamicXtremeLibrary.Infos
             {
                 for (int i = 0; i < Palettes.Length; i++)
                 {
-                    path = Path.IsPathRooted(Palettes[i])
-                        ? Palettes[i]
-                        : Path.Combine(resourceDirectory, Palettes[i]);
+                    path = InputPath.Resolve(resourceDirectory, Palettes[i]);
                     if (!File.Exists(path))
                     {
                         logging.Add(new ResourceNotFound(Palettes[i]));
@@ -169,9 +167,7 @@ namespace DynamicXtremeLibrary.Infos
             {
                 for (int i = 0; i < Resources.Length; i++)
                 {
-                    path = Path.IsPathRooted(Resources[i])
-                        ? Resources[i]
-                        : Path.Combine(resourceDirectory, Resources[i]);
+                    path = InputPath.Resolve(resourceDirectory, Resources[i]);
                     if (!File.Exists(path))
                     {
                         logging.Add(new ResourceNotFound(Resources[i]));
@@ -191,9 +187,7 @@ namespace DynamicXtremeLibrary.Infos
            
             for (int i = 0; i < PoseGraphics.Length; i++)
             {
-                path = Path.IsPathRooted(PoseGraphics[i])
-                    ? PoseGraphics[i]
-                    : Path.Combine(resourceDirectory, PoseGraphics[i]);
+                path = InputPath.Resolve(resourceDirectory, PoseGraphics[i]);
                 if (!File.Exists(path))
                 {
                     logging.Add(new ResourceNotFound(PoseGraphics[i]));
@@ -299,15 +293,8 @@ namespace DynamicXtremeLibrary.Infos
                         throw new InvalidOperationException(
                             $"Dynamic pose name '{candidate.Name}' refers to different data.");
                     }
-
-                    DynamicPoseResource? equivalent = poses.FirstOrDefault(resource =>
-                        resource.IsEquivalentTo(candidate.Data, poseSize, blocks,
-                            firstChunkSize, secondChunkSize, lastRow));
-                    if (equivalent != null)
-                    {
-                        equivalent.AddAlias(candidate.Name);
+                    if (sameName != null)
                         continue;
-                    }
 
                     poses.Add(new(poses.Count, candidate.Name, candidate.Data, poseSize, blocks,
                         firstChunkSize, secondChunkSize, lastRow));

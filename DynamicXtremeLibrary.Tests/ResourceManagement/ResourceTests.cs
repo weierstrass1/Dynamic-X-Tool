@@ -17,6 +17,19 @@ public sealed class ResourceTests
     }
 
     [Fact]
+    public void Resource_AddAliasPreservesDistinctLogicalNamesOnceInOrdinalOrder()
+    {
+        Resource resource = new(0, "Primary", ResourceType.PaletteEffectPalette, [1]);
+
+        resource.AddAlias("Alias");
+        resource.AddAlias("Alias");
+        resource.AddAlias("alias");
+
+        Assert.Equal(["Primary", "Alias", "alias"], resource.Names);
+        Assert.Equal("Primary", resource.Name);
+    }
+
+    [Fact]
     public void ResourceReference_ExposesBufferPositionAndDiagnosticString()
     {
         Resource resource = new(3, "Hero", ResourceType.DynamicPose, [1]);
@@ -82,12 +95,14 @@ public sealed class ResourceTests
             Buffers = [Ref(ResourceType.Buffer, 10)],
             DynamicPoses = [Ref(ResourceType.DynamicPose, 20), Ref(ResourceType.DynamicPose, 5)],
             Palettes = [Ref(ResourceType.Palette, 7)],
+            PaletteEffectPalettes = [Ref(ResourceType.PaletteEffectPalette, 11)],
             GeneralResources = [Ref(ResourceType.GeneralResource, 9)]
         };
 
         Assert.Equal(10, references.BufferSize);
         Assert.Equal(25, references.DynamicPosesSize);
         Assert.Equal(7, references.PaletteSize);
+        Assert.Equal(11, references.PaletteEffectPaletteSize);
         Assert.Equal(9, references.GeneralResourceSize);
     }
 }

@@ -17,8 +17,8 @@
         {
             string directory = Path.GetDirectoryName(value)!;
             if (string.IsNullOrWhiteSpace(directory))
-                directory = ".\\";
-            return Path.GetRelativePath(".\\", directory);
+                directory = ".";
+            return Path.GetRelativePath(".", directory);
         }
         /// <summary>Validates an empty value, an executable path, or a stored directory as appropriate.</summary>
         /// <param name="value">The configured path.</param>
@@ -39,5 +39,12 @@
             return string.IsNullOrWhiteSpace(directory) ||
                 Directory.Exists(directory);
         }
+        /// <summary>
+        /// Validates the directory form stored after an external-tool executable was selected.
+        /// </summary>
+        /// <param name="value">The stored external-tool directory.</param>
+        /// <returns>Whether the stored directory is empty or still exists.</returns>
+        protected override bool ValidateStoredValue(string value)
+            => string.IsNullOrWhiteSpace(value) || Directory.Exists(value);
     }
 }

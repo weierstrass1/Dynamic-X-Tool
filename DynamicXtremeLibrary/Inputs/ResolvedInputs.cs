@@ -1,5 +1,5 @@
 using DynamicXtremeLibrary.Infos;
-using DynamicXtremePaletteCreatorLibrary;
+using DynamicXtremeLibrary.PaletteEffec;
 
 namespace DynamicXtremeLibrary.Inputs
 {
@@ -22,7 +22,7 @@ namespace DynamicXtremeLibrary.Inputs
         /// <summary>
         /// Gets the resolved palette-effect collections.
         /// </summary>
-        public IReadOnlyList<PaletteEffectCollection> PaletteEffects { get; init; } = [];
+        public IReadOnlyList<ResolvedPaletteEffectCollection> PaletteEffects { get; init; } = [];
 
         /// <summary>
         /// Gets the deferred modifications for external ASM consumers.

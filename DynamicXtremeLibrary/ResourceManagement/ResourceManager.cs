@@ -71,6 +71,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
             List<ResourceReference> references = [];
             List<ResourceReference> posesRefs = [];
             List<ResourceReference> palRefs = [];
+            List<ResourceReference> paletteEffectPalRefs = [];
             List<ResourceReference> resRefs = [];
             ResourceReference bufRef;
 
@@ -81,6 +82,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                     Buffers = references.AsReadOnly(),
                     DynamicPoses = posesRefs.AsReadOnly(),
                     Palettes = palRefs.AsReadOnly(),
+                    PaletteEffectPalettes = paletteEffectPalRefs.AsReadOnly(),
                     GeneralResources = resRefs.AsReadOnly()
                 };
             }
@@ -107,10 +109,13 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 logging.Add(new ResourceInsertedAt(bufRef));
                 posesRefs.AddRange(buffer.GetReferences().Where(r => r.Resource.Type == ResourceType.DynamicPose));
                 palRefs.AddRange(buffer.GetReferences().Where(r => r.Resource.Type == ResourceType.Palette));
+                paletteEffectPalRefs.AddRange(buffer.GetReferences().Where(
+                    r => r.Resource.Type == ResourceType.PaletteEffectPalette));
                 resRefs.AddRange(buffer.GetReferences().Where(r => r.Resource.Type == ResourceType.GeneralResource));
             }
             posesRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
             palRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
+            paletteEffectPalRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
             resRefs.Sort((a, b) => a.Resource.ID.CompareTo(b.Resource.ID));
             if (posesRefs.Count != 0)
             {
@@ -124,6 +129,12 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 foreach (var reference in palRefs)
                     logging.Add(new ResourceInsertedAt(reference));
             }
+            if (paletteEffectPalRefs.Count != 0)
+            {
+                logging.Add(new Title("Palette Effect Palettes"));
+                foreach (var reference in paletteEffectPalRefs)
+                    logging.Add(new ResourceInsertedAt(reference));
+            }
             if (resRefs.Count != 0)
             {
                 logging.Add(new Title("Resources"));
@@ -135,6 +146,7 @@ namespace DynamicXtremeLibrary.ResourceManagement
                 Buffers = references.AsReadOnly(),
                 DynamicPoses = posesRefs!.AsReadOnly(),
                 Palettes = palRefs!.AsReadOnly(),
+                PaletteEffectPalettes = paletteEffectPalRefs.AsReadOnly(),
                 GeneralResources = resRefs!.AsReadOnly()
             };
         }
@@ -161,13 +173,11 @@ namespace DynamicXtremeLibrary.ResourceManagement
         {
             List<Resource> positions = [.. resources.OrderByDescending(r=>r.Length)];
 
-            byte[] resBuff;
             ResourceBuffer currentbuffer;
             List<ResourceBuffer> result = [];
             int size;
             bool find;
             int buffIndex = 0;
-            int counter;
             while (positions.Count > 0)
             {
                 size = 0;
@@ -180,27 +190,40 @@ namespace DynamicXtremeLibrary.ResourceManagement
                     {
                         if (buff.Length + size <= 32760)
                         {
+                            int position = size;
                             find = true;
-
                             currentbuffer.AddReference(
-                                new(buffIndex, size, buff));
+                                new(buffIndex, position, buff));
                             size += buff.Length;
                             positions.Remove(buff);
+
+                            Resource[] sharedResources = [.. positions.Where(candidate =>
+                                canSharePhysicalData(buff, candidate))];
+                            foreach (Resource sharedResource in sharedResources)
+                            {
+                                currentbuffer.AddReference(
+                                    new(buffIndex, position, sharedResource));
+                                positions.Remove(sharedResource);
+                            }
                             break;
                         }
                     }
-                }
-                resBuff = new byte[size];
-                counter = 0;
-                foreach (var buff in currentbuffer.GetReferences())
-                {
-                    buff.Resource.Data.CopyTo(resBuff, counter);
-                    counter += buff.Resource.Length;
                 }
                 result.Add(currentbuffer);
                 buffIndex++;
             }
             return result.AsReadOnly();
         }
+
+        /// <summary>
+        /// Determines whether two logical resources can safely share one physical payload while
+        /// retaining separate types, IDs, defines, and runtime-table rows.
+        /// </summary>
+        private static bool canSharePhysicalData(Resource left, Resource right)
+            => (left.Type == ResourceType.PaletteEffectPalette ||
+                right.Type == ResourceType.PaletteEffectPalette ||
+                left.Type == ResourceType.DynamicPose && right.Type == ResourceType.DynamicPose) &&
+                left.Data.Length == right.Data.Length &&
+                left.Data.AsSpan().SequenceEqual(right.Data);
     }
 }

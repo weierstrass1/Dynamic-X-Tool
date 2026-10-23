@@ -11,7 +11,7 @@ namespace DynamicXtremeLibrary.Inputs
     /// <param name="DynamicInfoDirectory">The directory containing traditional DynamicInfo inputs.</param>
     /// <param name="DrawInfoDirectory">The directory containing traditional DrawInfo inputs.</param>
     /// <param name="PaletteEffectsDirectory">The directory containing traditional palette-effect inputs.</param>
-    /// <param name="DynamicResourcesDirectory">The resource directory used by traditional DynamicInfo inputs.</param>
+    /// <param name="DynamicResourcesDirectory">The resource directory used by traditional DynamicInfo and palette-effect inputs.</param>
     /// <param name="PixiListPath">The optional PIXI list whose ASM entries may include Dynamic Xtreme inputs.</param>
     /// <param name="PixiExecutablePath">The optional PIXI executable used to locate its installation directory.</param>
     /// <param name="UberasmListPath">The optional UberASMTool list whose ASM entries may include Dynamic Xtreme inputs.</param>
@@ -47,6 +47,7 @@ namespace DynamicXtremeLibrary.Inputs
         private readonly LogRegisterSystem _log;
         private readonly string _temporaryDirectory;
         private readonly Func<NameCollision, bool>? _collisionResolver;
+        private readonly Func<PixiEntryIssue, bool>? _ignorePixiEntry;
 
         /// <summary>
         /// Initializes an input-preparation operation.
@@ -54,12 +55,14 @@ namespace DynamicXtremeLibrary.Inputs
         /// <param name="log">The log that receives discovery, validation, and collision errors.</param>
         /// <param name="temporaryDirectory">The directory available for temporary parsing data.</param>
         /// <param name="collisionResolver">The optional callback used to approve generated collision-free names.</param>
+        /// <param name="ignorePixiEntry">The optional callback that approves skipping problematic PIXI entries.</param>
         public InputPreparation(LogRegisterSystem log, string temporaryDirectory,
-            Func<NameCollision, bool>? collisionResolver)
+            Func<NameCollision, bool>? collisionResolver, Func<PixiEntryIssue, bool>? ignorePixiEntry = null)
         {
             _log = log;
             _temporaryDirectory = temporaryDirectory;
             _collisionResolver = collisionResolver;
+            _ignorePixiEntry = ignorePixiEntry;
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace DynamicXtremeLibrary.Inputs
                     sources.PixiListPath,
                     sources.PixiExecutablePath,
                     sources.UberasmListPath,
-                    sources.UberasmExecutablePath);
+                    sources.UberasmExecutablePath, _ignorePixiEntry);
 
                 InputResolver resolver = new(_log, new ReadInfo(_log), _temporaryDirectory,
                     _collisionResolver);

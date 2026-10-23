@@ -16,7 +16,7 @@
         /// <returns>The normalized relative path.</returns>
         public override string ParseFromString(string value)
         {
-            return Path.GetRelativePath(".\\", value);
+            return Path.GetRelativePath(".", value);
         }
         /// <summary>Validates the SMC extension, parent directory, and existence requirement.</summary>
         /// <param name="value">The ROM path to validate.</param>
@@ -27,9 +27,11 @@
                 return false;
             string directory = Path.GetDirectoryName(value)!;
             if(string.IsNullOrWhiteSpace(directory))
-                directory = ".\\";
+                directory = ".";
             if (!Directory.Exists(directory))
             {
+                if (File.Exists(directory))
+                    return false;
                 if (ExistCheck)
                     return false;
                 Directory.CreateDirectory(directory);

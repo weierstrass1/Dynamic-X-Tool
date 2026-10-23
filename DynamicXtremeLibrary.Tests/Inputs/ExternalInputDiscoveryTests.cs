@@ -26,6 +26,8 @@ public sealed class ExternalInputDiscoveryTests
             result.Select(x => x.OriginalName));
         Assert.Equal(Path.GetFullPath(resources),
             result.First(input => input.Kind == InfoKind.DynamicInfo).ResourceDirectory);
+        Assert.Equal(Path.GetFullPath(resources),
+            result.First(input => input.Kind == InfoKind.PaletteEffect).ResourceDirectory);
     }
 
     [Fact]
@@ -34,7 +36,7 @@ public sealed class ExternalInputDiscoveryTests
         using TestDirectory temp = new();
         string root = temp.GetPath("pixi");
         temp.CreateFile("pixi/list.txt", "SPRITE:\n00 test.cfg");
-        temp.CreateFile("pixi/sprites/test.cfg", "test.asm");
+        temp.CreateFile("pixi/sprites/test.cfg", PixiCfg("01", "test.asm"));
         string asm = temp.CreateFile("pixi/sprites/test.asm",
             ";#incdri \"inputs/enemy.drawinfo\" ; dxt-name: EnemySprite\n");
         string inputPath = temp.CreateFile("pixi/sprites/inputs/enemy.drawinfo", "");
@@ -59,9 +61,9 @@ public sealed class ExternalInputDiscoveryTests
     {
         using TestDirectory temp = new();
         string root = temp.GetPath("pixi");
-        temp.CreateFile("pixi/list.txt", "SPRITE:\nentry.json");
+        temp.CreateFile("pixi/list.txt", "SPRITE:\n00 entry.json");
         temp.CreateFile("pixi/sprites/entry.json",
-            "{\"Other\":\"wrong.asm\",\"AsmFile\":\"right.asm\"}");
+            "{\"Type\":1,\"Other\":\"wrong.asm\",\"AsmFile\":\"right.asm\"}");
         temp.CreateFile("pixi/sprites/right.asm", ";#incpale \"effect.paleffect\"");
         temp.CreateFile("pixi/sprites/effect.paleffect", "{}");
 
@@ -71,6 +73,47 @@ public sealed class ExternalInputDiscoveryTests
 
         Assert.Equal(InfoKind.PaletteEffect, result.Kind);
         Assert.Equal("Entry", result.Origins.Single().ConsumerName);
+        Assert.Equal(Path.GetDirectoryName(Path.GetFullPath(result.Path)), result.ResourceDirectory);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Discover_ResolvesRelativePixiListFromToolDirectoryOrExecutable(bool executablePath)
+    {
+        using TestDirectory temp = new();
+        string root = temp.GetPath("pixi");
+        temp.CreateFile("pixi/list.txt", "SPRITE:\n00 consumer.cfg");
+        temp.CreateFile("pixi/sprites/consumer.cfg", PixiCfg("01", "consumer.asm"));
+        temp.CreateFile("pixi/sprites/consumer.asm", ";#incdri \"enemy.drawinfo\"");
+        temp.CreateFile("pixi/sprites/enemy.drawinfo", "");
+        string configuredToolPath = executablePath
+            ? temp.CreateFile("pixi/pixi.exe", [])
+            : root;
+
+        InfoInput result = Assert.Single(ExternalInputDiscovery.Discover(
+            temp.GetPath("none1"), temp.GetPath("none2"), temp.GetPath("none3"),
+            temp.GetPath("resources"), "list.txt", configuredToolPath, null, null));
+
+        Assert.Equal(InfoKind.DrawInfo, result.Kind);
+        Assert.Equal(Path.GetFullPath(temp.GetPath("pixi/sprites/enemy.drawinfo")), result.Path);
+    }
+
+    [Fact]
+    public void Discover_ResolvesRelativeUberasmListFromToolDirectory()
+    {
+        using TestDirectory temp = new();
+        string root = temp.GetPath("uber");
+        temp.CreateFile("uber/list.txt", "LEVEL:\n105 code.asm");
+        temp.CreateFile("uber/level/code.asm", ";#incpale \"effect.paleffect\"");
+        temp.CreateFile("uber/level/effect.paleffect", "{}");
+
+        InfoInput result = Assert.Single(ExternalInputDiscovery.Discover(
+            temp.GetPath("none1"), temp.GetPath("none2"), temp.GetPath("none3"),
+            temp.GetPath("resources"), null, null, "list.txt", root));
+
+        Assert.Equal(InfoKind.PaletteEffect, result.Kind);
+        Assert.Equal(Path.GetFullPath(temp.GetPath("uber/level/effect.paleffect")), result.Path);
     }
 
     [Fact]
@@ -79,7 +122,8 @@ public sealed class ExternalInputDiscoveryTests
         using TestDirectory temp = new();
         string drawDirectory = temp.GetPath("draw");
         string input = temp.CreateFile("draw/enemy.drawinfo", "");
-        temp.CreateFile("pixi/list.txt", "SPRITE:\nconsumer.asm");
+        temp.CreateFile("pixi/list.txt", "SPRITE:\n00 consumer.cfg");
+        temp.CreateFile("pixi/sprites/consumer.cfg", PixiCfg("01", "consumer.asm"));
         temp.CreateFile("pixi/sprites/consumer.asm",
             $";#incdri \"{input.Replace("\\", "/")}\"");
 
@@ -97,7 +141,8 @@ public sealed class ExternalInputDiscoveryTests
     {
         using TestDirectory temp = new();
         string root = temp.GetPath("pixi");
-        temp.CreateFile("pixi/list.txt", "SPRITE:\nconsumer.asm");
+        temp.CreateFile("pixi/list.txt", "SPRITE:\n00 consumer.cfg");
+        temp.CreateFile("pixi/sprites/consumer.cfg", PixiCfg("01", "consumer.asm"));
         string asm = temp.CreateFile("pixi/sprites/consumer.asm", ";#incdri no-quotes.drawinfo");
 
         Assert.Throws<InvalidDataException>(() => ExternalInputDiscovery.Discover(
@@ -141,4 +186,7 @@ public sealed class ExternalInputDiscoveryTests
             temp.GetPath("none1"), temp.GetPath("none2"), temp.GetPath("none3"),
             temp.GetPath("resources"), temp.GetPath("missing-list.txt"), null, null, null));
     }
+
+    private static string PixiCfg(string type, string asmFile) =>
+        $"{type}\n36\n00 00 00 00 00 00\n00 00\n{asmFile}\n00:00\n";
 }

@@ -73,6 +73,7 @@ namespace DynamicXtremeLibrary.Defines
             var buffs = refs.Buffers.OrderBy(r => r.Resource.ID);
             var dynP = refs.DynamicPoses.OrderBy(r => r.Resource.ID);
             var pals = refs.Palettes.OrderBy(r => r.Resource.ID);
+            var paletteEffectPals = refs.PaletteEffectPalettes.OrderBy(r => r.Resource.ID);
             var res = refs.GeneralResources.OrderBy(r => r.Resource.ID);
             StringBuilder ids = new();
             StringBuilder addrs = new();
@@ -115,6 +116,17 @@ namespace DynamicXtremeLibrary.Defines
             result.AppendLine($"!NumberOfPalettes = ${pals.Count():X4}\n");
             result.Append($"{ids}\n{addrs}\n{sizes}\n");
             ids.Clear();
+            addrs.Clear();
+            sizes.Clear();
+            foreach (var palette in paletteEffectPals)
+            {
+                foreach (string name in palette.Resource.Names)
+                {
+                    addrs.AppendLine($"!Palette{name} = ${SNESROMUtils.PCtoSNES(palette.Position, mapper):X6}");
+                    sizes.AppendLine($"!Palette{name}Size = ${palette.Resource.Length:X4}");
+                }
+            }
+            result.Append($"{addrs}\n{sizes}\n");
             addrs.Clear();
             sizes.Clear();
             foreach (var r in res)

@@ -16,7 +16,8 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
         {
             Parameters = new Dictionary<string, string>
             {
-                { "file", $"'{resourceName}'" }
+                { "file", $"'{resourceName}'" + (OperatingSystem.IsLinux()
+                    ? " (Linux paths require exact filename casing)" : "") }
             }.AsReadOnly();
         }
     }

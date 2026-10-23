@@ -22,7 +22,7 @@ namespace DynamicXtremeLibrary.Readers
         /// <summary>Recursively loads, validates, and assigns IDs to traditional DrawInfo files.</summary>
         public IReadOnlyList<DrawInfo> GetAllDrawInfos(string drawInfoDirectory, out bool validation)
         {
-            string[] paths = [.. Directory.GetFiles(drawInfoDirectory, "*.drawinfo", SearchOption.AllDirectories)
+            string[] paths = [.. InputPath.GetFiles(drawInfoDirectory, "*.drawinfo")
                 .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
             if (paths == null || paths.Length == 0)
@@ -72,7 +72,7 @@ namespace DynamicXtremeLibrary.Readers
         /// <summary>Recursively loads and validates traditional DynamicInfo files and generated names.</summary>
         public IReadOnlyList<DynamicInfo> GetAllDynamicInfos(string dynamicInfoDirectory, string resourceDirectory, out bool validation)
         {
-            string[] paths = [.. Directory.GetFiles(dynamicInfoDirectory, "*.dynamicinfo", SearchOption.AllDirectories)
+            string[] paths = [.. InputPath.GetFiles(dynamicInfoDirectory, "*.dynamicinfo")
                 .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(path => Path.GetFileName(path), StringComparer.Ordinal)];
             if (paths == null || paths.Length == 0)
@@ -111,11 +111,11 @@ namespace DynamicXtremeLibrary.Readers
                     _logRegisterSystem) &
                 AsarSymbolName.ValidateUnique(
                     dynamicInfos.SelectMany(info => info.Palettes ?? [])
-                        .Distinct(StringComparer.OrdinalIgnoreCase),
+                        .Distinct(InputPath.Comparer),
                     _logRegisterSystem) &
                 AsarSymbolName.ValidateUnique(
                     dynamicInfos.SelectMany(info => info.Resources ?? [])
-                        .Distinct(StringComparer.OrdinalIgnoreCase),
+                        .Distinct(InputPath.Comparer),
                     _logRegisterSystem);
             if (!generatedNamesAreValid)
                 validation = false;

@@ -2,9 +2,9 @@
   "Name": "UberasmListPath",
   "Value": "",
   "DefaultValue": "",
-  "Description": "Path to the UberASMTool list file whose primary ASM files must be scanned (optional).",
+  "Description": "Path to the UberASMTool list file whose primary ASM files must be scanned (optional). Relative paths use the UberASMTool directory.",
   "Warning": "",
-  "Question": "Enter the UberASMTool list path, or leave it empty to skip external UberASM resources.",
+  "Question": "Enter the UberASMTool list path (absolute or relative to UberASMTool), or leave it empty to skip external UberASM resources.",
   "RedoError": "The specified file does not exist. Enter \"Y\" to try again.",
   "Error": "Installation aborted."
 }

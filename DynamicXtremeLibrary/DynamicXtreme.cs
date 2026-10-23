@@ -27,7 +27,7 @@ namespace DynamicXtremeLibrary
         public required string DynamicInfoDirectory { get; init; }
         /// <summary>Gets the traditional DrawInfo directory.</summary>
         public required string DrawInfoDirectory { get; init; }
-        /// <summary>Gets the resource base for traditional DynamicInfo files.</summary>
+        /// <summary>Gets the resource base for traditional DynamicInfo and palette-effect files.</summary>
         public required string DynamicResourcesDirectory { get; init; }
         /// <summary>Gets the traditional palette-effect directory.</summary>
         public required string PaletteEffectsDirectory { get; init; }
@@ -76,6 +76,8 @@ namespace DynamicXtremeLibrary
         /// external inputs generate colliding Asar symbols.
         /// </summary>
         public Func<NameCollision, bool>? CollisionResolver { get; init; }
+        /// <summary>Gets the callback that approves skipping PIXI entries that cannot be inspected.</summary>
+        public Func<PixiEntryIssue, bool>? IgnorePixiEntry { get; init; }
         /// <summary>Initializes the installer with its structured log.</summary>
         public DynamicXtreme(LogRegisterSystem log)
         {
@@ -110,20 +112,26 @@ namespace DynamicXtremeLibrary
             EnabledInputs enabledInputs = new(
                 boolOpts["GraphicsChange"] || boolOpts["PalettesChange"],
                 boolOpts["DrawingSystem"], boolOpts["PalettesEffects"]);
-            InputPreparation inputPreparation = new(_log, TMPDirectory, CollisionResolver);
+            InputPreparation inputPreparation = new(_log, TMPDirectory, CollisionResolver, IgnorePixiEntry);
             ResolvedInputs? resolvedInputs = inputPreparation.Prepare(inputSources, enabledInputs);
             if (resolvedInputs == null)
                 return false;
 
+            IReadOnlyList<ResolvedPaletteEffectCollection>? resolvedPaletteEffects =
+                boolOpts["PalettesEffects"] ? resolvedInputs.PaletteEffects : null;
+            PaletteEffectResourceSet paletteEffectResources =
+                PaletteEffectExtension.CreateResources(resolvedPaletteEffects ?? []);
+
             RemoveResources(rom);
 
-            IReadOnlyList<DynamicInfo>? dynamicInfos = null;
+            IReadOnlyList<DynamicInfo>? dynamicInfos = boolOpts["GraphicsChange"] ||
+                boolOpts["PalettesChange"] ? resolvedInputs.DynamicInfos : null;
             IReadOnlyList<Resource>? resources = null;
             IReadOnlyList<ResourceBuffer>? buffers = null;
             ResourceAllReferences? allRefs = null;
-            if (boolOpts["GraphicsChange"] || boolOpts["PalettesChange"])
-                processDynamicInfos(rom, resolvedInputs.DynamicInfos, out validation,
-                    out dynamicInfos, out resources, out buffers, out allRefs);
+            if (dynamicInfos != null || resolvedPaletteEffects != null)
+                processResources(rom, dynamicInfos, paletteEffectResources.Resources,
+                    out validation, out resources, out buffers, out allRefs);
             if (!validation)
                 return false;
 
@@ -135,8 +143,9 @@ namespace DynamicXtremeLibrary
                 return false;
 
             IReadOnlyList<PaletteEffectCollection>? palEffects = null;
-            if (boolOpts["PalettesEffects"])
-                palEffects = processPaletteEffects(resolvedInputs.PaletteEffects, out validation);
+            if (resolvedPaletteEffects != null)
+                palEffects = processPaletteEffects(resolvedPaletteEffects,
+                    paletteEffectResources, out validation);
             if (!validation)
                 return false;
 
@@ -195,47 +204,45 @@ namespace DynamicXtremeLibrary
         /// Serializes already resolved palette-effect collections into the patch data file.
         /// </summary>
         /// <param name="palEffects">The validated palette-effect collections to serialize.</param>
+        /// <param name="resources">The converted target-palette resources bound to the effects.</param>
         /// <param name="validation">Whether palette-effect data generation succeeded.</param>
         /// <returns>The same collections supplied to the method.</returns>
         private IReadOnlyList<PaletteEffectCollection> processPaletteEffects(
-            IReadOnlyList<PaletteEffectCollection> palEffects, out bool validation)
+            IReadOnlyList<ResolvedPaletteEffectCollection> palEffects,
+            PaletteEffectResourceSet resources, out bool validation)
         {
             validation = true;
-            PaletteEffectExtension.ToFile(_log, palEffects,
+            PaletteEffectExtension.ToFile(_log, palEffects, resources,
                                 Path.Combine(PatchDirectory, DataDirectory, $"{PaletteEffectsDataFilename}.asm"));
-            return palEffects;
+            return palEffects.Select(effect => effect.Collection).ToArray();
         }
         /// <summary>
-        /// Merges resolved DynamicInfo resources, inserts their buffers into the ROM, and generates
-        /// the buffer, pose, and palette tables consumed by the patch.
+        /// Merges DynamicInfo and additional resources, inserts their buffers into the ROM, and
+        /// generates the buffer, pose, and palette tables consumed by the patch.
         /// </summary>
         /// <param name="rom">The in-memory ROM being prepared for Asar.</param>
-        /// <param name="resolvedDynamicInfos">The validated and deduplicated DynamicInfo models.</param>
+        /// <param name="dynamicInfos">The enabled validated DynamicInfo models, if any.</param>
+        /// <param name="additionalResources">Resources owned by enabled non-DynamicInfo features.</param>
         /// <param name="validation">Whether resource insertion and table generation succeeded.</param>
-        /// <param name="dynamicInfos">The DynamicInfo models passed to downstream generators.</param>
-        /// <param name="resources">The resources collected from all DynamicInfo models.</param>
+        /// <param name="resources">All resources passed to the buffer packer.</param>
         /// <param name="buffers">The merged resource buffers.</param>
         /// <param name="allRefs">The ROM references assigned to inserted buffers and resources.</param>
-        private void processDynamicInfos(byte[] rom, IReadOnlyList<DynamicInfo> resolvedDynamicInfos,
-            out bool validation, out IReadOnlyList<DynamicInfo>? dynamicInfos,
-            out IReadOnlyList<Resource>? resources, out IReadOnlyList<ResourceBuffer>? buffers,
-            out ResourceAllReferences? allRefs)
+        private void processResources(byte[] rom,
+            IReadOnlyList<DynamicInfo>? dynamicInfos,
+            IReadOnlyList<Resource> additionalResources,
+            out bool validation, out IReadOnlyList<Resource>? resources,
+            out IReadOnlyList<ResourceBuffer>? buffers, out ResourceAllReferences? allRefs)
         {
             validation = true;
-            dynamicInfos = resolvedDynamicInfos;
             string dataDir = Path.Combine(PatchDirectory, DataDirectory);
-            if(dynamicInfos == null)
-            {
-                resources = null;
-                buffers = null;
-                allRefs = null;
-                File.WriteAllText(Path.Combine(dataDir, $"{BufferDataFilename}.asm"),
-                    "BufferTable:\n\tdl $FFFFFF\n");
-                File.WriteAllText(Path.Combine(dataDir, $"{PaletteDataFilename}.asm"),
-                    "PaletteTable:\n.IDs\n.Addresses\n");
-                return;
-            }
-            resources = DynamicInfo.GetAllResources(dynamicInfos);
+            IEnumerable<Resource> dynamicResources = dynamicInfos == null
+                ? []
+                : DynamicInfo.GetAllResources(dynamicInfos);
+            resources =
+            [
+                .. dynamicResources,
+                .. additionalResources
+            ];
             buffers = ResourceManager.MergeResources(resources);
             allRefs = ResourceManager.InsertBuffers(_log, rom, buffers);
             if (allRefs == null)
@@ -244,9 +251,11 @@ namespace DynamicXtremeLibrary
                 return;
             }
             string bufferTable = ResourceManager.BuildBufferTable(allRefs.Buffers);
-            string dynamicPoseData = DynamicPoseDataGenerator.GenerateData(
-                SNESROMUtils.GetMapper(rom), allRefs.DynamicPoses, dynamicInfos);
-            string paletteTable = ResourceManager.BuildPalettesTable(dynamicInfos);
+            string dynamicPoseData = dynamicInfos == null || dynamicInfos.Count == 0
+                ? DynamicPoseDataGenerator.GenerateEmpty()
+                : DynamicPoseDataGenerator.GenerateData(
+                    SNESROMUtils.GetMapper(rom), allRefs.DynamicPoses, dynamicInfos);
+            string paletteTable = ResourceManager.BuildPalettesTable(dynamicInfos ?? []);
 
             File.WriteAllText(Path.Combine(dataDir, $"{BufferDataFilename}.asm"),
                 bufferTable);
@@ -355,6 +364,9 @@ namespace DynamicXtremeLibrary
             _log.Add(new NumberOf("Palettes", 
                 dyns == null ? 0 : dyns.Sum(dyn => dyn.PaletteLength),
                 allRefs == null ? 0 : allRefs.PaletteSize));
+            _log.Add(new NumberOf("Palette Effect Palettes",
+                allRefs == null ? 0 : allRefs.PaletteEffectPalettes.Count,
+                allRefs == null ? 0 : allRefs.PaletteEffectPaletteSize));
             _log.Add(new NumberOf("Resources", 
                 dyns == null ? 0 : dyns.Sum(dyn => dyn.ResourcesLength),
                 allRefs == null ? 0 : allRefs.GeneralResourceSize));

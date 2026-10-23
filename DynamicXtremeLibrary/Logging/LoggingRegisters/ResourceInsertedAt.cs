@@ -19,6 +19,7 @@ namespace DynamicXtremeLibrary.Logging.LoggingRegisters
             {
                 ResourceType.GeneralResource => "Resource",
                 ResourceType.Palette => "Palette",
+                ResourceType.PaletteEffectPalette => "Palette Effect Palette",
                 ResourceType.DynamicPose => "Dynamic Pose",
                 ResourceType.Buffer => "Buffer",
                 ResourceType.GraphicRoutine => "Graphic Routine",

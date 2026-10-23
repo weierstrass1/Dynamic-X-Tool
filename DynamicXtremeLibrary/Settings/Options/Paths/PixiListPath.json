@@ -2,9 +2,9 @@
   "Name": "PixiListPath",
   "Value": "",
   "DefaultValue": "",
-  "Description": "Path to the PIXI list file whose primary ASM files must be scanned (optional).",
+  "Description": "Path to the PIXI list file whose primary ASM files must be scanned (optional). Relative paths use the PIXI directory.",
   "Warning": "",
-  "Question": "Enter the PIXI list path, or leave it empty to skip external PIXI resources.",
+  "Question": "Enter the PIXI list path (absolute or relative to PIXI), or leave it empty to skip external PIXI resources.",
   "RedoError": "The specified file does not exist. Enter \"Y\" to try again.",
   "Error": "Installation aborted."
 }

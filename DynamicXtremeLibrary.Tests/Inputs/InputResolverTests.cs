@@ -1,5 +1,7 @@
 using DynamicXtremeLibrary.Inputs;
+using DynamicXtremeLibrary.PaletteEffec;
 using DynamicXtremeLibrary.Readers;
+using DynamicXtremePaletteCreatorLibrary;
 using LogRegister;
 
 namespace DynamicXtremeLibrary.Tests.Inputs;
@@ -144,6 +146,68 @@ public sealed class InputResolverTests
             result.DrawInfos.Select(x => x.ContextName));
     }
 
+    [Fact]
+    public void Resolve_PreservesPaletteEffectSourceContextAndConvertedTargets()
+    {
+        using TestDirectory temp = new();
+        string resourceDirectory = temp.GetPath("resources");
+        string palettePath = temp.CreateFile("resources/target.pal", [0xFF, 0x7F]);
+        string effectPath = temp.CreateFile("effects/fade.paleffect", $$"""
+            {"Effects":[{"EffectType":{{(int)EffectType.PalTransitionRGB}},
+            "Palette":"target.pal"}]}
+            """);
+        InfoInput input = Input(InfoKind.PaletteEffect, effectPath, "Fade", 0,
+            resourceDirectory: resourceDirectory);
+
+        ResolvedInputs? result = Resolver(temp).Resolve([input], false, false, true);
+
+        Assert.NotNull(result);
+        ResolvedPaletteEffectCollection collection = Assert.Single(result.PaletteEffects);
+        Assert.Equal(Path.GetFullPath(effectPath), collection.SourcePath);
+        Assert.Equal(Path.GetFullPath(resourceDirectory), collection.ResourceDirectory);
+        ResolvedPaletteEffectTarget target = Assert.Single(collection.Targets);
+        Assert.Equal(Path.GetFullPath(palettePath), target.SourcePath);
+        Assert.Equal(PaletteEffectPaletteFormat.RGB, target.Format);
+        Assert.Equal([31, 31, 31], target.Data);
+    }
+
+    [Fact]
+    public void Resolve_RequiresCollisionApprovalWhenDynamicAndEffectPalettesGenerateSameSymbol()
+    {
+        using TestDirectory temp = new();
+        InfoInput[] inputs = CollidingCrossKindPaletteInputs(temp);
+
+        ResolvedInputs? result = Resolver(temp, collisionResolver: null)
+            .Resolve(inputs, true, false, true);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Resolve_ApprovedCrossKindPaletteCollisionRenamesEffectResourceAndPlansSymbolRewrite()
+    {
+        using TestDirectory temp = new();
+        InfoInput[] inputs = CollidingCrossKindPaletteInputs(temp);
+        NameCollision? collision = null;
+
+        ResolvedInputs? result = Resolver(temp, proposed =>
+        {
+            collision = proposed;
+            return true;
+        }).Resolve(inputs, true, false, true);
+
+        Assert.NotNull(result);
+        Assert.NotNull(collision);
+        Assert.Equal("SharedRGB", collision.GeneratedName);
+        Assert.Equal("FadeSprite", Assert.Single(result.PaletteEffects).LogicalName);
+        Assert.Contains(result.SourceRewrites.SelectMany(rewrite => rewrite.SymbolChanges),
+            change => change.Key == "!PaletteSharedRGB" &&
+                change.Value == "!PaletteSharedSpriteRGB");
+        Assert.Contains(result.SourceRewrites.SelectMany(rewrite => rewrite.SymbolChanges),
+            change => change.Key == "!PaletteSharedRGBSize" &&
+                change.Value == "!PaletteSharedSpriteRGBSize");
+    }
+
     private static InputResolver Resolver(TestDirectory temp,
         Func<NameCollision, bool>? collisionResolver = null)
     {
@@ -166,14 +230,34 @@ public sealed class InputResolverTests
         ];
     }
 
+    private static InfoInput[] CollidingCrossKindPaletteInputs(TestDirectory temp)
+    {
+        string dynamicPath = temp.CreateFile("dynamic/context.dynamicinfo",
+            "Palettes:\nsharedRGB.bin\n");
+        temp.CreateFile("dynamic/sharedRGB.bin", [1, 2, 3]);
+        InfoInput dynamic = Input(InfoKind.DynamicInfo, dynamicPath, "Context", 0);
+        dynamic.IsTraditional = true;
+
+        string effectPath = temp.CreateFile("sprite/fade.paleffect", $$"""
+            {"Effects":[{"EffectType":{{(int)EffectType.PalTransitionRGB}},
+            "Palette":"shared.pal"}]}
+            """);
+        temp.CreateFile("sprite/shared.pal", [0x1F, 0x00]);
+        string asm = temp.CreateFile("sprite/consumer.asm", ";#incpale \"fade.paleffect\"");
+        InfoInput effect = Input(InfoKind.PaletteEffect, effectPath, "Fade", 1,
+            Origin(asm, ConsumerKind.Sprite, "Consumer"));
+
+        return [dynamic, effect];
+    }
+
     private static InfoInput Input(InfoKind kind, string path, string originalName,
-        int order, InputOrigin? origin = null)
+        int order, InputOrigin? origin = null, string? resourceDirectory = null)
     {
         InfoInput input = new()
         {
             Kind = kind,
             Path = path,
-            ResourceDirectory = Path.GetDirectoryName(path)!,
+            ResourceDirectory = resourceDirectory ?? Path.GetDirectoryName(path)!,
             OriginalName = originalName,
             LogicalName = originalName,
             DiscoveryOrder = order

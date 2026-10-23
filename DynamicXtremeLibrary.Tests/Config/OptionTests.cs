@@ -45,6 +45,20 @@ public sealed class OptionTests
     }
 
     [Fact]
+    public void OptionalFileOption_ResolvesAndStoresRelativePathsFromExternalToolDirectory()
+    {
+        using TestDirectory temp = new();
+        string toolDirectory = temp.GetPath("pixi");
+        string list = temp.CreateFile("pixi/list.txt", "data");
+        OptionalFileOption option = new() { RelativeToDirectory = toolDirectory };
+
+        Assert.Equal(Path.GetFullPath(list), option.ResolvePath("list.txt"));
+        Assert.True(option.Validate("list.txt"));
+        Assert.Equal("list.txt", option.ParseFromString(list));
+        Assert.False(option.Validate("missing.txt"));
+    }
+
+    [Fact]
     public void PathOption_ExistingInputRequiresSmcFile()
     {
         using TestDirectory temp = new();
@@ -195,6 +209,51 @@ public sealed class OptionTests
         }
     }
 
+    [Fact]
+    public void DirectoryOption_EmptyInputValidatesTheExistingStoredDirectoryForm()
+    {
+        using TestDirectory temp = new();
+        DirectoryOption option = InteractiveDirectory(temp.Path);
+        TextReader originalInput = Console.In;
+        TextWriter originalOutput = Console.Out;
+        try
+        {
+            Console.SetIn(new StringReader(Environment.NewLine));
+            Console.SetOut(new StringWriter());
+
+            Assert.True(option.ObtainValue());
+            Assert.Equal(temp.Path, option.Value);
+        }
+        finally
+        {
+            Console.SetIn(originalInput);
+            Console.SetOut(originalOutput);
+        }
+    }
+
+    [Fact]
+    public void DirectoryOption_EmptyInputRejectsAStoredDirectoryThatNoLongerExists()
+    {
+        using TestDirectory temp = new();
+        string missing = temp.GetPath("missing");
+        DirectoryOption option = InteractiveDirectory(missing);
+        TextReader originalInput = Console.In;
+        TextWriter originalOutput = Console.Out;
+        try
+        {
+            Console.SetIn(new StringReader($"{Environment.NewLine}n{Environment.NewLine}"));
+            Console.SetOut(new StringWriter());
+
+            Assert.False(option.ObtainValue());
+            Assert.Equal(missing, option.Value);
+        }
+        finally
+        {
+            Console.SetIn(originalInput);
+            Console.SetOut(originalOutput);
+        }
+    }
+
     private static BoolOption InteractiveBool(bool value) => new()
     {
         Name = "Feature",
@@ -205,5 +264,18 @@ public sealed class OptionTests
         Question = "Question",
         RedoError = "Retry?",
         Error = "Error"
+    };
+
+    private static DirectoryOption InteractiveDirectory(string value) => new()
+    {
+        Name = "Tool",
+        Value = value,
+        DefaultValue = "",
+        Description = "Description",
+        Warning = "",
+        Question = "Question",
+        RedoError = "Retry?",
+        Error = "Error",
+        GetFromSettings = false
     };
 }
