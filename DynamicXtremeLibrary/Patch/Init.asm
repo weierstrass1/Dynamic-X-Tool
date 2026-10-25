@@ -107,6 +107,7 @@ if !PalettesEffects
 	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
 	STA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
     STA DX_PPU_CGRAM_BGEffectLoaded
+	STA DX_PPU_CGRAM_BGBaseLoaded
 	STA DX_PPU_FixedColor_Base
 	STA DX_PPU_FixedColor_Result
 	STA DX_PPU_PaletteColor00_Base

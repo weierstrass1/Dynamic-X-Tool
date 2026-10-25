@@ -29,6 +29,12 @@ if read1($00FFD5) == $23
     !Free7E2000 = 0
 endif
 
+if !sa1 == 0 && !Free7E2000 == 0
+    !Variables = $7FB440
+    !Variables2 = $7F9C80
+    !Variables3 = $7FAC82
+endif
+
 !VRAMTransferSize = 64
 !CGRAMTransferSize = 64
 
@@ -39,7 +45,7 @@ org (!normalBnk+$0701)|!addr
 DX_PPU_FixedColor_Mirror:
 
 org (!PalCopyBNK+$0703)|!addr
-DX_PPU_CGRAM_PaletteCopy:
+DX_PPU_CGRAM_PaletteWriteMirror:
 
 org !Variables
     namespace DX
@@ -155,13 +161,15 @@ org !Variables2
                 BaseHSLPalette: skip 768
                 LocalEffectBuffer: skip 768
                 LocalEffectID: skip 32   
-                PaletteWriteMirror: skip 512
+                PaletteCopy: skip 512
                 BGBaseRGBPaletteLoaded: skip 1
                 SPBaseRGBPaletteLoaded: skip 1
                 BGBaseHSLPaletteLoaded: skip 1
                 SPBaseHSLPaletteLoaded: skip 1
                 BGEffectLoaded: skip 1
                 SPEffectLoaded: skip 1
+                BGBaseLoaded: skip 1
+                SPBaseLoaded: skip 1
                 endif
                 if !PlayerFeatures
                 LastPlayerPal: skip 2  
@@ -180,6 +188,9 @@ org !Variables2
             namespace off
             endif
         namespace off
+if !sa1 == 0 && !Free7E2000 == 0
+org !Variables3
+endif
         FreeRams2:
     namespace off
 namespace nested off

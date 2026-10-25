@@ -303,6 +303,10 @@ if !PalettesEffects == 1
 	AND.l ?.BitClearer,x
 	STA DX_Dynamic_Palettes_GlobalSPEnable
 
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    AND.l ?.BitClearer,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
+
     LDA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
 	AND.l ?.BitClearer,x
 	STA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
@@ -349,53 +353,42 @@ macro PaletteAssignmentUploadTail(sprite, palette, paletteOption, paletteVersion
     LDX !SpriteIndex
     endif
 
-if !PalettesEffects == 1
+if !PalettesEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?.NoPalEffect
 
     LDA $0C
     STA <palette>
+    ASL
+    ASL
+    ASL
+    ORA #$81
+    STA $00
+
+    %TransferPaletteData($02, "$00", $1E, 1)
+    SEP #$30
+
+    LDA $0C
     LSR
     TAX
 
-    ASL
-    ASL
-    ASL
-    ASL
-    INC A
-    ASL
-    STA $00
-    STZ $01
-
     LDA DX_Dynamic_Palettes_GlobalSPEnable
-	ORA.l ?.BitSetter,x
-	STA DX_Dynamic_Palettes_GlobalSPEnable
+    ORA.l ?.BitSetter,x
+    STA DX_Dynamic_Palettes_GlobalSPEnable
 
     LDA DX_Dynamic_Palettes_EffectEnabled
     ORA.l ?.BitSetter,x
     STA DX_Dynamic_Palettes_EffectEnabled
 
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    ORA.l ?.BitSetter,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
+
     LDA #$01
     STA DX_Dynamic_Palettes_Updated+$08,x
     LDA #$02
     STA DX_Dynamic_Palettes_DisableTimer+$08,x
-
-    LDA $00
-    CLC
-    ADC #$1C
-    TAX
-    LDY #$1C
-    REP #$21
-?-
-    LDA [$02],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0100,x
-    DEX
-    DEX
-    DEY
-    DEY
-    BPL ?-
-    SEP #$20
 
     if <sprite> != 0
     LDX !SpriteIndex
@@ -408,54 +401,41 @@ RTL
 
 ?.NoPalEffect
 endif
-    REP #$21
-    LDA DX_Dynamic_CurrentDataSend
-    ADC #$001E
-    CMP DX_Dynamic_MaxDataPerFrame
-    SEP #$20
-    BEQ ?+
-    BCC ?+
-
-    LDA #$80
-    CMP <palette>
-RTL
-?+
     LDA $0C
-    STA <palette>
     ASL
     ASL
     ASL
     ORA #$81
     STA $00
 
-    LDA <palette>
+    %TransferPaletteData($02, "$00", $1E, 0)
+    BCS ?.Uploaded
+
+    LDA #$80
+    CMP <palette>
+RTL
+
+?.Uploaded
+    SEP #$30
+    if <sprite> != 0
+    LDX !SpriteIndex
+    endif
+
+    LDA $0C
+    STA <palette>
     LSR
     TAX
+
+if !PalettesEffects
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    ORA.l ?.BitSetter,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
+endif
+
     LDA #$01
     STA DX_Dynamic_Palettes_Updated+$08,x
     LDA #$02
     STA DX_Dynamic_Palettes_DisableTimer+$08,x
-
-    %ForcedTransferToCGRAM("$00", "$02", "$04", "#$001E")
-
-    LDA $00
-    AND #$7F
-    ASL
-    CLC
-    ADC #$1C
-    TAX
-    LDY #$1C
-    REP #$21
-?-
-    LDA [$02],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0100,x
-    STA.w $0A05|!addr,x
-    DEX
-    DEX
-    DEY
-    DEY
-    BPL ?-
-    SEP #$20
 
     if <sprite> != 0
     LDX !SpriteIndex
@@ -466,14 +446,11 @@ RTL
     SEC
 RTL
 
-if !PalettesEffects == 1
+if !PalettesEffects
 ?.BitSetter
     db $01,$02,$04,$08,$10,$20,$40,$80
-?.BitClearer
-    db $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 endif
 endmacro
-
 macro PaletteAssignmentNoUploadTail(sprite, palette, paletteVersion, paletteLastVersion)
 ?DXPaletteAssignmentNoUploadTail:
     if <sprite> != 0
@@ -720,12 +697,22 @@ if <hsl> != 0
 	%HSLToRGB("#DX_PPU_CGRAM_LocalEffectBuffer","#DX_PPU_CGRAM_LocalEffectBuffer>>16","#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16",$F0,#$000F)
 	%DoEffectAndMerge($F2,"#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16","#DX_PPU_CGRAM_PaletteCopy","#DX_PPU_CGRAM_PaletteCopy>>16",$F0,#$000F)
 
-	JMP ?...Finish
+	JMP ?...LocalBaseReady
 ?++
 	SEP #$20
 endif
 	%DoEffectAndMerge($F2,"#DX_PPU_CGRAM_LocalEffectBuffer","#DX_PPU_CGRAM_LocalEffectBuffer>>16","#DX_PPU_CGRAM_PaletteCopy","#DX_PPU_CGRAM_PaletteCopy>>16",$F0,#$000F)
 
+?...LocalBaseReady
+if <sprite> != 0
+	LDX !SpriteIndex
+endif
+	LDA <palette>
+	LSR
+	TAX
+	LDA DX_PPU_CGRAM_SPBaseLoaded
+	ORA.l ?.BitSetter,x
+	STA DX_PPU_CGRAM_SPBaseLoaded
 	JMP ?...Finish
 
 ?...ApplyGlobalEffect
@@ -745,11 +732,11 @@ endif
 	SEP #$30
 	AND #$01
 if <hsl> == 0
-	BEQ ?...Finish
+	BEQ ?...ConvertedBaseReady
 
 	%RGBToHSL("#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16","#DX_PPU_CGRAM_BaseHSLPalette","#DX_PPU_CGRAM_BaseHSLPalette>>16",$F0,#$000F)
 else
-	BNE ?...Finish
+	BNE ?...ConvertedBaseReady
 
 	%HSLToRGB("#DX_PPU_CGRAM_BaseHSLPalette","#DX_PPU_CGRAM_BaseHSLPalette>>16","#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16",$F0,#$000F)
 endif
@@ -770,6 +757,17 @@ else
 	ORA.l ?.BitSetter,x
 	STA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
 endif
+
+?...ConvertedBaseReady
+if <sprite> != 0
+	LDX !SpriteIndex
+endif
+	LDA <palette>
+	LSR
+	TAX
+	LDA DX_PPU_CGRAM_SPBaseLoaded
+	AND.l ?.BitClearer,x
+	STA DX_PPU_CGRAM_SPBaseLoaded
 
 ?...Finish
 if <sprite> != 0
@@ -846,17 +844,17 @@ endif
 	ASL
 	CLC
 	ADC #$1C
-	TAY
-	LDX #$1C
+	TAX
+	LDY #$1C
 	REP #$21
 ?-
-	LDA DX_PPU_CGRAM_PaletteWriteMirror,x
-	STA.w DX_PPU_CGRAM_PaletteCopy+$0100,y
-	STA.w $0A05|!addr,y
-	DEY
-	DEY
+	LDA.w DX_PPU_CGRAM_PaletteWriteMirror+$0100,x
+	STA.l DX_PPU_CGRAM_PaletteCopy+$0100,x
+	STA.w $0A05|!addr,x
 	DEX
 	DEX
+	DEY
+	DEY
 	BPL ?-
 	SEP #$20
 
@@ -865,7 +863,13 @@ if <sprite> != 0
 endif
 
 	LDA <palette>
-	AND #$0E
+	LSR
+	TAX
+	LDA DX_PPU_CGRAM_SPBaseLoaded
+	ORA.l ?.BitSetter,x
+	STA DX_PPU_CGRAM_SPBaseLoaded
+	TXA
+	ASL
 	TAX
 
 	REP #$20
@@ -927,71 +931,11 @@ macro ReplacePalette(sprite, paletteOption, palette)
     LDX !SpriteIndex
     endif
 
-if !PalettesEffects == 1
+if !PalettesEffects
     LDA <paletteOption>
     AND #$80
     BEQ ?.NoPalEffect
 
-    LDA <palette>
-    LSR
-    TAX
-
-    JSR ?.InvalidatePaletteState
-
-    ASL
-    ASL
-    ASL
-    ASL
-    INC A
-    ASL
-    STA $00
-    STZ $01
-
-    LDA DX_Dynamic_Palettes_GlobalSPEnable
-	ORA.l ?.BitSetter,x
-	STA DX_Dynamic_Palettes_GlobalSPEnable
-
-    LDA DX_Dynamic_Palettes_EffectEnabled
-    ORA.l ?.BitSetter,x
-    STA DX_Dynamic_Palettes_EffectEnabled
-
-    LDA #$01
-    STA DX_Dynamic_Palettes_Updated+$08,x
-    LDA #$02
-    STA DX_Dynamic_Palettes_DisableTimer+$08,x
-
-    LDA $00
-    CLC
-    ADC #$1C
-    TAX
-    LDY #$1C
-    REP #$21
-?-
-    LDA [$02],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0100,x
-    DEX
-    DEX
-    DEY
-    DEY
-    BPL ?-
-    SEP #$20
-
-    JMP ?.ReturnPaletteAvailability
-
-?.NoPalEffect
-endif
-    REP #$21
-    LDA DX_Dynamic_CurrentDataSend
-    ADC #$001E
-    CMP DX_Dynamic_MaxDataPerFrame
-    SEP #$20
-    BEQ ?+
-    BCC ?+
-
-    LDA #$80
-    CMP <palette>
-RTL
-?+
     LDA <palette>
     ASL
     ASL
@@ -999,39 +943,74 @@ RTL
     ORA #$81
     STA $00
 
+    %TransferPaletteData($02, "$00", $1E, 1)
+    SEP #$30
+
+    if <sprite> != 0
+    LDX !SpriteIndex
+    endif
     LDA <palette>
     LSR
     TAX
-
-if !PalettesEffects == 1
     JSR ?.InvalidatePaletteState
-endif
+
+    LDA DX_Dynamic_Palettes_GlobalSPEnable
+    ORA.l ?.BitSetter,x
+    STA DX_Dynamic_Palettes_GlobalSPEnable
+
+    LDA DX_Dynamic_Palettes_EffectEnabled
+    ORA.l ?.BitSetter,x
+    STA DX_Dynamic_Palettes_EffectEnabled
+
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    ORA.l ?.BitSetter,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
 
     LDA #$01
     STA DX_Dynamic_Palettes_Updated+$08,x
     LDA #$02
     STA DX_Dynamic_Palettes_DisableTimer+$08,x
 
-    %ForcedTransferToCGRAM("$00", "$02", "$04", "#$001E")
+    JMP ?.ReturnPaletteAvailability
 
-    LDA $00
-    AND #$7F
+?.NoPalEffect
+endif
+    LDA <palette>
     ASL
-    CLC
-    ADC #$1C
+    ASL
+    ASL
+    ORA #$81
+    STA $00
+
+    %TransferPaletteData($02, "$00", $1E, 0)
+    BCS ?.Uploaded
+
+    LDA #$80
+    CMP <palette>
+RTL
+
+?.Uploaded
+    SEP #$30
+    if <sprite> != 0
+    LDX !SpriteIndex
+    endif
+
+    LDA <palette>
+    LSR
     TAX
-    LDY #$1C
-    REP #$21
-?-
-    LDA [$02],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0100,x
-    STA.w $0A05|!addr,x
-    DEX
-    DEX
-    DEY
-    DEY
-    BPL ?-
-    SEP #$20
+
+if !PalettesEffects
+    JSR ?.InvalidatePaletteState
+
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    ORA.l ?.BitSetter,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
+endif
+
+    LDA #$01
+    STA DX_Dynamic_Palettes_Updated+$08,x
+    LDA #$02
+    STA DX_Dynamic_Palettes_DisableTimer+$08,x
 
     if <sprite> != 0
     LDX !SpriteIndex
@@ -1071,6 +1050,10 @@ RTL
     LDA DX_Dynamic_Palettes_GlobalSPEnable
 	AND.l ?.BitClearer,x
 	STA DX_Dynamic_Palettes_GlobalSPEnable
+
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    AND.l ?.BitClearer,x
+    STA DX_PPU_CGRAM_SPBaseLoaded
 
     LDA DX_PPU_CGRAM_SPBaseRGBPaletteLoaded
 	AND.l ?.BitClearer,x
@@ -1112,4 +1095,160 @@ RTS
 ?.BitClearer
     db $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 endif
+endmacro
+
+macro TransferPaletteFromAddress(Address, CGRAMOffset, Length, GlobalEffect)
+    REP #$20
+    LDA #(<Address>&$FFFF)
+    STA $65
+    SEP #$20
+    LDA.b #(<Address>>>16)
+    STA $67
+    %TransferPaletteFromPointer($65, "<CGRAMOffset>", <Length>, <GlobalEffect>)
+endmacro
+
+macro TransferPaletteFromPointer(Pointer, CGRAMOffset, Length, GlobalEffect)
+    %TransferPaletteCommon("<Pointer>", "<CGRAMOffset>", <Length>, <GlobalEffect>)
+endmacro
+
+macro TransferPaletteFromTable(TableAddr, TableBNK, CGRAMOffset, Length, GlobalEffect)
+    REP #$20
+    LDA <TableAddr>
+    STA $65
+    SEP #$20
+    LDA <TableBNK>
+    STA $67
+    %TransferPaletteFromPointer($65, "<CGRAMOffset>", <Length>, <GlobalEffect>)
+endmacro
+
+macro TransferPaletteResource(Name, CGRAMOffset, GlobalEffect)
+    %TransferPaletteFromAddress(!Palette<Name>, "<CGRAMOffset>", !Palette<Name>Size, <GlobalEffect>)
+endmacro
+
+macro TransferPaletteResourceWithLength(Name, CGRAMOffset, Length, GlobalEffect)
+    %TransferPaletteFromAddress(!Palette<Name>, "<CGRAMOffset>", <Length>, <GlobalEffect>)
+endmacro
+
+macro TransferPaletteData(Source, CGRAMOffset, Length, GlobalEffect)
+?TransferPaletteData:
+if !PalettesEffects && <GlobalEffect> != 0
+    LDA <CGRAMOffset>
+    REP #$30
+    AND #$00FF
+    ASL
+    TAX
+    LDY #$0000
+?.CopyBase
+    LDA [<Source>],y
+    STA.l DX_PPU_CGRAM_PaletteCopy,x
+    INX
+    INX
+    INY
+    INY
+    CPY.w #<Length>
+    BCC ?.CopyBase
+else
+    %TransferToCGRAM("<CGRAMOffset>", "<Source>", "<Source>+2", "#(<Length>|$0000)")
+    BCS ?.CopyPalette
+    JMP ?.End
+
+?.CopyPalette
+    LDA <CGRAMOffset>
+    REP #$30
+    AND #$00FF
+    ASL
+    TAX
+    LDY #$0000
+?..Loop
+    LDA [<Source>],y
+if !PalettesEffects
+    STA.l DX_PPU_CGRAM_PaletteCopy,x
+endif
+    STA.w DX_PPU_CGRAM_PaletteWriteMirror,x
+    STA.w $0905|!addr,x
+    INX
+    INX
+    INY
+    INY
+    CPY.w #<Length>
+    BCC ?..Loop
+endif
+?.End
+endmacro
+macro TransferPaletteCommon(Source, CGRAMOffset, Length, GlobalEffect)
+?TransferPaletteCommon:
+    %TransferPaletteData("<Source>", "<CGRAMOffset>", <Length>, <GlobalEffect>)
+if !PalettesEffects == 0 || <GlobalEffect> == 0
+    BCS ?.UpdateState
+    JMP ?.End
+?.UpdateState
+endif
+if !PalettesEffects
+    TXA
+    STA $6A
+    DEC A
+    AND #$01E0
+    LSR #4
+    ADC #$0002
+    STA $68
+
+    LDA $6A
+    SEC
+    SBC.w #<Length>
+    AND #$01E0
+    LSR #4
+    TAX
+
+    TXY
+    LDA.l ?.RangeMasks,x
+    LDX $68
+    EOR.l ?.RangeMasks,x
+    STA $6A
+    EOR #$FFFF
+    STA $6C
+
+    LDA $6A
+    ORA DX_PPU_CGRAM_BGBaseLoaded
+    STA DX_PPU_CGRAM_BGBaseLoaded
+
+    LDA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
+    AND $6C
+    STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
+    LDA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
+    AND $6C
+    STA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
+    LDA DX_PPU_CGRAM_BGEffectLoaded
+    AND $6C
+    STA DX_PPU_CGRAM_BGEffectLoaded
+
+if <GlobalEffect> != 0
+    LDA $6A
+    ORA DX_Dynamic_Palettes_GlobalBGEnable
+else
+    LDA DX_Dynamic_Palettes_GlobalBGEnable
+    AND $6C
+endif
+    STA DX_Dynamic_Palettes_GlobalBGEnable
+    TYX
+    LDA #$FFFF
+?.InvalidateID
+    STA DX_Dynamic_Palettes_LastGlobalEffectIDPerPal,x
+    INX
+    INX
+    CPX $68
+    BCC ?.InvalidateID
+
+endif
+
+    SEP #$30
+    SEC
+if !PalettesEffects
+    BRA ?.End
+?.RangeMasks
+    dw $0000,$0001,$0003,$0007,$000F,$001F,$003F,$007F
+    dw $00FF,$01FF,$03FF,$07FF,$0FFF,$1FFF,$3FFF,$7FFF
+    dw $FFFF
+endif
+
+?.End
 endmacro

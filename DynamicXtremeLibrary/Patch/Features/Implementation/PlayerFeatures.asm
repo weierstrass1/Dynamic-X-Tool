@@ -113,7 +113,7 @@ if !PalettesEffects
     AND #$80
     BNE .WithPalEffect
     SEP #$20
-    %ForcedTransferToCGRAM(#$86, DX_Dynamic_Player_Palette_Addr, DX_Dynamic_Player_Palette_BNK, #$0014)
+    JSR .UploadPaletteWithoutEffect
     SEP #$20
                 ; Accum (8 bit) 
 
@@ -130,44 +130,47 @@ JML $00F69E|!rom
 
     LDY #$00
     LDA [$8A]
-    STA.w DX_PPU_CGRAM_PaletteCopy+$010C
+    STA.l DX_PPU_CGRAM_PaletteCopy+$010C
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$010E
+    STA.l DX_PPU_CGRAM_PaletteCopy+$010E
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0110
+    STA.l DX_PPU_CGRAM_PaletteCopy+$0110
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0112
+    STA.l DX_PPU_CGRAM_PaletteCopy+$0112
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0114
+    STA.l DX_PPU_CGRAM_PaletteCopy+$0114
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0116
+    STA.l DX_PPU_CGRAM_PaletteCopy+$0116
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$0118
+    STA.l DX_PPU_CGRAM_PaletteCopy+$0118
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$011A
+    STA.l DX_PPU_CGRAM_PaletteCopy+$011A
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$011C
+    STA.l DX_PPU_CGRAM_PaletteCopy+$011C
     INY
     INY
     LDA [$8A],y
-    STA.w DX_PPU_CGRAM_PaletteCopy+$011E
+    STA.l DX_PPU_CGRAM_PaletteCopy+$011E
 
+    LDA DX_PPU_CGRAM_BGBaseLoaded
+    ORA #$0100
+    STA DX_PPU_CGRAM_BGBaseLoaded
     LDA #$FFFF
     STA DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$10
     SEP #$20
@@ -184,7 +187,7 @@ JML $00F69E|!rom
 JML $00F69E|!rom
 else
     SEP #$20
-    %ForcedTransferToCGRAM(#$86, DX_Dynamic_Player_Palette_Addr, DX_Dynamic_Player_Palette_BNK, #$0014)
+    JSR .UploadPaletteWithoutEffect
     SEP #$20
                 ; Accum (8 bit) 
 
@@ -193,3 +196,32 @@ else
 
 JML $00F69E|!rom
 endif
+
+
+; Forced upload already has priority; mirror its ten colors outside NMI.
+.UploadPaletteWithoutEffect
+    %ForcedTransferToCGRAM(#$86, DX_Dynamic_Player_Palette_Addr, DX_Dynamic_Player_Palette_BNK, #$0014)
+    LDA DX_Dynamic_Player_Palette_BNK
+    STA $8C
+    REP #$30
+    LDA DX_Dynamic_Player_Palette_Addr
+    STA $8A
+    LDY #$0012
+.CopyPlayerPalette
+    LDA [$8A],y
+    TYX
+if !PalettesEffects
+    STA.l DX_PPU_CGRAM_PaletteCopy+$010C,x
+endif
+    STA.w DX_PPU_CGRAM_PaletteWriteMirror+$010C,x
+    STA.w $0A11|!addr,x
+    DEY
+    DEY
+    BPL .CopyPlayerPalette
+    SEP #$30
+if !PalettesEffects
+    LDA DX_PPU_CGRAM_SPBaseLoaded
+    ORA #$01
+    STA DX_PPU_CGRAM_SPBaseLoaded
+endif
+RTS

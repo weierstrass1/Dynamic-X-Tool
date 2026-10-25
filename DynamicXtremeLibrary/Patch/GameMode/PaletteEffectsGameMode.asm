@@ -334,6 +334,8 @@ LoadPaletteGlobalEffect:
 	SEP #$20
 	BNE ++
 
+	JSR .EnsurePaletteBase
+
 	TXA
 	ASL
 	ASL
@@ -349,7 +351,7 @@ LoadPaletteGlobalEffect:
 	LDA.b #DX_PPU_CGRAM_PaletteCopy>>16
 	STA $03
 
-	JSR UploadPalette
+	JSR RestorePalette
 	BCC ++
 
 	REP #$20
@@ -405,6 +407,7 @@ RTL
 
 	LDA #DX_PPU_CGRAM_PaletteWriteMirror>>16
 	STA !Dst+2
+	LDA #DX_PPU_CGRAM_BaseRGBPalette>>16
 	STA !Source+2
 
 	REP #$31
@@ -475,13 +478,17 @@ RTL
 	SEP #$20
 RTS
 +
-	ORA .BitCheckExtended,x
-	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
 	SEP #$20
 
+	JSR .EnsurePaletteBase
 	PHX
 	%SetRGBBaseDefault($00,#$0010)
 	PLX
+	REP #$20
+	LDA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
+	ORA .BitCheckExtended,x
+	STA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
+	SEP #$20
 RTS
 
 .SetBaseHSL
@@ -493,19 +500,134 @@ RTS
 	SEP #$20
 RTS
 +
+	SEP #$20
+
+	JSR .EnsurePaletteBase
+	PHX
+	%SetHSLBaseDefault($00,#$0010)
+	PLX
+	REP #$20
+	LDA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
 	ORA .BitCheckExtended,x
 	STA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
 	SEP #$20
+RTS
+
+; Entry: A/X/Y 8-bit, X = palette * 2. Preserves X, DBR, D and $00-$01.
+; Capture the vanilla row only once; explicit base loaders mark it themselves.
+.EnsurePaletteBase
+	REP #$20
+	LDA DX_PPU_CGRAM_BGBaseLoaded
+	BIT .BitCheckExtended,x
+	BNE ..Ready
+	ORA .BitCheckExtended,x
+	STA DX_PPU_CGRAM_BGBaseLoaded
+
+	; Concatenate may have a local base only in converted form. Never capture
+	; the already globally affected mirror over that base.
+	LDA DX_PPU_CGRAM_BGBaseRGBPaletteLoaded
+	BIT .BitCheckExtended,x
+	BNE ..CachedRGB
+	LDA DX_PPU_CGRAM_BGBaseHSLPaletteLoaded
+	BIT .BitCheckExtended,x
+	BNE ..CachedHSL
 
 	PHX
-	%SetHSLBaseDefault($00,#$0010)
+	TXA
+	AND #$00FF
+	ASL #4
+	ADC #$001E
+	REP #$10
+	TAX
+	LDY #$001E
+..CopyRow
+	LDA.l DX_PPU_CGRAM_PaletteWriteMirror,x
+	STA.l DX_PPU_CGRAM_PaletteCopy,x
+	DEX
+	DEX
+	DEY
+	DEY
+	BPL ..CopyRow
+	SEP #$30
+	PLX
+RTS
+..Ready
+	SEP #$20
+RTS
+
+..CachedHSL
+	SEP #$20
+	PHX
+	REP #$20
+	LDA $00
+	PHA
+	TXA
+	AND #$00FF
+	ASL #3
+	STA $00
+	PHA
+	SEP #$20
+	%HSLToRGB("#DX_PPU_CGRAM_BaseHSLPalette","#DX_PPU_CGRAM_BaseHSLPalette>>16","#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16",$00,#$0010)
+	BRA ..MergeCachedBase
+
+..CachedRGB
+	SEP #$20
+	PHX
+	REP #$20
+	LDA $00
+	PHA
+	TXA
+	AND #$00FF
+	ASL #3
+	STA $00
+	PHA
+
+..MergeCachedBase
+	REP #$20
+	LDA $01,s
+	STA $00
+	SEP #$20
+	%DoEffectAndMerge(#$0000,"#DX_PPU_CGRAM_BaseRGBPalette","#DX_PPU_CGRAM_BaseRGBPalette>>16","#DX_PPU_CGRAM_PaletteCopy","#DX_PPU_CGRAM_PaletteCopy>>16",$00,#$0010)
+	REP #$20
+	PLA
+	PLA
+	STA $00
+	SEP #$30
+	PLX
+RTS
+
+; Restore the unmodified base. Unlike an effect result, it is not in $0703 yet.
+RestorePalette:
+	PHX
+	%TransferToCGRAM($00,$01,$03,#$0020)
+	BCC .Return
+
+	LDA $00
+	REP #$31
+	AND #$00FF
+	ASL
+	ADC #$001E
+	TAX
+	LDY #$001E
+.CopyRow
+	LDA [$01],y
+	STA.w DX_PPU_CGRAM_PaletteWriteMirror,x
+	STA.w $0905|!addr,x
+	DEX
+	DEX
+	DEY
+	DEY
+	BPL .CopyRow
+	SEP #$30
+	SEC
+.Return
 	PLX
 RTS
 
 UploadPalette:
 	PHX
 	%TransferToCGRAM($00,$01,$03,#$0020)
-	PHP
+	BCC .Return
 
     LDA $00
 	REP #$31
@@ -524,6 +646,7 @@ UploadPalette:
     BPL -
 	SEP #$30
 
-	PLP
+	SEC
+.Return
 	PLX
 RTS

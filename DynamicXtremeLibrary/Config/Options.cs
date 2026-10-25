@@ -431,10 +431,13 @@ namespace DynamicXtremeLibrary.Config
                         if (!FeatureDependency.CheckDependency(option.Name, dependency, BoolOptions))
                             dependencyFulfilled = false;
                     }
-                    if (dependencyFulfilled)
+                    // Palette effects can be selected independently; their runtime support
+                    // is enabled below even when no imported palettes are requested.
+                    if (dependencyFulfilled || option.Name == "PalettesEffects")
                         if (!option.ObtainValue()) return false;
                 }
             }
+            EnsurePaletteEffectsSupport();
             Settings.InputROMPath = InputRomPath.Value;
             Settings.OutputROMPath = OutputRomPath.Value;
             Settings.PixiPath = PixiPath.Value;
@@ -478,10 +481,21 @@ namespace DynamicXtremeLibrary.Config
             jsonString = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             File.WriteAllText(SETTINGS_FILE, jsonString);
         }
-        /// <summary>Builds the Asar Boolean defines and dependency overrides for enabled features.</summary>
+        /// <summary>
+        /// Enables the palette runtime required by selected effects, regardless of imported palette counts.
+        /// Other feature dependencies retain their existing behavior.
+        /// </summary>
+        public void EnsurePaletteEffectsSupport()
+        {
+            if (BoolOptions.First(option => option.Name == "PalettesEffects").Value)
+                BoolOptions.First(option => option.Name == "PalettesChange").Value = true;
+        }
+
+        /// <summary>Builds Asar feature defines after ensuring the runtime support required by palette effects.</summary>
         /// <returns>The generated options-define source.</returns>
         public string GetOptionsDefines()
         {
+            EnsurePaletteEffectsSupport();
             StringBuilder sb = new();
             sb.AppendLine("!True = 1");
             sb.AppendLine("!False = 0\n");

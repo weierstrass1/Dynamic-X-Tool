@@ -87,6 +87,8 @@ namespace DynamicXtremeLibrary
         /// <summary>
         /// Resolves all enabled inputs, generates and applies the Dynamic Xtreme patch, and commits
         /// the output ROM together with any required external-tool updates.
+        /// Preserves the configured palette-effect feature even without registered effects,
+        /// so callers can use its runtime macros manually.
         /// </summary>
         /// <param name="rom">The input ROM bytes to process in memory.</param>
         /// <returns><see langword="true"/> when the complete installation is committed.</returns>
@@ -101,6 +103,7 @@ namespace DynamicXtremeLibrary
             File.WriteAllBytes(tmpROM, rom);
 
             Options opt = Options.Instance;
+            opt.EnsurePaletteEffectsSupport();
             var boolOpts = opt.BoolOptions.ToDictionary(o => o.Name, o => o.Value);
 
             bool validation = true;
@@ -157,8 +160,8 @@ namespace DynamicXtremeLibrary
                 opt.BoolOptions.First(bo => bo.Name == "DrawingSystem").Value = false;
             if (dynamicInfos == null || dynamicInfos.Count == 0)
                 opt.BoolOptions.First(bo => bo.Name == "DynamicPoses").Value = false;
-            if (palEffects == null || palEffects.Count == 0) 
-                opt.BoolOptions.First(bo => bo.Name == "PalettesEffects").Value = false;
+            // Keep palette effects enabled as configured, including when macros are used
+            // manually without any registered palette-effect collections.
 
             string optDefines = opt.GetOptionsDefines();
             File.WriteAllText(Path.Combine(extDefinesDir, $"{OptionsDefinesFilename}.asm"),
