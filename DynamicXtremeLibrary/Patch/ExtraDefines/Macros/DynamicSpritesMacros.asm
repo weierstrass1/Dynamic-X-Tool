@@ -1,3 +1,12 @@
+macro DefineDynamicSpaceConfig(init,end,restricted)
+    LDA #(<end>-<init>)|$80
+    STA DX_Dynamic_Tile_Size+<init>
+    STA DX_Dynamic_Tile_Size+<end>
+    LDA #<init>|<restricted>
+    STA DX_Dynamic_Tile_Offset+<init>
+    STA DX_Dynamic_Tile_Offset+<end>
+endmacro
+
 macro GeneralUpload(Pose16, checkLast, sprite, flip, safeCheck, withoutOffset, safeLow, safeHigh, poseIndex, lastPoseIndex, lastPoseHashIndex, globalFlip, localFlip, lastFlip)
 ?DXUpload:
     STA $00

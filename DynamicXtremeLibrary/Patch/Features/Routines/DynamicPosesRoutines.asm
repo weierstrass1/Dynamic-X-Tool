@@ -41,201 +41,192 @@ RTL
     dw ..SecondHalfSP1andSP234WithPlayerAndDSX
     dw ..SP1234WithPlayerAndDSX
 
-macro zone(init,end,restricted)
-    LDA #(<end>-<init>)|$80
-    STA DX_Dynamic_Tile_Size+<init>
-    STA DX_Dynamic_Tile_Size+<end>
-    LDA #<init>|<restricted>
-    STA DX_Dynamic_Tile_Offset+<init>
-    STA DX_Dynamic_Tile_Offset+<end>
-endmacro
-
 ..SecondHalfSSP4
-    %zone($00,$6F,$80)
-    %zone($70,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$6F,$80)
+    %DefineDynamicSpaceConfig($70,$7F,$00)
 RTS
 
 ..SP4
-    %zone($00,$5F,$80)
-    %zone($60,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$5F,$80)
+    %DefineDynamicSpaceConfig($60,$7F,$00)
 RTS
 
 ..SecondHalfSP3
-    %zone($00,$4F,$80)
-    %zone($50,$5F,$00)
-    %zone($60,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$4F,$80)
+    %DefineDynamicSpaceConfig($50,$5F,$00)
+    %DefineDynamicSpaceConfig($60,$7F,$80)
 RTS
 
 ..FirstHalfSP3
-    %zone($00,$3F,$80)
-    %zone($40,$4F,$00)
-    %zone($50,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$3F,$80)
+    %DefineDynamicSpaceConfig($40,$4F,$00)
+    %DefineDynamicSpaceConfig($50,$7F,$80)
 RTS
 
 ..SP3
-    %zone($00,$3F,$80)
-    %zone($40,$5F,$00)
-    %zone($60,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$3F,$80)
+    %DefineDynamicSpaceConfig($40,$5F,$00)
+    %DefineDynamicSpaceConfig($60,$7F,$80)
 RTS
 
 ..SecondHalfSP2
-    %zone($00,$2F,$80)
-    %zone($30,$3F,$00)
-    %zone($40,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$2F,$80)
+    %DefineDynamicSpaceConfig($30,$3F,$00)
+    %DefineDynamicSpaceConfig($40,$7F,$80)
 RTS
 
 ..FirstHalfSP2
-    %zone($00,$1F,$80)
-    %zone($20,$2F,$00)
-    %zone($30,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$2F,$00)
+    %DefineDynamicSpaceConfig($30,$7F,$80)
 RTS
 
 ..SP2
-    %zone($00,$1F,$80)
-    %zone($20,$3F,$00)
-    %zone($40,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$3F,$00)
+    %DefineDynamicSpaceConfig($40,$7F,$80)
 RTS
 
 ..SecondHalfSP1
-    %zone($00,$0F,$80)
-    %zone($10,$1F,$00)
-    %zone($20,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$0F,$80)
+    %DefineDynamicSpaceConfig($10,$1F,$00)
+    %DefineDynamicSpaceConfig($20,$7F,$80)
 RTS
 
 ..FirstHalfSP1
-    %zone($00,$0F,$00)
-    %zone($10,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$0F,$00)
+    %DefineDynamicSpaceConfig($10,$7F,$80)
 RTS
 
 ..SP1
-    %zone($00,$1F,$00)
-    %zone($20,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$1F,$00)
+    %DefineDynamicSpaceConfig($20,$7F,$80)
 RTS
 
 ..FirstHalfSP1WithPlayer
-    %zone($00,$06,$80)
-    %zone($07,$08,$00)
-    %zone($09,$09,$80)
-    %zone($0A,$0F,$80)
-    %zone($10,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$06,$80)
+    %DefineDynamicSpaceConfig($07,$08,$00)
+    %DefineDynamicSpaceConfig($09,$09,$80)
+    %DefineDynamicSpaceConfig($0A,$0F,$80)
+    %DefineDynamicSpaceConfig($10,$7F,$80)
 RTS
 
 ..SP11WithPlayer
-    %zone($00,$06,$80)
-    %zone($07,$08,$00)
-    %zone($09,$09,$80)
-    %zone($0A,$14,$80)
-    %zone($15,$15,$80)
-    %zone($16,$1E,$00)
-    %zone($1F,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$06,$80)
+    %DefineDynamicSpaceConfig($07,$08,$00)
+    %DefineDynamicSpaceConfig($09,$09,$80)
+    %DefineDynamicSpaceConfig($0A,$14,$80)
+    %DefineDynamicSpaceConfig($15,$15,$80)
+    %DefineDynamicSpaceConfig($16,$1E,$00)
+    %DefineDynamicSpaceConfig($1F,$7F,$80)
 RTS
 
 ..SecondHalfSP3ndSP4
-    %zone($00,$4F,$80)
-    %zone($50,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$4F,$80)
+    %DefineDynamicSpaceConfig($50,$7F,$00)
 RTS
 
 ..SP34
-    %zone($00,$3F,$80)
-    %zone($40,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$3F,$80)
+    %DefineDynamicSpaceConfig($40,$7F,$00)
 RTS
 
 ..SecondHalfSP2andSP34
-    %zone($00,$2F,$80)
-    %zone($30,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$2F,$80)
+    %DefineDynamicSpaceConfig($30,$7F,$00)
 RTS
 
 ..SP234
-    %zone($00,$1F,$80)
-    %zone($20,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$7F,$00)
 RTS
 
 ..SecondHalfSP1andSP234
-    %zone($00,$0F,$80)
-    %zone($10,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$0F,$80)
+    %DefineDynamicSpaceConfig($10,$7F,$00)
 RTS
 
 ..SP1234
-    %zone($00,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$7F,$00)
 RTS
 
 ..SecondHalfSP1andSP234WithPlayer
-    %zone($00,$0F,$80)
-    %zone($07,$08,$00)
-    %zone($09,$09,$80)
-    %zone($0A,$14,$80)
-    %zone($15,$15,$80)
-    %zone($16,$1E,$00)
-    %zone($1F,$1F,$80)
-    %zone($20,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$0F,$80)
+    %DefineDynamicSpaceConfig($07,$08,$00)
+    %DefineDynamicSpaceConfig($09,$09,$80)
+    %DefineDynamicSpaceConfig($0A,$14,$80)
+    %DefineDynamicSpaceConfig($15,$15,$80)
+    %DefineDynamicSpaceConfig($16,$1E,$00)
+    %DefineDynamicSpaceConfig($1F,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$7F,$00)
 RTS
 
 ..SP1234WithPlayer
-    %zone($00,$06,$80)
-    %zone($07,$08,$00)
-    %zone($09,$09,$80)
-    %zone($0A,$14,$80)
-    %zone($15,$15,$80)
-    %zone($16,$1E,$00)
-    %zone($1F,$1F,$80)
-    %zone($20,$7F,$00)
+    %DefineDynamicSpaceConfig($00,$06,$80)
+    %DefineDynamicSpaceConfig($07,$08,$00)
+    %DefineDynamicSpaceConfig($09,$09,$80)
+    %DefineDynamicSpaceConfig($0A,$14,$80)
+    %DefineDynamicSpaceConfig($15,$15,$80)
+    %DefineDynamicSpaceConfig($16,$1E,$00)
+    %DefineDynamicSpaceConfig($1F,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$7F,$00)
 RTS
 
 ..SecondHalfSP3ndSP4WithDSX
-    %zone($00,$4F,$80)
-    %zone($50,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$4F,$80)
+    %DefineDynamicSpaceConfig($50,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SP34WithDSX
-    %zone($00,$3F,$80)
-    %zone($40,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$3F,$80)
+    %DefineDynamicSpaceConfig($40,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SecondHalfSP2andSP34WithDSX
-    %zone($00,$2F,$80)
-    %zone($30,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$2F,$80)
+    %DefineDynamicSpaceConfig($30,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SP234WithDSX
-    %zone($00,$1F,$80)
-    %zone($20,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SecondHalfSP1andSP234WithDSX
-    %zone($00,$0F,$80)
-    %zone($10,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$0F,$80)
+    %DefineDynamicSpaceConfig($10,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SP1234WithDSX
-    %zone($00,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SecondHalfSP1andSP234WithPlayerAndDSX
-    %zone($00,$0F,$80)
-    %zone($10,$14,$00)
-    %zone($15,$15,$80)
-    %zone($16,$1E,$00)
-    %zone($1F,$1F,$80)
-    %zone($20,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$0F,$80)
+    %DefineDynamicSpaceConfig($10,$14,$00)
+    %DefineDynamicSpaceConfig($15,$15,$80)
+    %DefineDynamicSpaceConfig($16,$1E,$00)
+    %DefineDynamicSpaceConfig($1F,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 ..SP1234WithPlayerAndDSX
-    %zone($00,$06,$80)
-    %zone($07,$08,$00)
-    %zone($09,$09,$80)
-    %zone($0A,$14,$80)
-    %zone($15,$15,$80)
-    %zone($16,$1E,$00)
-    %zone($1F,$1F,$80)
-    %zone($20,$6F,$00)
-    %zone($70,$7F,$80)
+    %DefineDynamicSpaceConfig($00,$06,$80)
+    %DefineDynamicSpaceConfig($07,$08,$00)
+    %DefineDynamicSpaceConfig($09,$09,$80)
+    %DefineDynamicSpaceConfig($0A,$14,$80)
+    %DefineDynamicSpaceConfig($15,$15,$80)
+    %DefineDynamicSpaceConfig($16,$1E,$00)
+    %DefineDynamicSpaceConfig($1F,$1F,$80)
+    %DefineDynamicSpaceConfig($20,$6F,$00)
+    %DefineDynamicSpaceConfig($70,$7F,$80)
 RTS
 
 !Property = $04

@@ -153,7 +153,8 @@ public sealed class InputResolverTests
         string resourceDirectory = temp.GetPath("resources");
         string palettePath = temp.CreateFile("resources/target.pal", [0xFF, 0x7F]);
         string effectPath = temp.CreateFile("effects/fade.paleffect", $$"""
-            {"Effects":[{"EffectType":{{(int)EffectType.PalTransitionRGB}},
+            {"Name":"InjectedLegacyName",
+            "Effects":[{"EffectType":{{(int)EffectType.PalTransitionRGB}},
             "Palette":"target.pal"}]}
             """);
         InfoInput input = Input(InfoKind.PaletteEffect, effectPath, "Fade", 0,
@@ -163,6 +164,9 @@ public sealed class InputResolverTests
 
         Assert.NotNull(result);
         ResolvedPaletteEffectCollection collection = Assert.Single(result.PaletteEffects);
+        Assert.Equal("Fade", collection.OriginalName);
+        Assert.Equal("Fade", collection.LogicalName);
+        Assert.Equal("Fade", collection.Collection.Name);
         Assert.Equal(Path.GetFullPath(effectPath), collection.SourcePath);
         Assert.Equal(Path.GetFullPath(resourceDirectory), collection.ResourceDirectory);
         ResolvedPaletteEffectTarget target = Assert.Single(collection.Targets);

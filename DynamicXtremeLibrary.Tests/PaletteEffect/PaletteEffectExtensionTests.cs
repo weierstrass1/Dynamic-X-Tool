@@ -85,11 +85,12 @@ public sealed class PaletteEffectExtensionTests
     }
 
     [Fact]
-    public void LoadCollection_LoadsValidJsonAndAppliesLogicalName()
+    public void LoadCollection_IgnoresLegacyJsonNameAndAppliesToolLogicalName()
     {
         using TestDirectory temp = new();
         string path = temp.CreateFile("effect.paleffect", """
-            {"Effects":[{"Channel1":31,"Channel2":0,"Channel3":1,
+            {"Name":"LegacyWrongName",
+            "Effects":[{"Channel1":31,"Channel2":0,"Channel3":1,
             "Ratio1":127,"Ratio2":0,"Ratio3":1,"EffectType":0}]}
             """);
 
@@ -137,7 +138,7 @@ public sealed class PaletteEffectExtensionTests
     public void GetCollections_UsesFilenameOrderAndRejectsNormalizedNameCollisions()
     {
         using TestDirectory temp = new();
-        const string valid = "{\"Effects\":[]}";
+        const string valid = "{\"Name\":\"SameLegacyName\",\"Effects\":[]}";
         temp.CreateFile("z.paleffect", valid);
         temp.CreateFile("a.paleffect", valid);
 
@@ -164,7 +165,8 @@ public sealed class PaletteEffectExtensionTests
         string resources = temp.GetPath("resources");
         string palette = temp.CreateFile("resources/palettes/target.bin", [0x1F, 0x00]);
         string path = temp.CreateFile("effects/fade.paleffect", $$"""
-            {"Effects":[{"Channel1":255,"Channel2":255,"Channel3":255,
+            {"Name":"LegacyWrongName",
+            "Effects":[{"Channel1":255,"Channel2":255,"Channel3":255,
             "Ratio1":127,"Ratio2":0,"Ratio3":1,"EffectType":{{(int)effectType}},
             "Palette":"palettes/target.bin"}]}
             """);
@@ -174,6 +176,9 @@ public sealed class PaletteEffectExtensionTests
 
         Assert.True(valid);
         Assert.NotNull(result);
+        Assert.Equal("Fade", result.OriginalName);
+        Assert.Equal("Fade", result.LogicalName);
+        Assert.Equal("Fade", result.Collection.Name);
         ResolvedPaletteEffectTarget target = Assert.Single(result.Targets);
         Assert.Equal(Path.GetFullPath(palette), target.SourcePath);
         Assert.Equal(expectedFormat, target.Format);

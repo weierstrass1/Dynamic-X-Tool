@@ -2,11 +2,15 @@
 
 namespace DynamicXtremePaletteCreatorLibrary
 {
-    /// <summary>Represents a named, JSON-serializable ordered collection of palette effects.</summary>
+    /// <summary>Represents an ordered effect collection with a runtime-only logical name.</summary>
     [Serializable]
     public class PaletteEffectCollection
     {
-        /// <summary>Gets or sets the logical collection name.</summary>
+        /// <summary>
+        /// Gets or sets the logical name assigned by the tool. It is excluded from JSON;
+        /// legacy Name fields are ignored when loading palette-effect files.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public string? Name { get; set; }
         /// <summary>Gets or sets the ordered effects.</summary>
         public List<PaletteEffect> Effects { get; set; } = [];
@@ -22,7 +26,7 @@ namespace DynamicXtremePaletteCreatorLibrary
         public void AddAt(PaletteEffect effect, int index) => Effects.Insert(index, effect);
         /// <summary>Removes the effect at a specific index.</summary>
         public void RemoveAt(int  index) => Effects.RemoveAt(index);
-        /// <summary>Replaces the collection by deserializing a validated JSON file.</summary>
+        /// <summary>Loads ordered effects while ignoring legacy Name fields and preserving the runtime name.</summary>
         public bool Load(string path)
         {
             string jsonContent = File.ReadAllText(path);
@@ -39,7 +43,7 @@ namespace DynamicXtremePaletteCreatorLibrary
                 return false;
             }
         }
-        /// <summary>Serializes the collection as indented JSON.</summary>
+        /// <summary>Serializes effects as indented JSON without the runtime-only logical name.</summary>
         public void Save(string path)
         {
             string json = JsonSerializer.Serialize(this,new JsonSerializerOptions()
