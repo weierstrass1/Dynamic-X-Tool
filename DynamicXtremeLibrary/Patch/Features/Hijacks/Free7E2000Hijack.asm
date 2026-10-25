@@ -1,4 +1,8 @@
 if !Free7E2000
+if read4($00A2A5) == $05BB3922
+	error "Free7E2000 requires saving a level with at least one ExAnimation slot in Lunar Magic. You can remove the slot afterwards."
+endif
+
 org $0098D1
 	db Data_GFX33>>16
 

@@ -14,18 +14,24 @@ VRAMOptimizer:
     cmp #$05 : beq .ok
     rts
 .ok:
+    phb
+    lda.b #!stripe_table>>16
+    pha
+    plb
     rep #$30
 
     ; Write the stripe table pointer to $00
     lda.w #!stripe_table : sta $00
-    lda.w #!stripe_table>>8 : sta $01
 
     ; Loop through the entire stripe table
     ldy #$0000
 .loop:
     ; If the end bit is set, return
-    lda [$00],y : bit #$0080 : beq +
+    lda ($00),y
+    bit #$0080
+    beq +
     sep #$30
+    plb
     rts
 +   
     ; Copy the first header word in $03
@@ -33,7 +39,9 @@ VRAMOptimizer:
 
     ; Set RLE flag in $05
     iny #2
-    lda [$00],y : and #$0040 : sta $05
+    lda ($00),y
+    and #$0040
+    sta $05
 
     ; Compute the new VRAM destination
     jmp lm_stripe
@@ -41,14 +49,17 @@ VRAMOptimizer:
 .change:
     ; Set the new destination in the stripe table
     dey #2
-    xba : sta [$00],y
+    xba
+    sta ($00),y
     iny #2
 
     ; Check if RLE is used
     lda $05 : bne ..rle
 ..no_rle:
     ; If not RLE, the data is 2 + (length+1) additional bytes
-    lda [$00],y : xba : and #$3FFF
+    lda ($00),y
+    xba
+    and #$3FFF
     inc #3
     sta $03
     tya : clc : adc $03 : tay
@@ -119,27 +130,36 @@ lm_stripe:
     ; It can be very time consuming, but this scenario should only happen once or twice per frame in the worst case
     ; The code here also looks kinda bad and you can blame me this time
 .skip:
-    rep #$20
-    phb
+    rep #$21
 
     ; Compute next data index in $03 and current data size in $07
     lda $05 : beq +
     lda #$0006
     bra ++
-+   lda [$00],y
-    xba : and #$03FF : clc : adc #$0005
++   lda ($00),y
+    xba
+    and #$03FF
+    adc #$0005
 ++  sta $07
     dey #2
-    tya : clc : adc $07 : sta $03
+    tya
+    adc $07
+    sta $03
 
     ; Setup source address in X
-    clc : adc.w #!stripe_table : tax
+    adc.w #!stripe_table
+    tax
 
     ; Setup size-1 in A
-    lda.l !stripe_index : sec : sbc $03 : pha
+    lda.w !stripe_index
+    sec
+    sbc $03
+    pha
 
     ; Update stripe index
-    lda.l !stripe_index : sec : sbc $07 : sta.l !stripe_index
+    lda.w !stripe_index
+    sbc $07
+    sta.w !stripe_index
 
     ; Setup destination address in Y
     sty $03
@@ -148,8 +168,6 @@ lm_stripe:
     ; Transfer bytes -> effectively deletes the current entry
     pla
     mvn !stripe_table>>16,!stripe_table>>16
-
-    plb
 
     ; Return with the new current index in Y
     ldy $03

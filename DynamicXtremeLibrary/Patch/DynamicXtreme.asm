@@ -104,11 +104,11 @@ if !GraphicsChange || !PalettesChange || !PalettesEffects
     incsrc "Data/BufferData.asm"
 endif
 if !Free7E2000
-freedata
+freedata align
 GFX32:
 	incbin "Data/GFX32.bin"
 		
-freedata
+freedata align
 GFX33:
 	incbin "Data/GFX33.bin"
 endif
