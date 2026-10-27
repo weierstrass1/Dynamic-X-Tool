@@ -45,10 +45,10 @@ namespace DynamicXtremeTool
                     string message = "";
                     if (command == "-version")
                     {
-                        string stringversion = Assembly.GetExecutingAssembly()
-                            .GetName()
-                            .Version?
-                            .ToString() ?? "Unknown";
+                        Assembly assembly = Assembly.GetExecutingAssembly();
+                        string stringversion = assembly
+                            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                            .InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "Unknown";
                         message = $"Current version: {stringversion}";
                     }
                     else if(command == "-help")
