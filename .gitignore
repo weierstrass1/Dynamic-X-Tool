@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /docs
 AGENTS.md
+
+# Archivos locales de trabajo
+/propuestas/
+/memorias/

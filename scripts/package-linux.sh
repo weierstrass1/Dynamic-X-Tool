@@ -27,10 +27,17 @@ cp -a -- "$publish_directory/." "$staging/DynamicXtreme/"
 chmod 755 "$staging/DynamicXtreme/dxt" "$staging/DynamicXtreme/Asar/asar"
 tar -czf "$staging/package.tar.gz" -C "$staging" DynamicXtreme
 
-# Check extracted permissions on a Linux filesystem before publishing the archive.
+# Check extracted permissions and required patch files before publishing the archive.
 tar -xzf "$staging/package.tar.gz" -C "$staging/check"
 test -x "$staging/check/DynamicXtreme/dxt"
 test -x "$staging/check/DynamicXtreme/Asar/asar"
+for hijack in Free7E2000Hijack.asm VRAMOptimizerHijack.asm; do
+    relative_path="Patch/Features/Hijacks/$hijack"
+    if [[ ! -f "$staging/check/DynamicXtreme/$relative_path" ]]; then
+        echo "The extracted package is missing $relative_path. Check the filename casing." >&2
+        exit 1
+    fi
+done
 mkdir -p -- "$(dirname -- "$archive")"
 cp --no-clobber -- "$staging/package.tar.gz" "$archive"
 echo "Created $archive (dxt and Asar/asar have executable permissions)."

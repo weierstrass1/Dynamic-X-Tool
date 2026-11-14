@@ -315,12 +315,6 @@ namespace DynamicXtremeLibrary.PaletteEffec
             string file)
         {
             var sourceList = sources.ToArray();
-            if (sourceList.Length == 0)
-            {
-                File.WriteAllText(file, "PaletteEffectsTable:\n.Length\n\tdw $0000\n");
-                return;
-            }
-
             List<string> types = [];
             List<string> value1 = [];
             List<string> value2 = [];
@@ -328,7 +322,8 @@ namespace DynamicXtremeLibrary.PaletteEffec
             List<string> ratio1 = [];
             List<string> ratio2 = [];
             List<string> ratio3 = [];
-            log.Add(new Title("Palette Effects"));
+            if (sourceList.Length != 0)
+                log.Add(new Title("Palette Effects"));
             foreach (var source in sourceList)
             {
                 PaletteEffect[] filtered = [.. source.Collection.Effects.Where(

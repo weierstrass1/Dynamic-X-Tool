@@ -32,7 +32,17 @@ and continue using the other Dynamic Xtreme systems. Disabling an option does
 not undo changes made by another patch, and the uninstall restriction for
 `KevinLMVRAMOptimization` still applies.
 
+Dynamic Xtreme adapts its game mode hook for Lunar Magic 3.70 and later.
+Starting with Lunar Magic 3.71, installation disables `KevinLMVRAMOptimization` even if selected.
+
+When updating from rc.6, reinstall Dynamic Xtreme and reassemble PIXI, UberASM,
+and any other consumers with the newly generated defines. Review any fixed RAM
+addresses used by other patches.
+
 ### Free RAM usage
+
+Before enabling `Free7E2000` on a LoROM, use at least one ExAnimation slot in
+Lunar Magic and save the change to the ROM you will use as input.
 
 The source layout is defined in
 [`DynamicXtremeLibrary/ASM/DXDefines.asm`](DynamicXtremeLibrary/ASM/DXDefines.asm).
@@ -44,11 +54,11 @@ their default value of 64:
 | ROM configuration | `!Variables` block | Size | `!Variables2` block | Size | Total |
 | --- | --- | --- | --- | --- | --- |
 | LoROM, `Free7E2000` enabled | `$7E2000–$7E2500` | `$0501` / 1,281 bytes | `$7E2800–$7E3608` | `$0E09` / 3,593 bytes | 4,874 bytes |
-| LoROM, `Free7E2000` disabled | `$7FB440–$7FB940` | `$0501` / 1,281 bytes | `$7F9C80–$7FAA88` | `$0E09` / 3,593 bytes | 4,874 bytes |
-| SA-1 | `$40C000–$40C47E` | `$047F` / 1,151 bytes | `$418AFF–$419907` | `$0E09` / 3,593 bytes | 4,744 bytes |
+| LoROM, `Free7E2000` disabled | `$7FB540–$7FBA40` | `$0501` / 1,281 bytes | `$7F9C80–$7FAA88` | `$0E09` / 3,593 bytes | 4,874 bytes |
+| SA-1 | `$40C000–$40C47E` | `$047F` / 1,151 bytes | `$418B00–$419908` | `$0E09` / 3,593 bytes | 4,744 bytes |
 
 The ranges above describe the bytes occupied by the two layouts, not every byte
-between their bases. They were checked with Asar against the current source.
+between their bases. The ranges reflect the current base addresses and allocation sizes.
 `Free7E2000` relocates vanilla graphics storage so Dynamic Xtreme can use the
 LoROM `$7E2000` area. With it disabled, the fallback locations may overlap RAM
 used by other common resources. SA-1 selects its own bases and forces
@@ -74,7 +84,7 @@ there are no imported palettes. Increasing `!VRAMTransferSize` or
 
 `DX_FreeRams` marks the end of the first block. `DX_FreeRams2` normally marks
 the end of the second block, but in the LoROM fallback configuration it is
-explicitly positioned at `!Variables3 = $7FAC82`; that label is not an additional
+explicitly positioned at `!Variables3 = $7FBD00`; that label is not an additional
 allocated block and does not indicate the actual end of the preceding arrays.
 
 The file also references the existing fixed-color mirror at `$7E0701` (2 bytes)

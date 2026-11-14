@@ -33,6 +33,33 @@ org $00823A
 	db $20,$00,$A3,$2C,$9B,$0D
 endif
 
+!DXGameModeReturn = $008075
+if !DXLunarMagicVersion >= 370
+    !DXGameModeReturn = $00BA59
+
+; Migrate the old DX hook without restoring the pre-3.70 JSR over LM's JMP.
+if read2($008073) == $5844
+%CleanOrg($00806F)
+    db $58,$E6,$13,$4C,$56,$BA
+endif
+
+if !GraphicsChange || !PalettesChange || !ControllerOptimization || !KevinLMVRAMOptimization
+org $008072
+    JMP $BA55
+org $00BA55
+    autoclean JML DXGameMode
+org $00BA5D
+    db "DX"
+elseif read2($00BA5D) == $5844
+%CleanOrg($00BA55)
+    db $FF,$20,$22,$93
+org $008072
+    JMP $BA56
+org $00BA5D
+    db $FF,$FF
+endif
+
+else
 if !GraphicsChange || !PalettesChange || !ControllerOptimization || !KevinLMVRAMOptimization
 org $00806F
 	autoclean JML DXGameMode
@@ -40,4 +67,5 @@ org $00806F
 elseif read2($008073) == $5844
 %CleanOrg($00806F)
 	db $58,$E6,$13,$20,$22,$93
+endif
 endif

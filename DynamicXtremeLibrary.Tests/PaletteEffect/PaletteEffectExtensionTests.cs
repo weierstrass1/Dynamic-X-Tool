@@ -39,15 +39,27 @@ public sealed class PaletteEffectExtensionTests
         ], result);
     }
 
-    [Fact]
-    public void ToFile_WritesEmptyTableWhenNoEffectsExist()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ToFile_DeclaresAllParallelTablesWhenNoCollectionsExist(bool resolved)
     {
         using TestDirectory temp = new();
         string path = temp.GetPath("effects.asm");
 
-        PaletteEffectExtension.ToFile(new LogRegisterSystem(), [], path);
+        if (resolved)
+            PaletteEffectExtension.ToFile(new LogRegisterSystem(),
+                Array.Empty<ResolvedPaletteEffectCollection>(),
+                PaletteEffectExtension.CreateResources([]), path);
+        else
+            PaletteEffectExtension.ToFile(new LogRegisterSystem(), [], path);
 
-        Assert.Equal("PaletteEffectsTable:\n.Length\n\tdw $0000\n", File.ReadAllText(path));
+        string result = File.ReadAllText(path).Replace("\r\n", "\n");
+        Assert.Contains("PaletteEffectsTable:\n.Length\n\tdw $0000", result);
+        foreach (string label in new[]
+            { "Types", "Value1", "Value2", "Value3", "Ratio1", "Ratio2", "Ratio3" })
+            Assert.Matches($@"(?m)^\.{label}:?$", result);
+        Assert.DoesNotContain("\tdb ", result);
     }
 
     [Fact]

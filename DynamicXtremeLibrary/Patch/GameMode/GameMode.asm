@@ -1,6 +1,8 @@
 DXGameMode:
+if !DXLunarMagicVersion < 370
     CLI                       ; Enable IRQ 
     INC $13                   ; Increment frame number
+endif
 
 if !ControllerOptimization
     JSL $008650|!rom
@@ -30,10 +32,10 @@ elseif !PalettesChange
 if !sa1
 RTL
 else
-JML $008075|!rom
+JML !DXGameModeReturn|!rom
 endif
 else
-JML $008075|!rom
+JML !DXGameModeReturn|!rom
 endif
 
 if !KevinLMVRAMOptimization

@@ -513,6 +513,17 @@ namespace DynamicXtremeLibrary.Config
                 }
                 sb.AppendLine("endif");
             }
+            sb.AppendLine();
+            sb.AppendLine("""
+                ; Lunar Magic 3.70 moved the game-mode call into its tile-upload trampoline.
+                !DXLunarMagicVersion = 0
+                if read1($0FF0B5) == '.' && read1($0FF0B4) >= '0' && read1($0FF0B4) <= '9' && read1($0FF0B6) >= '0' && read1($0FF0B6) <= '9' && read1($0FF0B7) >= '0' && read1($0FF0B7) <= '9'
+                    !DXLunarMagicVersion = ((read1($0FF0B4)-'0')*100)+((read1($0FF0B6)-'0')*10)+(read1($0FF0B7)-'0')
+                endif
+                if !DXLunarMagicVersion >= 371
+                    !KevinLMVRAMOptimization = !False
+                endif
+                """);
             return sb.ToString();
         }
     }

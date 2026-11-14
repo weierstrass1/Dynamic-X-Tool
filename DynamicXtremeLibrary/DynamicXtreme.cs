@@ -181,6 +181,12 @@ namespace DynamicXtremeLibrary
             if (!success)
             {
                 Console.WriteLine(asarLog);
+                if (asarLog.Contains("(Efile_not_found):", StringComparison.Ordinal))
+                {
+                    Console.WriteLine(
+                        "Asar could not find a patch file. Extract the complete Dynamic Xtreme " +
+                        "package for your version into a new folder and check the path and filename casing above.");
+                }
                 return false;
             }
             string[] patchResult = [.. asarLog.Replace("\r\n","\n").Split('\n')

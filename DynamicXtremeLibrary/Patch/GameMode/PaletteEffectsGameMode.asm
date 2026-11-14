@@ -62,7 +62,7 @@ endwhile
 if !sa1
 RTL
 else
-JML $008075|!rom
+JML !DXGameModeReturn|!rom
 endif
 
 ;Input:

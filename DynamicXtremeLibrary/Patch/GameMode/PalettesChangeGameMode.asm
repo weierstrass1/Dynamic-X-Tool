@@ -7,7 +7,7 @@ if !sa1
 	LDA.b #..Start>>16
 	STA $3182
 	JSR $1E80
-JML $008075|!rom
+JML !DXGameModeReturn|!rom
 
 ..Start
 endif
@@ -20,7 +20,7 @@ endif
 if !sa1
 RTL
 else
-JML $008075|!rom
+JML !DXGameModeReturn|!rom
 endif
 +
     REP #$20

@@ -1,4 +1,7 @@
 ?DyzenBounce:
+	LDA !HitmanNormalPlayerIsAbove,x
+	BIT #$40
+	BNE ?.ApplyBounce
 	REP #$20
 	LDA $6A
 	SEC
@@ -8,8 +11,11 @@
 	STA !PlayerY
 	SEP #$20
 
+?.ApplyBounce
 	JSL $01AA33|!rom    ;Do the player boost its Y Speed  
 
-	LDA #$08
+	LDA !HitmanNormalPlayerIsAbove,x
+	AND #$40
+	ORA #$08
 	STA !HitmanNormalPlayerIsAbove,x
 RTL

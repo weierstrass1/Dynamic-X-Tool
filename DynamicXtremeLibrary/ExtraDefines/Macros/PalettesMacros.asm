@@ -806,8 +806,68 @@ endif
 	REP #$20
 	LDA $F2
 	STA DX_PPU_CGRAM_LocalEffectID+$10,x
-	SEP #$20
 
+	; A zero global effect leaves a complete local BGR555 result in Copy.
+	LDA DX_Dynamic_Palettes_GlobalEffectID
+	BEQ ?...PublishLocalResult
+	SEP #$20
+	JMP ?.ReturnPaletteAvailability
+
+?...PublishLocalResult
+	LDA $F0
+	AND #$00FF
+	ASL A
+	CLC
+	ADC #DX_PPU_CGRAM_PaletteCopy
+	STA $05
+	SEP #$20
+	LDA.b #DX_PPU_CGRAM_PaletteCopy>>16
+	STA $07
+
+	%TransferToCGRAM($F0, $05, $07, #$001E)
+	BCS ?...LocalResultQueued
+	SEP #$30
+	JMP ?.ReturnPaletteAvailability
+
+?...LocalResultQueued
+	REP #$30
+	LDA $F0
+	AND #$00FF
+	ASL A
+	TAX
+	LDY #$0000
+?...CopyLocalOutput
+	LDA [$05],y
+	STA.w DX_PPU_CGRAM_PaletteWriteMirror,x
+	; The vanilla fade buffer has only $01F0 bytes.
+	CPX.w #$01F0
+	BCS ?...SkipFadeColor
+	STA.w $0905|!addr,x
+?...SkipFadeColor
+	INX
+	INX
+	INY
+	INY
+	CPY.w #$001E
+	BCC ?...CopyLocalOutput
+
+	SEP #$30
+if <sprite> != 0
+	LDX !SpriteIndex
+endif
+	LDA <palette>
+	LSR A
+	TAX
+	LDA DX_PPU_CGRAM_SPEffectLoaded
+	ORA.l ?.BitSetter,x
+	STA DX_PPU_CGRAM_SPEffectLoaded
+	TXA
+	ASL A
+	TAX
+	REP #$20
+	LDA #$0000
+	STA DX_Dynamic_Palettes_LastGlobalEffectIDPerPal+$10,x
+	SEP #$20
 	JMP ?.ReturnPaletteAvailability
 
 ?..EffectAndMerge

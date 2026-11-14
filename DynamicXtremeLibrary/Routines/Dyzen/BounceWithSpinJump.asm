@@ -1,4 +1,7 @@
 ?DyzenBounceWithSpinJump:
+	LDA !HitmanNormalPlayerIsAbove,x
+	BIT #$40
+	BNE ?.ApplyBounce
 	REP #$20
 	LDA $6A
 	SEC
@@ -8,7 +11,10 @@
 	STA !PlayerY
 	SEP #$20
 
-	LDA #$08
+?.ApplyBounce
+	LDA !HitmanNormalPlayerIsAbove,x
+	AND #$40
+	ORA #$08
 	STA !HitmanNormalPlayerIsAbove,x
 
 	LDA !SpinJumpFlag

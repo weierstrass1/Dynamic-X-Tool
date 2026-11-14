@@ -20,7 +20,7 @@ if read1($00FFD5) == $23
     !addr = $6000
     !rom = $000000
     !Variables = $40C000
-    !Variables2 = $418AFF  
+    !Variables2 = $418B00  
     !MultiplicationResult = $2306
     !DivisionResult = $2306
     !RemainderResult = $2308
@@ -30,9 +30,9 @@ if read1($00FFD5) == $23
 endif
 
 if !sa1 == 0 && !Free7E2000 == 0
-    !Variables = $7FB440
+    !Variables = $7FB540
     !Variables2 = $7F9C80
-    !Variables3 = $7FAC82
+    !Variables3 = $7FBD00
 endif
 
 !VRAMTransferSize = 64
