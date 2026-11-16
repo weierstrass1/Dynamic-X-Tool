@@ -69,6 +69,11 @@ namespace nested on
 namespace Routines
     incsrc "Features/Routines/AllowedGameMode.asm"
 if !DrawingSystem
+    if !sa1
+        !OAMYPos = $400001
+    else
+        !OAMYPos = $0201
+    endif
     incsrc "Features/Routines/DrawingSystemRoutines.asm"
 endif
 if !DynamicPoses

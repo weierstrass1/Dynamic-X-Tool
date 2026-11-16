@@ -175,11 +175,12 @@ namespace DynamicXtremeLibrary
                 Path.Combine(ExtraDefinesDirectory, $"{OutputDefinesFilename}.asm"));
             dg.GenerateDefinesFile(allRefs, SNESROMUtils.GetMapper(rom), drawInfos, dynamicInfos, palEffects);
 
-            Task<(bool, string)> asarTask = AsarPatch.Run();
+            var asarTask = AsarPatch.Run();
             asarTask.Wait();
-            (bool success, string asarLog) = asarTask.Result;
+            var (success, stdout, stderr) = asarTask.Result;
             if (!success)
             {
+                string asarLog = stdout + Environment.NewLine + stderr;
                 Console.WriteLine(asarLog);
                 if (asarLog.Contains("(Efile_not_found):", StringComparison.Ordinal))
                 {
@@ -189,7 +190,10 @@ namespace DynamicXtremeLibrary
                 }
                 return false;
             }
-            string[] patchResult = [.. asarLog.Replace("\r\n","\n").Split('\n')
+            if (!string.IsNullOrWhiteSpace(stderr))
+                Console.Error.WriteLine(stderr.TrimEnd());
+
+            string[] patchResult = [.. stdout.Replace("\r\n", "\n").Split('\n')
                 .Where(s => !string.IsNullOrWhiteSpace(s))];
 
             if (boolOpts["DrawingSystem"])

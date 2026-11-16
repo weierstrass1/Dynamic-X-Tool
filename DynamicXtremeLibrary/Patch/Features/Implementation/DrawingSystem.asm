@@ -210,7 +210,7 @@ endif
 if !sa1 == 0
     BRA ..End
 
-.next2
+..next2
     LDA !maxtile_pointer
     DEC A
     STA !maxtile_pointer

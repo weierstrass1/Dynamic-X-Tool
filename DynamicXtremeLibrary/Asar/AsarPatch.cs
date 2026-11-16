@@ -7,8 +7,8 @@ namespace DynamicXtremeLibrary.Asar
     public class AsarPatch
     {
         /// <summary>Applies the patch to the temporary ROM and captures Asar output.</summary>
-        /// <returns>The process success flag and combined standard output and error text.</returns>
-        public async static Task<(bool, string)> Run()
+        /// <returns>The process success flag, standard output, and standard error.</returns>
+        public async static Task<(bool Success, string StandardOutput, string StandardError)> Run()
         {
             try
             {
@@ -16,14 +16,14 @@ namespace DynamicXtremeLibrary.Asar
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or Win32Exception)
             {
-                return (false, $"Could not execute bundled Asar: {exception.Message}. " +
+                return (false, string.Empty, $"Could not execute bundled Asar: {exception.Message}. " +
                     "Check that the binary exists, has execute permission, and its native dependencies are installed.");
             }
         }
 
         /// <summary>Starts Asar, drains both output streams concurrently, and checks its exit code.</summary>
-        /// <returns>Whether Asar exited successfully and its complete diagnostic output.</returns>
-        private static async Task<(bool, string)> RunProcess()
+        /// <returns>The exit status, standard output, and standard error.</returns>
+        private static async Task<(bool Success, string StandardOutput, string StandardError)> RunProcess()
         {
             string asarPath = EnsureExecutable();
 
@@ -57,7 +57,7 @@ namespace DynamicXtremeLibrary.Asar
             if (!success && string.IsNullOrWhiteSpace(stdout + stderr))
                 stderr = $"Asar exited with code {process.ExitCode} without diagnostic output.";
 
-            return (success, stdout + stderr);
+            return (success, stdout, stderr);
         }
         /// <summary>Verifies the bundled binary and restores a missing execute bit on Linux as a fallback.</summary>
         /// <returns>The executable path to launch.</returns>

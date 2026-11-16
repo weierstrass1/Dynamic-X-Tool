@@ -23,14 +23,12 @@
 !OAMTiles = $0202
 !OAMProps = $0203
 !OAMXPos = $0200
-!OAMYPos = $0201
 !OAMSize = $0420
 
 if !sa1
 !OAMTiles = $400002
 !OAMProps = $400003
 !OAMXPos = $400000
-!OAMYPos = $400001
 !OAMSize = $400000
 endif
 

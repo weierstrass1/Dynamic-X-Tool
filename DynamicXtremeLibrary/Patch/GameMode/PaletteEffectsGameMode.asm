@@ -124,7 +124,7 @@ ProcessGlobalColorEffect:
 	BNE .SetBaseLoaded
 
 	REP #$20
-	LDA DX_PPU_FixedColor_Mirror
+	LDA.l DX_PPU_FixedColor_Mirror
 	STA DX_PPU_FixedColor_Base
 	SEP #$20
 
@@ -199,7 +199,7 @@ ProcessGlobalColorEffect:
 
 	REP #$20
 	LDA DX_PPU_FixedColor_Result
-	STA DX_PPU_FixedColor_Mirror
+	STA.l DX_PPU_FixedColor_Mirror
 	LDA $98
 	STA DX_PPU_FixedColor_LastGlobalEffectID
 	SEP #$20
